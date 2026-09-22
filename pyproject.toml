@@ -138,3 +138,12 @@ dev = [
     "pytest-cov>=7.1.0",
     "ruff>=0.16.8",
 ]
+notebooks = [
+    "ipykernel>=7.3.0",
+    "jupyterlab>=4.6.4",
+    "matplotlib>=3.11.2",
+    "polars>=1.44.2",
+]
+
+[tool.uv]
+default-groups = ["dev", "notebooks"]
