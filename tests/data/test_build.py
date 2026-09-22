@@ -1,126 +1,127 @@
 import json
-from typing import TYPE_CHECKING
+import shutil
+from typing import TYPE_CHECKING, Literal
 
-import pyarrow.parquet as pq
+import polars as pl
 import pytest
 
-from taxonomy_classifier.data.build import (
-    DATASET_FILENAME,
-    PARQUET_SCHEMA,
-    REPORT_FILENAME,
-    BuildConfig,
-    build_dataset,
-)
-from taxonomy_classifier.data.filters import ExclusionReason, FilterConfig
-from taxonomy_classifier.exceptions import MalformedFastaError
+from taxonomy_classifier.data.build import BuildConfig, DataLayout, build_dataset
+from taxonomy_classifier.data.filters import FilterConfig
+from taxonomy_classifier.data.split import Split, SplitConfig
 
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from taxonomy_classifier.data.build import BuildReport
+    from taxonomy_classifier.data.sources.base import DataSource
+
 CONFIG = BuildConfig(
-    filters=FilterConfig(min_length=10, max_length=40, max_ambiguous_fraction=0.1),
+    filters=FilterConfig(min_length=10, max_length=100),
+    split=SplitConfig(val_fraction=0.2, test_fraction=0.2),
     batch_size=2,
 )
 
 
-def _build(fasta: Path, taxonomy: Path, out_dir: Path, config: BuildConfig = CONFIG) -> None:
-    build_dataset(fasta, taxonomy, out_dir, release="test", config=config)
+@pytest.fixture
+def layout(sources: tuple[DataSource, ...], fixtures_dir: Path, tmp_path: Path) -> DataLayout:
+    layout = DataLayout(root=tmp_path / "data")
+
+    for source in sources:
+        raw_dir = layout.raw_dir(source)
+        raw_dir.mkdir(parents=True)
+
+        for remote in source.files:
+            shutil.copy(fixtures_dir / remote.filename, raw_dir / remote.filename)
+
+    return layout
 
 
-def test_build_dataset_reports_every_outcome(
-    silva_fasta: Path,
-    silva_taxonomy: Path,
-    tmp_path: Path,
-) -> None:
-    report = build_dataset(silva_fasta, silva_taxonomy, tmp_path, release="test", config=CONFIG)
-
-    assert report.total == 13
-    assert report.kept == 4
-    assert report.excluded == dict.fromkeys(ExclusionReason, 1)
+@pytest.fixture
+def report(sources: tuple[DataSource, ...], layout: DataLayout) -> BuildReport:
+    return build_dataset(sources, layout, config=CONFIG)
 
 
-def test_build_dataset_writes_expected_rows(
-    silva_fasta: Path,
-    silva_taxonomy: Path,
-    tmp_path: Path,
-) -> None:
-    _build(silva_fasta, silva_taxonomy, tmp_path)
-
-    table = pq.read_table(tmp_path / DATASET_FILENAME)
-    rows = table.to_pylist()
-
-    assert table.schema.equals(PARQUET_SCHEMA)
-    assert [row["accession"] for row in rows] == ["AB000001", "AB000002", "AB000003", "AB000004"]
-
-    assert rows[0]["sequence"] == "ATTGAACGCTGGCGGCAGGCCTAA"
-    assert rows[0]["length"] == 24
-    assert rows[0]["genus"] == "Escherichia-Shigella"
-    assert rows[0]["organism"] == "Escherichia coli"
-
-    assert rows[2]["class"] == "Sordariomycetes"
-    assert rows[2]["order"] is None
-    assert rows[2]["lineage"][-1] == "Sordariomycetes"
-
-    assert rows[3]["family"] == "Enterobacteriaceae"
-    assert rows[3]["genus"] is None
+def test_backbone_sources_are_staged_first(report: BuildReport) -> None:
+    assert [source.source for source in report.sources] == [
+        "gtdb_test",
+        "pr2_test",
+        "silva_test",
+        "refseq_16s",
+    ]
 
 
-def test_build_dataset_writes_report_json(
-    silva_fasta: Path,
-    silva_taxonomy: Path,
-    tmp_path: Path,
-) -> None:
-    report = build_dataset(silva_fasta, silva_taxonomy, tmp_path, release="test", config=CONFIG)
+def test_report_counts_every_stage(report: BuildReport) -> None:
+    assert sum(source.kept for source in report.sources) == 16
+    assert report.merge.to_dict() == {
+        "staged": 16,
+        "unique": 14,
+        "kept": 14,
+        "merged": 1,
+        "conflicts": 1,
+        "domain_conflicts": 0,
+    }
+    assert sum(report.splits.values()) == 14
+    assert set(report.splits) == {split.value for split in Split}
+    assert report.rank_coverage["domain"] == 14
 
-    written = json.loads((tmp_path / REPORT_FILENAME).read_text(encoding="utf-8"))
+
+def test_dataset_merges_duplicates_across_sources(report: BuildReport, layout: DataLayout) -> None:
+    del report
+
+    dataset = pl.read_parquet(layout.dataset_path)
+    [ecoli] = dataset.filter(pl.col("n_records") == 3).to_dicts()
+
+    assert dataset.height == 14
+    assert ecoli["sources"] == ["gtdb", "silva"]
+    assert ecoli["label_conflict"] is True
+    assert (ecoli["class"], ecoli["order"]) == ("Gammaproteobacteria", None)
+    assert set(dataset.get_column("split")) <= {split.value for split in Split}
+
+
+def test_report_is_written_as_json(report: BuildReport, layout: DataLayout) -> None:
+    written = json.loads(layout.report_path.read_text(encoding="utf-8"))
 
     assert written == json.loads(report.to_json())
-    assert written["release"] == "test"
     assert written["config"]["filters"]["min_length"] == 10
-    assert set(written["excluded"]) == {reason.value for reason in ExclusionReason}
+    assert written["sources"][0]["source"] == "gtdb_test"
 
 
-def test_build_dataset_output_does_not_depend_on_batch_size(
-    silva_fasta: Path,
-    silva_taxonomy: Path,
-    tmp_path: Path,
+def test_build_leaves_no_partial_files(
+    sources: tuple[DataSource, ...],
+    report: BuildReport,
+    layout: DataLayout,
 ) -> None:
-    single = BuildConfig(filters=CONFIG.filters, batch_size=1)
-    large = BuildConfig(filters=CONFIG.filters, batch_size=1000)
+    del report
 
-    _build(silva_fasta, silva_taxonomy, tmp_path / "single", single)
-    _build(silva_fasta, silva_taxonomy, tmp_path / "large", large)
+    produced = [*layout.interim_dir.iterdir(), *layout.processed_dir.iterdir()]
 
-    single_table = pq.read_table(tmp_path / "single" / DATASET_FILENAME)
-    large_table = pq.read_table(tmp_path / "large" / DATASET_FILENAME)
-
-    assert single_table.equals(large_table)
-
-
-def test_build_dataset_leaves_no_partial_files(
-    silva_fasta: Path,
-    silva_taxonomy: Path,
-    tmp_path: Path,
-) -> None:
-    _build(silva_fasta, silva_taxonomy, tmp_path)
-
-    assert sorted(path.name for path in tmp_path.iterdir()) == [REPORT_FILENAME, DATASET_FILENAME]
-
-
-def test_build_dataset_cleans_up_when_the_input_is_corrupt(
-    silva_taxonomy: Path,
-    tmp_path: Path,
-) -> None:
-    fasta = tmp_path / "corrupt.fasta"
-    fasta.write_text("ACGT\n>a\nACGT\n", encoding="utf-8")
-    out_dir = tmp_path / "out"
-
-    with pytest.raises(MalformedFastaError):
-        _build(fasta, silva_taxonomy, out_dir)
-
-    assert list(out_dir.iterdir()) == []
+    assert not [path for path in produced if path.suffix == ".part"]
+    assert layout.staged_path(sources[0]).exists()
 
 
 def test_build_config_rejects_non_positive_batch_size() -> None:
     with pytest.raises(ValueError, match="batch_size must be positive"):
         BuildConfig(batch_size=0)
+
+
+def test_build_cleans_up_when_writing_the_dataset_fails(
+    sources: tuple[DataSource, ...],
+    layout: DataLayout,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original = pl.LazyFrame.sink_parquet
+
+    def fail_on_dataset(frame: pl.LazyFrame, path: Path, *, compression: Literal["zstd"]) -> None:
+        if path.name.startswith("dataset"):
+            path.write_bytes(b"partial")
+            msg = "disk full"
+            raise OSError(msg)
+
+        original(frame, path, compression=compression)
+
+    monkeypatch.setattr(pl.LazyFrame, "sink_parquet", fail_on_dataset)
+
+    with pytest.raises(OSError, match="disk full"):
+        build_dataset(sources, layout, config=CONFIG)
+
+    assert list(layout.processed_dir.iterdir()) == []

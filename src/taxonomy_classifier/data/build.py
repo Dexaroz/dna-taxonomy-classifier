@@ -1,64 +1,68 @@
-from collections import Counter
 from dataclasses import asdict, dataclass, field
-from itertools import batched
 import json
 import logging
 from typing import TYPE_CHECKING, Final
 
-import pyarrow as pa
-import pyarrow.parquet as pq
+import polars as pl
 
-from taxonomy_classifier.data.fasta import read_fasta
+from taxonomy_classifier.data.columns import RANK_COLUMNS
 from taxonomy_classifier.data.files import partial_path, write_text_atomic
-from taxonomy_classifier.data.filters import (
-    ExclusionReason,
-    FilterConfig,
-    build_filters,
-    first_exclusion,
-)
-from taxonomy_classifier.data.silva import to_sequence_record
-from taxonomy_classifier.data.taxonomy import CANONICAL_RANKS, load_rank_map
-from taxonomy_classifier.exceptions import (
-    DuplicateRankError,
-    InvalidSequenceError,
-    MalformedHeaderError,
-    TaxonomyError,
-    UnknownTaxonPathError,
-)
+from taxonomy_classifier.data.filters import FilterConfig
+from taxonomy_classifier.data.harmonize import BackboneIndex
+from taxonomy_classifier.data.merge import merge_staged
+from taxonomy_classifier.data.split import Split, SplitConfig, assign_splits
+from taxonomy_classifier.data.staging import stage_source
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator, Mapping, Sequence
+    from collections.abc import Mapping, Sequence
     from pathlib import Path
 
-    from taxonomy_classifier.data.fasta import FastaRecord
-    from taxonomy_classifier.data.filters import Filter
-    from taxonomy_classifier.data.records import SequenceRecord
-    from taxonomy_classifier.data.taxonomy import RankMap
+    from taxonomy_classifier.data.merge import MergeReport
+    from taxonomy_classifier.data.sources.base import DataSource
+    from taxonomy_classifier.data.staging import SourceReport
 
 _LOGGER: Final = logging.getLogger(__name__)
+
+DATASET_NAME: Final = "geneflow"
 
 DATASET_FILENAME: Final = "dataset.parquet"
 
 REPORT_FILENAME: Final = "build_report.json"
 
-_FIELDS: Final[list[pa.Field[pa.DataType]]] = [
-    pa.field("accession", pa.string(), nullable=False),
-    pa.field("start", pa.int64(), nullable=False),
-    pa.field("end", pa.int64(), nullable=False),
-    pa.field("organism", pa.string(), nullable=False),
-    pa.field("sequence", pa.string(), nullable=False),
-    pa.field("length", pa.int32(), nullable=False),
-    pa.field("n_ambiguous", pa.int32(), nullable=False),
-    pa.field("lineage", pa.list_(pa.string()), nullable=False),
-    *(pa.field(rank.value, pa.string()) for rank in CANONICAL_RANKS),
-]
+MERGED_FILENAME: Final = "merged.parquet"
 
-PARQUET_SCHEMA: Final = pa.schema(_FIELDS)
+
+@dataclass(frozen=True, slots=True)
+class DataLayout:
+    root: Path
+
+    def raw_dir(self, source: DataSource) -> Path:
+        return self.root / "raw" / source.slug
+
+    @property
+    def interim_dir(self) -> Path:
+        return self.root / "interim" / DATASET_NAME
+
+    @property
+    def processed_dir(self) -> Path:
+        return self.root / "processed" / DATASET_NAME
+
+    @property
+    def dataset_path(self) -> Path:
+        return self.processed_dir / DATASET_FILENAME
+
+    @property
+    def report_path(self) -> Path:
+        return self.processed_dir / REPORT_FILENAME
+
+    def staged_path(self, source: DataSource) -> Path:
+        return self.interim_dir / f"{source.slug}.parquet"
 
 
 @dataclass(frozen=True, slots=True)
 class BuildConfig:
     filters: FilterConfig = field(default_factory=FilterConfig)
+    split: SplitConfig = field(default_factory=SplitConfig)
     batch_size: int = 50_000
 
     def __post_init__(self) -> None:
@@ -69,135 +73,100 @@ class BuildConfig:
 
 @dataclass(frozen=True, slots=True)
 class BuildReport:
-    release: str
     config: BuildConfig
-    total: int
-    kept: int
-    excluded: Mapping[ExclusionReason, int]
+    sources: Sequence[SourceReport]
+    merge: MergeReport
+    splits: Mapping[str, int]
+    rank_coverage: Mapping[str, int]
 
     def to_json(self) -> str:
         payload = {
-            "release": self.release,
             "config": asdict(self.config),
-            "total": self.total,
-            "kept": self.kept,
-            "excluded": {reason.value: self.excluded.get(reason, 0) for reason in ExclusionReason},
+            "sources": [report.to_dict() for report in self.sources],
+            "merge": self.merge.to_dict(),
+            "splits": dict(self.splits),
+            "rank_coverage": dict(self.rank_coverage),
         }
 
         return json.dumps(payload, indent=2)
 
 
 def build_dataset(
-    fasta_path: Path,
-    taxonomy_path: Path,
-    out_dir: Path,
+    sources: Sequence[DataSource],
+    layout: DataLayout,
     *,
-    release: str,
     config: BuildConfig,
 ) -> BuildReport:
-    rank_map = load_rank_map(taxonomy_path)
-    filters = build_filters(config.filters)
-    excluded: Counter[ExclusionReason] = Counter()
+    backbone = BackboneIndex()
 
-    out_dir.mkdir(parents=True, exist_ok=True)
-    target = out_dir / DATASET_FILENAME
+    source_reports = [
+        stage_source(
+            source,
+            layout.raw_dir(source),
+            layout.staged_path(source),
+            filters=config.filters,
+            backbone=backbone,
+            batch_size=config.batch_size,
+        )
+        for source in _backbones_first(sources)
+    ]
 
-    records = _select(read_fasta(fasta_path), rank_map, filters, excluded)
-    kept = _write_parquet(records, target, batch_size=config.batch_size)
-
-    report = BuildReport(
-        release=release,
-        config=config,
-        total=kept + excluded.total(),
-        kept=kept,
-        excluded=dict(excluded),
+    merged_path = layout.interim_dir / MERGED_FILENAME
+    merge_report = merge_staged([layout.staged_path(source) for source in sources], merged_path)
+    _LOGGER.info(
+        "Merged %d staged records into %d sequences", merge_report.staged, merge_report.kept
     )
 
-    write_text_atomic(out_dir / REPORT_FILENAME, f"{report.to_json()}\n")
-    _LOGGER.info("Kept %d of %d sequences in %s", report.kept, report.total, target)
+    _write_dataset(merged_path, layout, config.split)
+
+    report = BuildReport(
+        config=config,
+        sources=source_reports,
+        merge=merge_report,
+        splits=_split_counts(layout.dataset_path),
+        rank_coverage=_rank_coverage(layout.dataset_path),
+    )
+
+    write_text_atomic(layout.report_path, f"{report.to_json()}\n")
+    _LOGGER.info("Wrote %s", layout.dataset_path)
 
     return report
 
 
-def _select(
-    fasta_records: Iterable[FastaRecord],
-    rank_map: RankMap,
-    filters: Sequence[Filter],
-    excluded: Counter[ExclusionReason],
-) -> Iterator[SequenceRecord]:
-    for fasta_record in fasta_records:
-        outcome = _to_record(fasta_record, rank_map)
-
-        if isinstance(outcome, ExclusionReason):
-            excluded[outcome] += 1
-
-            continue
-
-        reason = first_exclusion(outcome, filters)
-
-        if reason is not None:
-            excluded[reason] += 1
-
-            continue
-
-        yield outcome
+def _backbones_first(sources: Sequence[DataSource]) -> list[DataSource]:
+    return sorted(sources, key=lambda source: not source.is_backbone)
 
 
-def _to_record(fasta_record: FastaRecord, rank_map: RankMap) -> SequenceRecord | ExclusionReason:
-    try:
-        return to_sequence_record(fasta_record, rank_map)
+def _write_dataset(merged_path: Path, layout: DataLayout, config: SplitConfig) -> None:
+    labels = pl.read_parquet(merged_path, columns=["seq_hash", *RANK_COLUMNS])
+    splits = assign_splits(labels, config)
 
-    except MalformedHeaderError:
-        return ExclusionReason.MALFORMED_HEADER
-
-    except InvalidSequenceError:
-        return ExclusionReason.INVALID_SEQUENCE
-
-    except UnknownTaxonPathError:
-        return ExclusionReason.UNKNOWN_TAXON_PATH
-
-    except DuplicateRankError:
-        return ExclusionReason.DUPLICATE_RANK
-
-    except TaxonomyError:
-        return ExclusionReason.INVALID_LINEAGE
-
-
-def _write_parquet(records: Iterable[SequenceRecord], target: Path, *, batch_size: int) -> int:
-    partial = partial_path(target)
-    written = 0
+    layout.processed_dir.mkdir(parents=True, exist_ok=True)
+    partial = partial_path(layout.dataset_path)
 
     try:
-        with pq.ParquetWriter(partial, PARQUET_SCHEMA, compression="zstd") as writer:
-            for batch in batched(records, batch_size, strict=False):
-                writer.write_batch(_to_record_batch(batch))
-                written += len(batch)
-
-                _LOGGER.info("Wrote %d sequences", written)
+        (
+            pl.scan_parquet(merged_path)
+            .join(splits.lazy(), on="seq_hash", how="left", maintain_order="left")
+            .sink_parquet(partial, compression="zstd")
+        )
 
     except BaseException:
         partial.unlink(missing_ok=True)
 
         raise
 
-    partial.replace(target)
-
-    return written
+    partial.replace(layout.dataset_path)
 
 
-def _to_record_batch(records: Sequence[SequenceRecord]) -> pa.RecordBatch:
-    columns: dict[str, list[object]] = {
-        "accession": [record.accession for record in records],
-        "start": [record.start for record in records],
-        "end": [record.end for record in records],
-        "organism": [record.organism for record in records],
-        "sequence": [record.sequence for record in records],
-        "length": [record.length for record in records],
-        "n_ambiguous": [record.n_ambiguous for record in records],
-        "lineage": [list(record.lineage.path) for record in records],
-    }
+def _split_counts(dataset_path: Path) -> dict[str, int]:
+    counts = pl.scan_parquet(dataset_path).group_by("split").len().collect()
+    observed = dict(counts.iter_rows())
 
-    for rank in CANONICAL_RANKS:
-        columns[rank.value] = [record.lineage.get(rank) for record in records]
+    return {split.value: observed.get(split.value, 0) for split in Split}
 
-    return pa.RecordBatch.from_pydict(columns, schema=PARQUET_SCHEMA)
+
+def _rank_coverage(dataset_path: Path) -> dict[str, int]:
+    counts = pl.scan_parquet(dataset_path).select(pl.col(RANK_COLUMNS).count()).collect()
+
+    return counts.row(0, named=True)
