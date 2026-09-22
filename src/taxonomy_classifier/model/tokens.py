@@ -16,8 +16,12 @@ _TABLE: Final = bytes(
 )
 
 
+def encode_bytes(data: bytes) -> bytes:
+    return data.translate(_TABLE)
+
+
 def encode_sequence(sequence: str) -> torch.Tensor:
-    translated = bytearray(sequence.encode("ascii").translate(_TABLE))
+    translated = bytearray(encode_bytes(sequence.encode("ascii")))
 
     return torch.frombuffer(translated, dtype=torch.uint8).long()
 

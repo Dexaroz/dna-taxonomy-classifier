@@ -1,0 +1,219 @@
+import random
+from typing import TYPE_CHECKING
+
+import polars as pl
+import pytest
+import torch
+
+from taxonomy_classifier.data.staging import sequence_hash
+from taxonomy_classifier.data.taxonomy import Rank
+from taxonomy_classifier.model.labels import IGNORE_INDEX, LEVELS, LabelSpace
+from taxonomy_classifier.model.tokens import PAD
+from taxonomy_classifier.training import data
+from taxonomy_classifier.training.data import (
+    CropConfig,
+    LabeledSet,
+    SequenceBank,
+    TrainingData,
+    iterate_batches,
+    make_batch,
+    sampling_weights,
+)
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+ECOLI = ("Bacteria", "Bacteria", "P", "C", "O", "F", "Escherichia", "Escherichia coli")
+
+RARE = ("Bacteria", "Bacteria", "P", "C", "O", "F", "Rarus", None)
+
+
+def _frame(rows: list[tuple[str, tuple[str | None, ...]]]) -> pl.LazyFrame:
+    records = [
+        {
+            "seq_hash": sequence_hash(sequence),
+            "sequence": sequence,
+            "length": len(sequence),
+            "domain": names[0],
+            "kingdom": names[1],
+            **dict(
+                zip(
+                    ("phylum", "class", "order", "family", "genus", "species"),
+                    names[2:],
+                    strict=True,
+                )
+            ),
+        }
+        for sequence, names in rows
+    ]
+
+    return pl.LazyFrame(records)
+
+
+FRAME = _frame([("ACGTACGT", ECOLI), ("CCCC", ECOLI), ("GGGGGGTT", RARE)])
+
+SPACE = LabelSpace.from_frame(FRAME, min_count=2)
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "message"),
+    [
+        ({"probability": 1.5}, "probability must be in"),
+        ({"min_length": 0}, "crop lengths"),
+        ({"min_length": 10, "max_length": 5}, "crop lengths"),
+    ],
+)
+def test_crop_config_rejects_invalid_values(kwargs: dict[str, float], message: str) -> None:
+    with pytest.raises(ValueError, match=message):
+        CropConfig(**kwargs)  # type: ignore[arg-type]
+
+
+def test_sequence_bank_stores_every_sequence_contiguously() -> None:
+    sequences = pl.Series(["ACGT", "", "NNA"])
+    bank = SequenceBank.from_batches(
+        [sequences.slice(0, 2), sequences.slice(2)], sequences.str.len_bytes()
+    )
+
+    assert len(bank) == 3
+    assert bank.get(0).tolist() == [1, 2, 3, 4]
+    assert bank.get(1).tolist() == []
+    assert bank.get(2).tolist() == [5, 5, 1]
+
+
+def test_sequence_bank_rejects_lengths_that_do_not_match() -> None:
+    with pytest.raises(ValueError, match="lengths add up to"):
+        SequenceBank.from_batches([pl.Series(["ACGT"])], pl.Series([3]))
+
+
+def test_labeled_set_streams_sequences_in_chunks(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(data, "_CHUNK_ROWS", 2)
+
+    labeled = LabeledSet.from_frame(FRAME, SPACE)
+
+    assert len(labeled) == 3
+    assert labeled.bank.get(2).tolist() == [3, 3, 3, 3, 3, 3, 4, 4]
+    assert labeled.targets.shape == (3, len(LEVELS))
+    assert labeled.targets[2, -2:].tolist() == [IGNORE_INDEX, IGNORE_INDEX]
+
+
+def test_training_data_needs_one_weight_per_sequence() -> None:
+    labeled = LabeledSet.from_frame(FRAME, SPACE)
+
+    with pytest.raises(ValueError, match="one sampling weight per training sequence"):
+        TrainingData(train=labeled, weights=torch.ones(2), validation=labeled)
+
+
+def test_sampling_weights_favor_rare_genera() -> None:
+    weights = sampling_weights(FRAME, rank=Rank.GENUS, power=1.0)
+
+    assert weights.dtype == torch.double
+    assert weights[2] == pytest.approx(2 * weights[0])
+    assert float(weights.sum()) == pytest.approx(3.0)
+
+
+def test_make_batch_pads_masks_and_gathers_targets() -> None:
+    labeled = LabeledSet.from_frame(FRAME, SPACE)
+
+    batch = make_batch(labeled, [1, 0], crop=None, rng=random.Random(0))
+
+    assert batch.tokens.tolist() == [[2, 2, 2, 2, PAD, PAD, PAD, PAD], [1, 2, 3, 4, 1, 2, 3, 4]]
+    assert batch.mask.sum(dim=-1).tolist() == [4, 8]
+    assert torch.equal(batch.targets, labeled.targets[[1, 0]])
+    assert batch.tokens.dtype == torch.long
+
+
+def test_make_batch_crops_contiguous_windows() -> None:
+    labeled = LabeledSet.from_frame(FRAME, SPACE)
+    crop = CropConfig(probability=1.0, min_length=3, max_length=3)
+
+    batch = make_batch(labeled, [0, 1], crop=crop, rng=random.Random(1))
+    full = labeled.bank.get(0).tolist()
+    window = batch.tokens[0, :3].tolist()
+
+    assert batch.mask.sum(dim=-1).tolist() == [3, 3]
+    assert any(full[start : start + 3] == window for start in range(len(full) - 2))
+
+
+def test_make_batch_keeps_sequences_shorter_than_the_crop() -> None:
+    labeled = LabeledSet.from_frame(FRAME, SPACE)
+    crop = CropConfig(probability=1.0, min_length=6, max_length=6)
+
+    batch = make_batch(labeled, [1], crop=crop, rng=random.Random(0))
+
+    assert batch.tokens.tolist() == [[2, 2, 2, 2]]
+
+
+def test_iterate_batches_covers_every_index_in_order() -> None:
+    labeled = LabeledSet.from_frame(FRAME, SPACE)
+
+    batches = list(
+        iterate_batches(
+            labeled, torch.tensor([2, 0, 1]), batch_size=2, crop=None, rng=random.Random(0)
+        )
+    )
+
+    assert [len(batch.targets) for batch in batches] == [2, 1]
+    assert torch.equal(batches[0].targets, labeled.targets[[2, 0]])
+
+
+def test_batch_moves_to_a_device() -> None:
+    labeled = LabeledSet.from_frame(FRAME, SPACE)
+
+    batch = make_batch(labeled, [0], crop=None, rng=random.Random(0)).to(torch.device("cpu"))
+
+    assert batch.tokens.device.type == "cpu"
+
+
+def test_sequence_bank_round_trips_through_a_memory_mapped_file(tmp_path: Path) -> None:
+    sequences = pl.Series(["ACGT", "", "NNA"])
+    path = tmp_path / "bank.bin"
+
+    written = SequenceBank.write([sequences], sequences.str.len_bytes(), path)
+    reopened = SequenceBank.open(path)
+
+    assert [reopened.get(index).tolist() for index in range(3)] == [[1, 2, 3, 4], [], [5, 5, 1]]
+    assert torch.equal(written.offsets, reopened.offsets)
+
+
+def test_empty_banks_can_be_written_and_opened(tmp_path: Path) -> None:
+    bank = SequenceBank.write(
+        [pl.Series([], dtype=pl.String)], pl.Series([], dtype=pl.Int64), tmp_path / "empty.bin"
+    )
+
+    assert len(bank) == 0
+
+
+def test_failed_writes_leave_no_partial_file(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="lengths add up to"):
+        SequenceBank.write([pl.Series(["ACGT"])], pl.Series([3]), tmp_path / "bank.bin")
+
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_labeled_set_reuses_a_matching_cache(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    cache = tmp_path / "tokens.bin"
+    first = LabeledSet.from_frame(FRAME, SPACE, cache=cache)
+
+    def fail(*_: object) -> SequenceBank:
+        msg = "the cache should have been reused"
+        raise AssertionError(msg)
+
+    monkeypatch.setattr(SequenceBank, "write", fail)
+
+    second = LabeledSet.from_frame(FRAME, SPACE, cache=cache)
+
+    assert torch.equal(first.bank.tokens, second.bank.tokens)
+    assert torch.equal(first.targets, second.targets)
+
+
+def test_labeled_set_rebuilds_a_stale_cache(tmp_path: Path) -> None:
+    cache = tmp_path / "tokens.bin"
+    LabeledSet.from_frame(FRAME, SPACE, cache=cache)
+
+    changed = _frame([("TTTT", ECOLI)])
+    rebuilt = LabeledSet.from_frame(changed, SPACE, cache=cache)
+
+    assert len(rebuilt) == 1
+    assert rebuilt.bank.get(0).tolist() == [4, 4, 4, 4]
