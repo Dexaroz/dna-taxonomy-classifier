@@ -53,11 +53,12 @@ def test_parse_fasta_rejects_records_without_sequence(lines: list[str]) -> None:
         list(parse_fasta(lines))
 
 
-def test_read_fasta_reads_plain_files(silva_fasta: Path) -> None:
-    records = list(read_fasta(silva_fasta))
+def test_read_fasta_reads_plain_files(fixtures_dir: Path) -> None:
+    records = list(read_fasta(fixtures_dir / "silva_ssu.fasta"))
 
-    assert len(records) == 13
-    assert records[0].sequence == "AUUGAACGCUGGCGGCAGGCCUAA"
+    assert len(records) == 7
+    assert records[-1].header == "not-a-silva-header"
+    assert all(len(record.sequence) == 24 for record in records)
 
 
 def test_read_fasta_reads_gzip_files(tmp_path: Path) -> None:

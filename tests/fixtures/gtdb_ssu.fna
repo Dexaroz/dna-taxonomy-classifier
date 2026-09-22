@@ -1,0 +1,20 @@
+>RS_GCF_000001.1~NC_000001.1 d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Enterobacterales;f__Enterobacteriaceae;g__Escherichia;s__Escherichia coli [location=1..24] [ssu_len=24] [contig_len=100]
+AAGCCCAATAAA
+CCACTCTGACTG
+>RS_GCF_000002.1~NC_000002.1 d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Enterobacterales;f__Enterobacteriaceae;g__Escherichia;s__Escherichia coli [location=1..24] [ssu_len=24] [contig_len=100]
+AAGCCCAATAAA
+CCACTCTGACTG
+>RS_GCF_000003.1~NC_000003.1 d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Pseudomonadales;f__Pseudomonadaceae;g__Pseudomonas;s__Pseudomonas aeruginosa [location=1..24] [ssu_len=24] [contig_len=100]
+GCCGAATAGGGA
+TATAGGCAACGA
+>GB_GCA_000004.1~CONTIG4 d__Bacteria;p__Bacillota;c__Bacilli;o__Lactobacillales;f__Streptococcaceae;g__Streptococcus;s__ [location=1..24] [ssu_len=24] [contig_len=100]
+CATGTGCGGCGA
+CCCTTGCGACAG
+>RS_GCF_000005.1~NC_000005.1 d__Archaea;p__Methanobacteriota;c__Methanobacteria;o__Methanobacteriales;f__Methanobacteriaceae;g__Methanobrevibacter;s__Methanobrevibacter smithii [location=1..24] [ssu_len=24] [contig_len=100]
+TGACGCTTTCGC
+CGTTGCCTAAAC
+>RS_GCF_000006.1~NC_000006.1 d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Enterobacterales;f__Enterobacteriaceae;g__Escherichia;s__Escherichia coli [location=1..5] [ssu_len=5] [contig_len=100]
+CTATT
+>GB_GCA_000007.1~CONTIG7 d__Bacteria;p__Pseudomonadota [location=1..24]
+TGAAGGAGTCTA
+GCAGCCGCAGTA
