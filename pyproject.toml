@@ -47,6 +47,9 @@ ignore = [
     "ANN201",  # test functions return None implicitly
     "S311",    # seeded simulation, not cryptography
 ]
+"src/taxonomy_classifier/training/**/*.py" = [
+    "S311", # seeded simulation, not cryptography
+]
 
 [tool.ruff.lint.pylint]
 max-args = 8 # ML constructors and training loops legitimately take many knobs

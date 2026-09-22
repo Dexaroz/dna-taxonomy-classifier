@@ -81,6 +81,8 @@ def test_prepare_downloads_and_builds(transport: httpx.MockTransport, tmp_path: 
 
     assert exit_code == 0
     assert layout.dataset_path.exists()
+    assert layout.synthetic_path.exists()
+    assert layout.augment_report_path.exists()
     assert [source["read"] for source in report["sources"]] == [7, 4, 7, 5]
 
 
@@ -94,3 +96,13 @@ def test_module_entrypoint_exits_with_command_status(
         runpy.run_module("taxonomy_classifier", run_name="__main__")
 
     assert caught.value.code == 1
+
+
+def test_augment_without_dataset_fails_cleanly(
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    exit_code = cli.main(["augment", "--data-dir", str(tmp_path)])
+
+    assert exit_code == 1
+    assert "run 'geneflow build' first" in caplog.text

@@ -32,6 +32,10 @@ REPORT_FILENAME: Final = "build_report.json"
 
 MERGED_FILENAME: Final = "merged.parquet"
 
+SYNTHETIC_FILENAME: Final = "train_synthetic.parquet"
+
+AUGMENT_REPORT_FILENAME: Final = "augment_report.json"
+
 UNKNOWN_KINGDOM: Final = "unknown"
 
 
@@ -57,6 +61,14 @@ class DataLayout:
     @property
     def report_path(self) -> Path:
         return self.processed_dir / REPORT_FILENAME
+
+    @property
+    def synthetic_path(self) -> Path:
+        return self.processed_dir / SYNTHETIC_FILENAME
+
+    @property
+    def augment_report_path(self) -> Path:
+        return self.processed_dir / AUGMENT_REPORT_FILENAME
 
     def staged_path(self, source: DataSource) -> Path:
         return self.interim_dir / f"{source.slug}.parquet"

@@ -9,6 +9,7 @@ from taxonomy_classifier.data.build import BuildConfig, DataLayout, build_datase
 from taxonomy_classifier.data.download import download_all
 from taxonomy_classifier.data.sources.registry import DEFAULT_SOURCES
 from taxonomy_classifier.exceptions import DataError, GeneflowError
+from taxonomy_classifier.training.oversampling import OversamplingConfig, oversample_train
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -24,7 +25,8 @@ _TIMEOUT: Final = httpx.Timeout(30.0, read=300.0)
 _COMMANDS: Final = {
     "download": "Download and verify the raw files of every source",
     "build": "Build the harmonized dataset from already downloaded files",
-    "prepare": "Download and build in one step",
+    "augment": "Oversample rare classes of the training split with synthetic variants",
+    "prepare": "Download, build and augment in one step",
 }
 
 
@@ -80,6 +82,16 @@ def _run(
 
         build_dataset(sources, layout, config=BuildConfig())
 
+    if command in {"augment", "prepare"}:
+        _require_dataset(layout)
+
+        oversample_train(
+            layout.dataset_path,
+            layout.synthetic_path,
+            layout.augment_report_path,
+            config=OversamplingConfig(),
+        )
+
 
 def _require_raw_files(sources: Sequence[DataSource], layout: DataLayout) -> None:
     missing = [
@@ -91,4 +103,10 @@ def _require_raw_files(sources: Sequence[DataSource], layout: DataLayout) -> Non
 
     if missing:
         msg = f"Missing raw files {missing}; run 'geneflow download' first"
+        raise DataError(msg)
+
+
+def _require_dataset(layout: DataLayout) -> None:
+    if not layout.dataset_path.exists():
+        msg = f"Missing dataset {layout.dataset_path}; run 'geneflow build' first"
         raise DataError(msg)
