@@ -1,0 +1,25 @@
+﻿# Normalize all text files to LF in the repository and in the working tree,
+* text=auto eol=lf
+
+# Windows batch scripts require CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files: no line-ending conversion and no textual diff.
+*.png       binary
+*.jpg       binary
+*.pdf       binary
+*.gz        binary
+*.zip       binary
+*.parquet   binary
+*.npy       binary
+*.npz       binary
+*.pt        binary
+*.pth       binary
+*.ckpt      binary
+*.safetensors binary
+*.onnx      binary
+*.pkl       binary
+
+# Generated files: collapsed in GitHub diffs.
+uv.lock linguist-generated=true
