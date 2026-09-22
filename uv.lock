@@ -604,6 +604,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
+    { name = "polars" },
     { name = "pyarrow" },
 ]
 
@@ -620,12 +621,12 @@ notebooks = [
     { name = "ipykernel" },
     { name = "jupyterlab" },
     { name = "matplotlib" },
-    { name = "polars" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "httpx", specifier = ">=0.28.1" },
+    { name = "polars", specifier = ">=1.44.2" },
     { name = "pyarrow", specifier = ">=25.0.1" },
 ]
 
@@ -642,7 +643,6 @@ notebooks = [
     { name = "ipykernel", specifier = ">=7.3.0" },
     { name = "jupyterlab", specifier = ">=4.6.4" },
     { name = "matplotlib", specifier = ">=3.11.2" },
-    { name = "polars", specifier = ">=1.44.2" },
 ]
 
 [[package]]

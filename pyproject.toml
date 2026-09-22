@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "httpx>=0.28.1",
+    "polars>=1.44.2",
     "pyarrow>=25.0.1",
 ]
 
@@ -44,6 +45,7 @@ ignore = [
     "PLR2004", # magic values are fine in assertions
     "INP001",  # tests/ is not a package
     "ANN201",  # test functions return None implicitly
+    "S311",    # seeded simulation, not cryptography
 ]
 
 [tool.ruff.lint.pylint]
@@ -142,7 +144,6 @@ notebooks = [
     "ipykernel>=7.3.0",
     "jupyterlab>=4.6.4",
     "matplotlib>=3.11.2",
-    "polars>=1.44.2",
 ]
 
 [tool.uv]
