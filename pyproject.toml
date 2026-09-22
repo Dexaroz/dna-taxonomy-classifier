@@ -4,13 +4,26 @@ version = "0.1.0"
 description = "Hierarchical taxonomic classification of DNA sequences: a reproducible research workbench."
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "httpx>=0.28.1",
+    "pyarrow>=25.0.1",
+]
+
+[project.scripts]
+geneflow = "taxonomy_classifier.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.11.1,<0.12"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "taxonomy_classifier"
 
 [tool.ruff]
 target-version = "py314"
 line-length = 100
 src = ["src", "tests"]
-extend-exclude = ["data", "checkpoints", "notebooks"]
+extend-exclude = ["notebooks"]
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -18,8 +31,7 @@ ignore = [
     "COM812", # missing-trailing-comma
     "ISC001", # single-line-implicit-string-concatenation
     "CPY001", # missing-copyright-notice
-    "D100",   # undocumented-public-module
-    "D104",   # undocumented-public-package
+    "D",      # pydocstyle
     "FIX002", # line-contains-todo
     "TD002",  # missing-todo-author
     "TD003",  # missing-todo-link
@@ -30,17 +42,9 @@ ignore = [
 "tests/**/*.py" = [
     "S101",    # assert is the point of tests
     "PLR2004", # magic values are fine in assertions
-    "D",       # tests document themselves through their names
     "INP001",  # tests/ is not a package
     "ANN201",  # test functions return None implicitly
 ]
-"src/main.py" = [
-    "INP001", # entrypoint script, not part of a package
-    "T201",   # CLI output
-]
-
-[tool.ruff.lint.pydocstyle]
-convention = "google"
 
 [tool.ruff.lint.pylint]
 max-args = 8 # ML constructors and training loops legitimately take many knobs
@@ -60,12 +64,10 @@ combine-as-imports = true
 force-sort-within-sections = true
 
 [tool.ruff.format]
-docstring-code-format = true
 line-ending = "lf"
 
 [tool.mypy]
 python_version = "3.14"
-mypy_path = "src"
 files = ["src", "tests"]
 strict = true
 warn_unreachable = true
@@ -89,7 +91,6 @@ pretty = true
 [tool.pytest.ini_options]
 minversion = "8.0"
 testpaths = ["tests"]
-pythonpath = ["src"]
 addopts = [
     "-ra",
     "--strict-markers",
@@ -126,12 +127,13 @@ exclude_also = [
 ]
 
 [tool.deptry]
-known_first_party = ["main"]
+known_first_party = ["taxonomy_classifier"]
 
 [dependency-groups]
 dev = [
     "deptry>=0.25.1",
     "mypy>=2.3.1",
+    "pyarrow-stubs>=20.0.0.20260819",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
     "ruff>=0.16.8",
