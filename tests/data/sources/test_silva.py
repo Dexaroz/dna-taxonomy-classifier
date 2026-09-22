@@ -147,3 +147,38 @@ def test_eukaryotes_without_a_resolvable_kingdom_keep_none(backbone: BackboneInd
     assert isinstance(record, SequenceRecord)
     assert record.lineage.deepest_rank is Rank.DOMAIN
     assert record.kingdom is None
+
+
+@pytest.mark.parametrize(
+    ("organism", "species"),
+    [
+        ("Pseudomonas aeruginosa PAO1", "Pseudomonas aeruginosa"),
+        ("Pseudomonas putida", None),
+        ("Escherichia coli", None),
+        ("uncultured Pseudomonas sp.", None),
+    ],
+    ids=["known", "unknown-to-backbone", "other-genus", "unnamed"],
+)
+def test_species_is_recovered_only_when_consistent_with_the_mapped_genus(
+    organism: str,
+    species: str | None,
+    backbone: BackboneIndex,
+) -> None:
+    header = PSEUDOMONAS.replace("Pseudomonas putida", organism)
+
+    record = _parse(f"AB1.1.24 {header}", backbone)
+
+    assert isinstance(record, SequenceRecord)
+    assert record.lineage.get(Rank.GENUS) == "Pseudomonas"
+    assert record.lineage.get(Rank.SPECIES) == species
+
+
+def test_species_is_not_recovered_above_genus(backbone: BackboneIndex) -> None:
+    header = PSEUDOMONAS.replace("Pseudomonas;", "Pseudomonas-Novel;").replace(
+        "Pseudomonas putida", "Pseudomonas aeruginosa"
+    )
+
+    record = _parse(f"AB1.1.24 {header}", backbone)
+
+    assert isinstance(record, SequenceRecord)
+    assert record.lineage.deepest_rank is Rank.FAMILY

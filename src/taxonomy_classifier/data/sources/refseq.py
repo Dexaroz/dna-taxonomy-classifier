@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Final
 
 from taxonomy_classifier.data.dna import normalize_sequence
 from taxonomy_classifier.data.kingdom import prokaryote_kingdom
+from taxonomy_classifier.data.organisms import split_organism
 from taxonomy_classifier.data.records import SequenceRecord
 from taxonomy_classifier.data.sources.base import parse_fasta_file
 from taxonomy_classifier.data.taxonomy import Lineage, Rank, Taxon
@@ -21,12 +22,6 @@ if TYPE_CHECKING:
 SOURCE_NAME: Final = "refseq"
 
 _MARKER: Final = " 16S ribosomal RNA"
-
-_CANDIDATUS: Final = "Candidatus "
-
-_UNNAMED_EPITHETS: Final = frozenset({"sp.", "bacterium", "archaeon"})
-
-_BINOMIAL_TOKENS: Final = 2
 
 
 @dataclass(frozen=True, slots=True)
@@ -73,16 +68,6 @@ def parse_record(record: FastaRecord, *, domain: str, backbone: BackboneIndex) -
         lineage=map_organism(genus, species, domain=domain, backbone=backbone),
         kingdom=prokaryote_kingdom(domain),
     )
-
-
-def split_organism(organism: str) -> tuple[str, str | None]:
-    tokens = organism.removeprefix(_CANDIDATUS).split()
-    genus = tokens[0]
-
-    if len(tokens) < _BINOMIAL_TOKENS or tokens[1] in _UNNAMED_EPITHETS:
-        return genus, None
-
-    return genus, f"{genus} {tokens[1]}"
 
 
 def map_organism(

@@ -6,7 +6,7 @@ from taxonomy_classifier.data.exclusions import ExclusionReason
 from taxonomy_classifier.data.fasta import FastaRecord
 from taxonomy_classifier.data.kingdom import Kingdom
 from taxonomy_classifier.data.records import SequenceRecord
-from taxonomy_classifier.data.sources.refseq import parse_record, split_organism
+from taxonomy_classifier.data.sources.refseq import parse_record
 from taxonomy_classifier.data.taxonomy import Rank
 from taxonomy_classifier.exceptions import MalformedHeaderError
 
@@ -23,20 +23,6 @@ def _parse(header: str, backbone: BackboneIndex, domain: str = "Bacteria") -> Se
         domain=domain,
         backbone=backbone,
     )
-
-
-@pytest.mark.parametrize(
-    ("organism", "expected"),
-    [
-        ("Escherichia coli strain K-12", ("Escherichia", "Escherichia coli")),
-        ("Candidatus Novelbacter mysteriosus", ("Novelbacter", "Novelbacter mysteriosus")),
-        ("Pseudomonas sp. 12", ("Pseudomonas", None)),
-        ("Clostridiales bacterium", ("Clostridiales", None)),
-        ("Pseudomonas", ("Pseudomonas", None)),
-    ],
-)
-def test_split_organism(organism: str, expected: tuple[str, str | None]) -> None:
-    assert split_organism(organism) == expected
 
 
 def test_species_known_to_the_backbone_gets_its_full_lineage(backbone: BackboneIndex) -> None:
