@@ -1,27 +1,13 @@
 from collections.abc import Callable
 from dataclasses import dataclass
-from enum import StrEnum
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING
+
+from taxonomy_classifier.data.exclusions import ExclusionReason
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from taxonomy_classifier.data.records import SequenceRecord
-
-_ORGANELLE_TAXA: Final = frozenset({"Chloroplast", "Mitochondria"})
-
-
-class ExclusionReason(StrEnum):
-    MALFORMED_HEADER = "malformed_header"
-    INVALID_SEQUENCE = "invalid_sequence"
-    UNKNOWN_TAXON_PATH = "unknown_taxon_path"
-    DUPLICATE_RANK = "duplicate_rank"
-    INVALID_LINEAGE = "invalid_lineage"
-    ORGANELLE = "organelle"
-    TOO_SHORT = "too_short"
-    TOO_LONG = "too_long"
-    TOO_AMBIGUOUS = "too_ambiguous"
-
 
 type Filter = Callable[[SequenceRecord], ExclusionReason | None]
 
@@ -31,7 +17,6 @@ class FilterConfig:
     min_length: int = 900
     max_length: int = 4000
     max_ambiguous_fraction: float = 0.01
-    exclude_organelles: bool = True
 
     def __post_init__(self) -> None:
         if self.min_length < 1:
@@ -48,15 +33,10 @@ class FilterConfig:
 
 
 def build_filters(config: FilterConfig) -> tuple[Filter, ...]:
-    filters: list[Filter] = []
-
-    if config.exclude_organelles:
-        filters.append(_exclude_organelle)
-
-    filters.append(_length_filter(config.min_length, config.max_length))
-    filters.append(_ambiguity_filter(config.max_ambiguous_fraction))
-
-    return tuple(filters)
+    return (
+        _length_filter(config.min_length, config.max_length),
+        _ambiguity_filter(config.max_ambiguous_fraction),
+    )
 
 
 def first_exclusion(record: SequenceRecord, filters: Sequence[Filter]) -> ExclusionReason | None:
@@ -67,13 +47,6 @@ def first_exclusion(record: SequenceRecord, filters: Sequence[Filter]) -> Exclus
             return reason
 
     return None
-
-
-def _exclude_organelle(record: SequenceRecord) -> ExclusionReason | None:
-    if _ORGANELLE_TAXA.isdisjoint(record.lineage.path):
-        return None
-
-    return ExclusionReason.ORGANELLE
 
 
 def _length_filter(min_length: int, max_length: int) -> Filter:

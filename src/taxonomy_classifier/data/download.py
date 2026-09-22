@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 import hashlib
 import logging
 from typing import TYPE_CHECKING, Final
@@ -9,19 +8,14 @@ from taxonomy_classifier.data.files import partial_path
 from taxonomy_classifier.exceptions import ChecksumMismatchError, DownloadError
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from pathlib import Path
 
-    from taxonomy_classifier.data.sources import RemoteFile, SilvaRelease
+    from taxonomy_classifier.data.remote import RemoteFile
 
 _LOGGER: Final = logging.getLogger(__name__)
 
 _CHUNK_SIZE: Final = 1 << 20
-
-
-@dataclass(frozen=True, slots=True)
-class ReleaseFiles:
-    fasta: Path
-    taxonomy: Path
 
 
 def sha256_of(path: Path) -> str:
@@ -34,7 +28,7 @@ def download_file(remote: RemoteFile, dest_dir: Path, *, client: httpx.Client) -
 
     if target.exists():
         _verify(target, remote.sha256)
-        _LOGGER.info("Already downloaded and verified: %s", target)
+        _LOGGER.info("Already downloaded: %s", target)
 
         return target
 
@@ -52,27 +46,30 @@ def download_file(remote: RemoteFile, dest_dir: Path, *, client: httpx.Client) -
         msg = f"Failed to download {remote.url}: {error}"
         raise DownloadError(msg) from error
 
-    if actual != remote.sha256:
+    if remote.sha256 is not None and actual != remote.sha256:
         partial.unlink()
 
         raise ChecksumMismatchError(target, remote.sha256, actual)
 
     partial.replace(target)
-    _LOGGER.info("Downloaded and verified: %s", target)
+    _LOGGER.info("Downloaded %s (sha256 %s)", target, actual)
 
     return target
 
 
-def download_release(
-    release: SilvaRelease, dest_dir: Path, *, client: httpx.Client
-) -> ReleaseFiles:
-    return ReleaseFiles(
-        fasta=download_file(release.fasta, dest_dir, client=client),
-        taxonomy=download_file(release.taxonomy, dest_dir, client=client),
-    )
+def download_all(
+    remotes: Iterable[RemoteFile],
+    dest_dir: Path,
+    *,
+    client: httpx.Client,
+) -> tuple[Path, ...]:
+    return tuple(download_file(remote, dest_dir, client=client) for remote in remotes)
 
 
-def _verify(path: Path, expected: str) -> None:
+def _verify(path: Path, expected: str | None) -> None:
+    if expected is None:
+        return
+
     actual = sha256_of(path)
 
     if actual != expected:

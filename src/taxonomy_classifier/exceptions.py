@@ -38,28 +38,3 @@ class MalformedHeaderError(DataError):
 
 class InvalidSequenceError(DataError):
     pass
-
-
-class TaxonomyError(DataError):
-    pass
-
-
-class UnknownTaxonPathError(TaxonomyError):
-    def __init__(self, path: str) -> None:
-        super().__init__(f"Lineage path not found in rank map: {path!r}")
-        self.path = path
-
-    @override
-    def __reduce__(self) -> tuple[type[Self], tuple[str]]:
-        return type(self), (self.path,)
-
-
-class DuplicateRankError(TaxonomyError):
-    def __init__(self, rank: str, path: str) -> None:
-        super().__init__(f"Rank {rank!r} assigned more than once in lineage {path!r}")
-        self.rank = rank
-        self.path = path
-
-    @override
-    def __reduce__(self) -> tuple[type[Self], tuple[str, str]]:
-        return type(self), (self.rank, self.path)

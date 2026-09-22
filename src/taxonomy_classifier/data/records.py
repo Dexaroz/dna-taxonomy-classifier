@@ -4,16 +4,15 @@ from typing import TYPE_CHECKING
 from taxonomy_classifier.data.dna import count_ambiguous
 
 if TYPE_CHECKING:
-    from taxonomy_classifier.data.taxonomy import Lineage
+    from taxonomy_classifier.data.taxonomy import Lineage, Taxon
 
 
 @dataclass(frozen=True, slots=True)
 class SequenceRecord:
+    source: str
     accession: str
-    start: int
-    end: int
-    organism: str
     sequence: str
+    source_lineage: tuple[Taxon, ...]
     lineage: Lineage
 
     @property

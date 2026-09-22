@@ -7,13 +7,10 @@ from taxonomy_classifier.exceptions import (
     ChecksumMismatchError,
     DataError,
     DownloadError,
-    DuplicateRankError,
     GeneflowError,
     InvalidSequenceError,
     MalformedFastaError,
     MalformedHeaderError,
-    TaxonomyError,
-    UnknownTaxonPathError,
 )
 
 
@@ -26,9 +23,6 @@ from taxonomy_classifier.exceptions import (
         (MalformedFastaError, DataError),
         (MalformedHeaderError, DataError),
         (InvalidSequenceError, DataError),
-        (TaxonomyError, DataError),
-        (UnknownTaxonPathError, TaxonomyError),
-        (DuplicateRankError, TaxonomyError),
     ],
 )
 def test_hierarchy(error_type: type[Exception], parent: type[Exception]) -> None:
@@ -46,33 +40,11 @@ def test_checksum_mismatch_exposes_attributes_and_message() -> None:
     assert "file.gz" in str(error)
 
 
-def test_unknown_taxon_path_exposes_attributes_and_message() -> None:
-    error = UnknownTaxonPathError("Bacteria;Foo;")
+def test_checksum_mismatch_survives_pickling() -> None:
+    error = ChecksumMismatchError(Path("f.gz"), expected="abc", actual="def")
 
-    assert error.path == "Bacteria;Foo;"
-    assert "Bacteria;Foo;" in str(error)
-
-
-def test_duplicate_rank_exposes_attributes_and_message() -> None:
-    error = DuplicateRankError("genus", "Bacteria;A;B;")
-
-    assert (error.rank, error.path) == ("genus", "Bacteria;A;B;")
-    assert "genus" in str(error)
-    assert "Bacteria;A;B;" in str(error)
-
-
-@pytest.mark.parametrize(
-    "error",
-    [
-        ChecksumMismatchError(Path("f.gz"), expected="abc", actual="def"),
-        UnknownTaxonPathError("Bacteria;Foo;"),
-        DuplicateRankError("genus", "Bacteria;A;B;"),
-    ],
-    ids=lambda error: type(error).__name__,
-)
-def test_structured_errors_survive_pickling(error: GeneflowError) -> None:
     restored = pickle.loads(pickle.dumps(error))  # noqa: S301
 
-    assert type(restored) is type(error)
+    assert type(restored) is ChecksumMismatchError
     assert str(restored) == str(error)
     assert vars(restored) == vars(error)

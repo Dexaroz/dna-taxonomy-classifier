@@ -4,14 +4,9 @@ from typing import TYPE_CHECKING
 import httpx
 import pytest
 
-from taxonomy_classifier.data.download import (
-    ReleaseFiles,
-    download_file,
-    download_release,
-    sha256_of,
-)
+from taxonomy_classifier.data.download import download_all, download_file, sha256_of
 from taxonomy_classifier.data.files import partial_path
-from taxonomy_classifier.data.sources import RemoteFile, SilvaRelease
+from taxonomy_classifier.data.remote import RemoteFile
 from taxonomy_classifier.exceptions import ChecksumMismatchError, DownloadError
 
 if TYPE_CHECKING:
@@ -120,21 +115,38 @@ def test_download_file_wraps_network_errors(tmp_path: Path) -> None:
     assert list(tmp_path.iterdir()) == []
 
 
-def test_download_release_fetches_fasta_and_taxonomy(tmp_path: Path) -> None:
-    taxonomy_content = b"Bacteria;\t2\tdomain\t\t\n"
-    release = SilvaRelease(
-        version="test",
-        fasta=REMOTE,
-        taxonomy=RemoteFile(
-            url="https://example.org/files/tax.txt.gz",
-            sha256=hashlib.sha256(taxonomy_content).hexdigest(),
-        ),
+def test_unpinned_files_are_downloaded_without_verification(tmp_path: Path) -> None:
+    remote = RemoteFile(url=REMOTE.url, sha256=None)
+    server = _serve(b"rolling release")
+
+    with server.client() as client:
+        path = download_file(remote, tmp_path, client=client)
+
+    assert path.read_bytes() == b"rolling release"
+
+
+def test_existing_unpinned_files_are_kept_as_they_are(tmp_path: Path) -> None:
+    (tmp_path / "data.gz").write_bytes(b"previous snapshot")
+    server = _serve(CONTENT)
+
+    with server.client() as client:
+        download_file(RemoteFile(url=REMOTE.url, sha256=None), tmp_path, client=client)
+
+    assert (tmp_path / "data.gz").read_bytes() == b"previous snapshot"
+    assert server.requests == []
+
+
+def test_download_all_fetches_every_file(tmp_path: Path) -> None:
+    other_content = b"taxonomy"
+    other = RemoteFile(
+        url="https://example.org/files/tax.txt.gz",
+        sha256=hashlib.sha256(other_content).hexdigest(),
     )
-    contents = {REMOTE.url: CONTENT, release.taxonomy.url: taxonomy_content}
+    contents = {REMOTE.url: CONTENT, other.url: other_content}
     server = FakeServer(lambda request: httpx.Response(200, content=contents[str(request.url)]))
 
     with server.client() as client:
-        files = download_release(release, tmp_path, client=client)
+        paths = download_all([REMOTE, other], tmp_path, client=client)
 
-    assert files == ReleaseFiles(fasta=tmp_path / "data.gz", taxonomy=tmp_path / "tax.txt.gz")
-    assert files.taxonomy.read_bytes() == taxonomy_content
+    assert paths == (tmp_path / "data.gz", tmp_path / "tax.txt.gz")
+    assert paths[1].read_bytes() == other_content

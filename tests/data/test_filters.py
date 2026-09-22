@@ -2,21 +2,13 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from taxonomy_classifier.data.filters import (
-    ExclusionReason,
-    FilterConfig,
-    build_filters,
-    first_exclusion,
-)
+from taxonomy_classifier.data.exclusions import ExclusionReason
+from taxonomy_classifier.data.filters import FilterConfig, build_filters, first_exclusion
 
 if TYPE_CHECKING:
     from conftest import RecordFactory
 
 CONFIG = FilterConfig(min_length=10, max_length=20, max_ambiguous_fraction=0.1)
-
-CHLOROPLAST = ("Bacteria", "Bacillati", "Cyanobacteriota", "Cyanophyceae", "Chloroplast")
-
-MITOCHONDRIA = ("Bacteria", "Pseudomonadati", "Pseudomonadota", "Rickettsiales", "Mitochondria")
 
 
 @pytest.mark.parametrize(
@@ -66,24 +58,10 @@ def test_ambiguity_threshold_is_inclusive(
     assert first_exclusion(record, build_filters(CONFIG)) is expected
 
 
-@pytest.mark.parametrize("path", [CHLOROPLAST, MITOCHONDRIA], ids=["chloroplast", "mitochondria"])
-def test_organelles_are_excluded(path: tuple[str, ...], make_record: RecordFactory) -> None:
-    record = make_record(sequence="A" * 15, path=path)
-
-    assert first_exclusion(record, build_filters(CONFIG)) is ExclusionReason.ORGANELLE
-
-
-def test_organelles_are_kept_when_disabled(make_record: RecordFactory) -> None:
-    config = FilterConfig(min_length=10, max_length=20, exclude_organelles=False)
-    record = make_record(sequence="A" * 15, path=CHLOROPLAST)
-
-    assert first_exclusion(record, build_filters(config)) is None
-
-
 def test_first_exclusion_reports_the_first_failing_filter(make_record: RecordFactory) -> None:
-    record = make_record(sequence="N" * 5, path=CHLOROPLAST)
+    record = make_record(sequence="N" * 5)
 
-    assert first_exclusion(record, build_filters(CONFIG)) is ExclusionReason.ORGANELLE
+    assert first_exclusion(record, build_filters(CONFIG)) is ExclusionReason.TOO_SHORT
 
 
 def test_first_exclusion_without_filters_keeps_everything(make_record: RecordFactory) -> None:
