@@ -27,8 +27,8 @@ htmlcov/
 .ipynb_checkpoints/
 
 # Project data
-data/
-checkpoints/
+/data/
+/checkpoints/
 *.pt
 *.pth
 *.ckpt
