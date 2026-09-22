@@ -1,0 +1,40 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+.python-version
+*$py.class
+.venv/
+.Python
+*.egg-info/
+dist/
+build/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Project data
+data/
+*.jsonl
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Ruff
+.ruff_cache/
+
+# Generated artifacts
+checkpoints/
