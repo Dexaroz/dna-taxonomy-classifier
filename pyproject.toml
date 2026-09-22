@@ -1,0 +1,138 @@
+[project]
+name = "dna-taxonomy-classifier"
+version = "0.1.0"
+description = "Hierarchical taxonomic classification of DNA sequences: a reproducible research workbench."
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = []
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+src = ["src", "tests"]
+extend-exclude = ["data", "checkpoints", "notebooks"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "COM812", # missing-trailing-comma
+    "ISC001", # single-line-implicit-string-concatenation
+    "CPY001", # missing-copyright-notice
+    "D100",   # undocumented-public-module
+    "D104",   # undocumented-public-package
+    "FIX002", # line-contains-todo
+    "TD002",  # missing-todo-author
+    "TD003",  # missing-todo-link
+    "N812",   # lowercase-imported-as-non-lowercase
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "S101",    # assert is the point of tests
+    "PLR2004", # magic values are fine in assertions
+    "D",       # tests document themselves through their names
+    "INP001",  # tests/ is not a package
+    "ANN201",  # test functions return None implicitly
+]
+"src/main.py" = [
+    "INP001", # entrypoint script, not part of a package
+    "T201",   # CLI output
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.pylint]
+max-args = 8 # ML constructors and training loops legitimately take many knobs
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.flake8-pytest-style]
+fixture-parentheses = false
+mark-parentheses = false
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-sort-within-sections = true
+
+[tool.ruff.format]
+docstring-code-format = true
+line-ending = "lf"
+
+[tool.mypy]
+python_version = "3.14"
+mypy_path = "src"
+files = ["src", "tests"]
+strict = true
+warn_unreachable = true
+warn_unused_configs = true
+extra_checks = true
+enable_error_code = [
+    "ignore-without-code",
+    "redundant-expr",
+    "redundant-self",
+    "truthy-bool",
+    "truthy-iterable",
+    "possibly-undefined",
+    "unused-awaitable",
+    "explicit-override",
+    "mutable-override",
+    "deprecated",
+]
+show_error_codes = true
+pretty = true
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--import-mode=importlib",
+    "--cov",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-report=xml",
+]
+xfail_strict = true
+filterwarnings = ["error"]
+markers = [
+    "slow: long-running tests (deselect with '-m \"not slow\"')",
+    "gpu: tests that require a CUDA device",
+]
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+parallel = true
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_covered = true
+precision = 2
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "@(abc\\.)?abstractmethod",
+    "^\\s*\\.\\.\\.$",
+    "assert_never\\(",
+]
+
+[tool.deptry]
+known_first_party = ["main"]
+
+[dependency-groups]
+dev = [
+    "deptry>=0.25.1",
+    "mypy>=2.3.1",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.8",
+]
