@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from taxonomy_classifier.data.harmonize import BackboneIndex
+from taxonomy_classifier.data.kingdom import Kingdom
 from taxonomy_classifier.data.taxonomy import CANONICAL_RANKS, Lineage, Rank, Taxon
 
 if TYPE_CHECKING:
@@ -8,14 +9,18 @@ if TYPE_CHECKING:
     from taxonomy_classifier.data.records import SequenceRecord
 
 
-def _native_record(make_record: RecordFactory, *names: str | None) -> SequenceRecord:
+def _native_record(
+    make_record: RecordFactory,
+    *names: str | None,
+    kingdom: Kingdom | None = Kingdom.BACTERIA,
+) -> SequenceRecord:
     taxa = tuple(
         Taxon(name=name, rank=rank)
         for name, rank in zip(names, CANONICAL_RANKS, strict=True)
         if name is not None
     )
 
-    return make_record(lineage=Lineage(names=names), source_lineage=taxa)
+    return make_record(lineage=Lineage(names=names), source_lineage=taxa, kingdom=kingdom)
 
 
 def _native(make_record: RecordFactory, *names: str | None) -> BackboneIndex:
@@ -117,3 +122,40 @@ def test_non_canonical_taxa_before_any_rank_are_ignored(make_record: RecordFacto
 
     assert index.lookup("Root", domain="Bacteria") is None
     assert index.lookup("Bacteria", domain="Bacteria") == Lineage.domain_only("Bacteria")
+
+
+def test_kingdom_of_returns_the_kingdom_seen_for_a_lineage(make_record: RecordFactory) -> None:
+    index = BackboneIndex()
+    fungus = ("Eukaryota", "Opisthokonta", "Ascomycota", None, None, None, None)
+    animal = ("Eukaryota", "Opisthokonta", "Arthropoda", None, None, None, None)
+
+    index.add_all(
+        [
+            _native_record(make_record, *fungus, kingdom=Kingdom.FUNGI),
+            _native_record(make_record, *animal, kingdom=Kingdom.ANIMALIA),
+        ]
+    )
+
+    assert index.kingdom_of(Lineage(names=fungus)) is Kingdom.FUNGI
+    assert index.kingdom_of(Lineage(names=animal).truncate(Rank.PHYLUM)) is None
+    assert index.kingdom_of(Lineage.domain_only("Archaea")) is None
+
+
+def test_kingdom_of_species_lineages(make_record: RecordFactory) -> None:
+    names = ("Eukaryota", "Opisthokonta", "Ascomycota", "O", "F", "Podospora", "P anserina")
+    index = BackboneIndex()
+
+    index.add(_native_record(make_record, *names, kingdom=Kingdom.FUNGI))
+
+    assert index.kingdom_of(Lineage(names=names)) is Kingdom.FUNGI
+
+
+def test_records_without_kingdom_do_not_register_one(make_record: RecordFactory) -> None:
+    index = BackboneIndex()
+
+    index.add(
+        _native_record(make_record, "Bacteria", "P", None, None, None, None, None, kingdom=None)
+    )
+
+    assert index.lookup("P", domain="Bacteria") is not None
+    assert index.kingdom_of(Lineage.domain_only("Bacteria")) is None

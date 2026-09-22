@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from taxonomy_classifier.data.dna import count_ambiguous
 
 if TYPE_CHECKING:
+    from taxonomy_classifier.data.kingdom import Kingdom
     from taxonomy_classifier.data.taxonomy import Lineage, Taxon
 
 
@@ -14,6 +15,7 @@ class SequenceRecord:
     sequence: str
     source_lineage: tuple[Taxon, ...]
     lineage: Lineage
+    kingdom: Kingdom | None
 
     @property
     def length(self) -> int:

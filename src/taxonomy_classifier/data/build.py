@@ -9,6 +9,7 @@ from taxonomy_classifier.data.columns import RANK_COLUMNS
 from taxonomy_classifier.data.files import partial_path, write_text_atomic
 from taxonomy_classifier.data.filters import FilterConfig
 from taxonomy_classifier.data.harmonize import BackboneIndex
+from taxonomy_classifier.data.kingdom import Kingdom
 from taxonomy_classifier.data.merge import merge_staged
 from taxonomy_classifier.data.split import Split, SplitConfig, assign_splits
 from taxonomy_classifier.data.staging import stage_source
@@ -30,6 +31,8 @@ DATASET_FILENAME: Final = "dataset.parquet"
 REPORT_FILENAME: Final = "build_report.json"
 
 MERGED_FILENAME: Final = "merged.parquet"
+
+UNKNOWN_KINGDOM: Final = "unknown"
 
 
 @dataclass(frozen=True, slots=True)
@@ -77,6 +80,7 @@ class BuildReport:
     sources: Sequence[SourceReport]
     merge: MergeReport
     splits: Mapping[str, int]
+    kingdoms: Mapping[str, int]
     rank_coverage: Mapping[str, int]
 
     def to_json(self) -> str:
@@ -85,6 +89,7 @@ class BuildReport:
             "sources": [report.to_dict() for report in self.sources],
             "merge": self.merge.to_dict(),
             "splits": dict(self.splits),
+            "kingdoms": dict(self.kingdoms),
             "rank_coverage": dict(self.rank_coverage),
         }
 
@@ -124,6 +129,7 @@ def build_dataset(
         sources=source_reports,
         merge=merge_report,
         splits=_split_counts(layout.dataset_path),
+        kingdoms=_kingdom_counts(layout.dataset_path),
         rank_coverage=_rank_coverage(layout.dataset_path),
     )
 
@@ -164,6 +170,16 @@ def _split_counts(dataset_path: Path) -> dict[str, int]:
     observed = dict(counts.iter_rows())
 
     return {split.value: observed.get(split.value, 0) for split in Split}
+
+
+def _kingdom_counts(dataset_path: Path) -> dict[str, int]:
+    counts = pl.scan_parquet(dataset_path).group_by("kingdom").len().collect()
+    observed = dict(counts.iter_rows())
+
+    return {
+        **{kingdom.value: observed.get(kingdom.value, 0) for kingdom in Kingdom},
+        UNKNOWN_KINGDOM: observed.get(None, 0),
+    }
 
 
 def _rank_coverage(dataset_path: Path) -> dict[str, int]:

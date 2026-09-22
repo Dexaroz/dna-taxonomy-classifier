@@ -15,6 +15,22 @@ _PREFIX: Final = "_prefix_"
 
 _DISTINCT: Final = "_distinct_"
 
+_KINGDOM_CONFLICT: Final = "_kingdom_conflict"
+
+MERGED_COLUMNS: Final = (
+    "seq_hash",
+    "sequence",
+    "length",
+    "n_ambiguous",
+    RANK_COLUMNS[0],
+    "kingdom",
+    *RANK_COLUMNS[1:],
+    "sources",
+    "accessions",
+    "n_records",
+    "label_conflict",
+)
+
 
 @dataclass(frozen=True, slots=True)
 class MergeReport:
@@ -66,6 +82,8 @@ def merged_frame(staged: pl.LazyFrame) -> pl.LazyFrame:
             pl.col("length").first(),
             pl.col("n_ambiguous").first(),
             *(pl.col(column).drop_nulls().first() for column in RANK_COLUMNS),
+            pl.col("kingdom").drop_nulls().first(),
+            (pl.col("kingdom").drop_nulls().n_unique() > 1).alias(_KINGDOM_CONFLICT),
             *(
                 pl.col(f"{_PREFIX}{column}").drop_nulls().n_unique().alias(f"{_DISTINCT}{column}")
                 for column in RANK_COLUMNS
@@ -86,10 +104,18 @@ def merged_frame(staged: pl.LazyFrame) -> pl.LazyFrame:
         for depth, column in enumerate(RANK_COLUMNS)
     ]
 
+    kingdom = (
+        pl.when(pl.col(_KINGDOM_CONFLICT)).then(None).otherwise(pl.col("kingdom")).alias("kingdom")
+    )
+
+    label_conflict = pl.any_horizontal(*conflicts, pl.col(_KINGDOM_CONFLICT)).alias(
+        "label_conflict"
+    )
+
     return (
-        grouped.with_columns(*resolved, pl.any_horizontal(conflicts).alias("label_conflict"))
-        .drop(f"{_DISTINCT}{column}" for column in RANK_COLUMNS)
+        grouped.with_columns(*resolved, kingdom, label_conflict)
         .filter(pl.col("domain").is_not_null())
+        .select(MERGED_COLUMNS)
         .sort("seq_hash")
     )
 

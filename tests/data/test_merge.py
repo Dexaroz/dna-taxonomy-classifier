@@ -30,6 +30,7 @@ def _row(
     source: str,
     accession: str,
     names: tuple[str | None, ...],
+    kingdom: str | None = "Bacteria",
 ) -> dict[str, object]:
     return {
         "source": source,
@@ -40,6 +41,7 @@ def _row(
         "n_ambiguous": 0,
         "source_lineage": [name for name in names if name],
         **dict(zip(RANK_COLUMNS, names, strict=True)),
+        "kingdom": kingdom,
     }
 
 
@@ -143,3 +145,33 @@ def test_merge_staged_cleans_up_on_failure(tmp_path: Path, monkeypatch: pytest.M
         merge_staged([staged], tmp_path / "merged.parquet")
 
     assert sorted(path.name for path in tmp_path.iterdir()) == ["staged.parquet"]
+
+
+def test_kingdom_is_placed_after_the_domain() -> None:
+    [row] = _merge(_row(b"h1", "gtdb", "G", ECOLI))
+
+    assert list(row)[3:6] == ["n_ambiguous", "domain", "kingdom"]
+    assert row["kingdom"] == "Bacteria"
+
+
+def test_missing_kingdoms_do_not_count_as_conflicts() -> None:
+    [row] = _merge(
+        _row(b"h1", "gtdb", "G", ECOLI),
+        _row(b"h1", "silva", "S", ECOLI, kingdom=None),
+    )
+
+    assert row["kingdom"] == "Bacteria"
+    assert row["label_conflict"] is False
+
+
+def test_conflicting_kingdoms_are_cleared_and_flagged() -> None:
+    fungus = ("Eukaryota", "Opisthokonta", None, None, None, None, None)
+
+    [row] = _merge(
+        _row(b"h1", "pr2", "P", fungus, kingdom="Fungi"),
+        _row(b"h1", "silva", "S", fungus, kingdom="Animalia"),
+    )
+
+    assert row["phylum"] == "Opisthokonta"
+    assert row["kingdom"] is None
+    assert row["label_conflict"] is True

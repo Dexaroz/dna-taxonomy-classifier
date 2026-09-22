@@ -4,6 +4,7 @@ import pytest
 
 from taxonomy_classifier.data.exclusions import ExclusionReason
 from taxonomy_classifier.data.fasta import FastaRecord
+from taxonomy_classifier.data.kingdom import Kingdom
 from taxonomy_classifier.data.records import SequenceRecord
 from taxonomy_classifier.data.sources.refseq import parse_record, split_organism
 from taxonomy_classifier.data.taxonomy import Rank
@@ -92,6 +93,7 @@ def test_read_parses_both_domains(
     assert outcomes.count(ExclusionReason.MALFORMED_HEADER) == 1
     assert [record.lineage.domain for record in records] == ["Bacteria"] * 3 + ["Archaea"]
     assert records[-1].lineage.get(Rank.SPECIES) == "Methanobrevibacter smithii"
+    assert [record.kingdom for record in records] == [Kingdom.BACTERIA] * 3 + [Kingdom.ARCHAEA]
 
 
 def test_unnamed_species_are_mapped_through_their_genus(backbone: BackboneIndex) -> None:

@@ -63,6 +63,15 @@ def test_report_counts_every_stage(report: BuildReport) -> None:
     assert sum(report.splits.values()) == 14
     assert set(report.splits) == {split.value for split in Split}
     assert report.rank_coverage["domain"] == 14
+    assert report.kingdoms == {
+        "Bacteria": 8,
+        "Archaea": 3,
+        "Animalia": 0,
+        "Fungi": 2,
+        "Plantae": 0,
+        "Protista": 1,
+        "unknown": 0,
+    }
 
 
 def test_dataset_merges_duplicates_across_sources(report: BuildReport, layout: DataLayout) -> None:

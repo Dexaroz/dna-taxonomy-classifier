@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Final
 
 from taxonomy_classifier.data.dna import normalize_sequence
 from taxonomy_classifier.data.exclusions import ExclusionReason
+from taxonomy_classifier.data.kingdom import Kingdom
 from taxonomy_classifier.data.records import SequenceRecord
 from taxonomy_classifier.data.sources.base import parse_fasta_file
 from taxonomy_classifier.data.taxonomy import Lineage, Rank, Taxon
@@ -39,6 +40,16 @@ _METADATA_FIELDS: Final = 4
 _PLACEHOLDER: Final = re.compile(r"_X+$")
 
 _UNNAMED_SPECIES: Final = "_sp."
+
+_DIVISION: Final = 2
+
+_SUBDIVISION: Final = 3
+
+_PLANT_DIVISIONS: Final = frozenset(
+    {"Streptophyta", "Chlorophyta", "Prasinodermophyta", "Rhodophyta", "Glaucophyta"}
+)
+
+_OPISTHOKONT_KINGDOMS: Final = {"Metazoa": Kingdom.ANIMALIA, "Fungi": Kingdom.FUNGI}
 
 
 @dataclass(frozen=True, slots=True)
@@ -94,7 +105,15 @@ def parse_record(record: FastaRecord) -> Outcome:
             if raw_name
         ),
         lineage=Lineage.from_ranks(names),
+        kingdom=pr2_kingdom(raw_names[_DIVISION], raw_names[_SUBDIVISION]),
     )
+
+
+def pr2_kingdom(division: str, subdivision: str) -> Kingdom:
+    if division in _PLANT_DIVISIONS:
+        return Kingdom.PLANTAE
+
+    return _OPISTHOKONT_KINGDOMS.get(subdivision, Kingdom.PROTISTA)
 
 
 def clean_name(raw_name: str, rank: Rank) -> str | None:

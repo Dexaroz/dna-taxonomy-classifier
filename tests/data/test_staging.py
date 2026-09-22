@@ -77,6 +77,7 @@ def test_stage_source_writes_one_row_per_kept_record(
     assert first["seq_hash"] == sequence_hash(first["sequence"])
     assert first["source_lineage"][-1] == "Escherichia coli"
     assert first["species"] == "Escherichia coli"
+    assert first["kingdom"] == "Bacteria"
     assert not (tmp_path / "gtdb.parquet.part").exists()
 
 

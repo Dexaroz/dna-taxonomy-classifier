@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Protocol
 import pytest
 
 from taxonomy_classifier.data.harmonize import BackboneIndex
+from taxonomy_classifier.data.kingdom import Kingdom
 from taxonomy_classifier.data.records import SequenceRecord
 from taxonomy_classifier.data.remote import RemoteFile
 from taxonomy_classifier.data.sources.gtdb import GtdbSource
@@ -30,6 +31,7 @@ class RecordFactory(Protocol):
         lineage: Lineage = ...,
         source_lineage: tuple[Taxon, ...] = ...,
         source: str = ...,
+        kingdom: Kingdom | None = ...,
     ) -> SequenceRecord: ...
 
 
@@ -46,6 +48,7 @@ def make_record() -> RecordFactory:
         lineage: Lineage = BACTERIA,
         source_lineage: tuple[Taxon, ...] = BACTERIA_TAXA,
         source: str = "test",
+        kingdom: Kingdom | None = Kingdom.BACTERIA,
     ) -> SequenceRecord:
         return SequenceRecord(
             source=source,
@@ -53,6 +56,7 @@ def make_record() -> RecordFactory:
             sequence=sequence,
             source_lineage=source_lineage,
             lineage=lineage,
+            kingdom=kingdom,
         )
 
     return factory

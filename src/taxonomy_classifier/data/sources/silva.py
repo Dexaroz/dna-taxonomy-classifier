@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Final
 
 from taxonomy_classifier.data.dna import normalize_sequence
 from taxonomy_classifier.data.exclusions import ExclusionReason
+from taxonomy_classifier.data.kingdom import prokaryote_kingdom
 from taxonomy_classifier.data.records import SequenceRecord
 from taxonomy_classifier.data.sources.base import parse_fasta_file
 from taxonomy_classifier.data.taxonomy import Lineage, Rank, Taxon
@@ -90,7 +91,7 @@ def parse_record(record: FastaRecord, *, backbone: BackboneIndex) -> Outcome:
 
     domain = header.taxa[0]
     candidates = [taxon for taxon in reversed(header.taxa[1:]) if not is_placeholder(taxon)]
-    lineage = backbone.map_lineage(candidates, domain=domain)
+    lineage = backbone.map_lineage(candidates, domain=domain) or Lineage.domain_only(domain)
 
     return SequenceRecord(
         source=SOURCE_NAME,
@@ -100,7 +101,8 @@ def parse_record(record: FastaRecord, *, backbone: BackboneIndex) -> Outcome:
             Taxon(name=domain, rank=Rank.DOMAIN),
             *(Taxon(name=taxon, rank=None) for taxon in header.taxa[1:]),
         ),
-        lineage=lineage or Lineage.domain_only(domain),
+        lineage=lineage,
+        kingdom=prokaryote_kingdom(domain) or backbone.kingdom_of(lineage),
     )
 
 

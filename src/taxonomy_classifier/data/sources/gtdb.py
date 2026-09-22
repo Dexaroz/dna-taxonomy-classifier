@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Final
 
 from taxonomy_classifier.data.dna import normalize_sequence
+from taxonomy_classifier.data.kingdom import prokaryote_kingdom
 from taxonomy_classifier.data.records import SequenceRecord
 from taxonomy_classifier.data.sources.base import parse_fasta_file
 from taxonomy_classifier.data.taxonomy import CANONICAL_RANKS, Lineage, Taxon
@@ -77,4 +78,5 @@ def parse_record(record: FastaRecord) -> SequenceRecord:
             if name is not None
         ),
         lineage=Lineage(names=names),
+        kingdom=prokaryote_kingdom(names[0]),
     )

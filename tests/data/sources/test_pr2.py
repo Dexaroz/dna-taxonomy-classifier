@@ -5,8 +5,9 @@ import pytest
 from taxonomy_classifier.data.exclusions import ExclusionReason
 from taxonomy_classifier.data.fasta import FastaRecord
 from taxonomy_classifier.data.harmonize import BackboneIndex
+from taxonomy_classifier.data.kingdom import Kingdom
 from taxonomy_classifier.data.records import SequenceRecord
-from taxonomy_classifier.data.sources.pr2 import clean_name, parse_record
+from taxonomy_classifier.data.sources.pr2 import clean_name, parse_record, pr2_kingdom
 from taxonomy_classifier.data.taxonomy import Rank, Taxon
 from taxonomy_classifier.exceptions import MalformedHeaderError
 
@@ -39,6 +40,7 @@ def test_parse_record_maps_pr2_ranks_to_canonical_ones() -> None:
         "Podospora",
         "Podospora anserina",
     )
+    assert record.kingdom is Kingdom.FUNGI
     assert record.source_lineage[1] == Taxon(name="Obazoa", rank=None)
     assert record.source_lineage[3] == Taxon(name="Fungi", rank=None)
     assert len(record.source_lineage) == 9
@@ -90,3 +92,20 @@ def test_read_yields_records_and_exclusions(pr2_source: Pr2Source, fixtures_dir:
 
     assert [type(outcome).__name__ for outcome in outcomes[:2]] == ["SequenceRecord"] * 2
     assert outcomes[2:] == [ExclusionReason.OFF_TARGET, ExclusionReason.MALFORMED_HEADER]
+
+
+@pytest.mark.parametrize(
+    ("division", "subdivision", "expected"),
+    [
+        ("Opisthokonta", "Metazoa", Kingdom.ANIMALIA),
+        ("Opisthokonta", "Fungi", Kingdom.FUNGI),
+        ("Opisthokonta", "Choanoflagellata", Kingdom.PROTISTA),
+        ("Streptophyta", "Streptophyta_X", Kingdom.PLANTAE),
+        ("Chlorophyta", "Chlorophyta_X", Kingdom.PLANTAE),
+        ("Rhodophyta", "Eurhodophytina", Kingdom.PLANTAE),
+        ("Alveolata", "Dinoflagellata", Kingdom.PROTISTA),
+        ("Picozoa", "Picozoa_X", Kingdom.PROTISTA),
+    ],
+)
+def test_pr2_kingdom(division: str, subdivision: str, expected: Kingdom) -> None:
+    assert pr2_kingdom(division, subdivision) is expected

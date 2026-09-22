@@ -4,6 +4,7 @@ import pytest
 
 from taxonomy_classifier.data.exclusions import ExclusionReason
 from taxonomy_classifier.data.fasta import FastaRecord
+from taxonomy_classifier.data.kingdom import Kingdom
 from taxonomy_classifier.data.records import SequenceRecord
 from taxonomy_classifier.data.sources.silva import (
     SilvaHeader,
@@ -63,6 +64,7 @@ def test_parse_record_maps_the_deepest_known_name(backbone: BackboneIndex) -> No
     assert record.sequence == "ACGT"
     assert record.lineage.get(Rank.GENUS) == "Pseudomonas"
     assert record.lineage.get(Rank.SPECIES) is None
+    assert record.kingdom is Kingdom.BACTERIA
 
 
 def test_parse_record_climbs_past_unknown_names(backbone: BackboneIndex) -> None:
@@ -90,6 +92,7 @@ def test_parse_record_maps_eukaryotes_onto_pr2(backbone: BackboneIndex) -> None:
         None,
         None,
     )
+    assert record.kingdom is Kingdom.FUNGI
 
 
 def test_parse_record_skips_placeholders_and_falls_back_to_domain(
@@ -136,3 +139,11 @@ def test_read_yields_records_and_exclusions(
     assert outcomes.count(ExclusionReason.ORGANELLE) == 1
     assert outcomes.count(ExclusionReason.MALFORMED_HEADER) == 1
     assert sum(isinstance(outcome, SequenceRecord) for outcome in outcomes) == 5
+
+
+def test_eukaryotes_without_a_resolvable_kingdom_keep_none(backbone: BackboneIndex) -> None:
+    record = _parse("AB1.1.24 Eukaryota;Amorphea;Unknownozoa;uncultured eukaryote", backbone)
+
+    assert isinstance(record, SequenceRecord)
+    assert record.lineage.deepest_rank is Rank.DOMAIN
+    assert record.kingdom is None

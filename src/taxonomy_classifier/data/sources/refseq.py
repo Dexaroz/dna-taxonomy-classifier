@@ -3,6 +3,7 @@ from functools import partial
 from typing import TYPE_CHECKING, Final
 
 from taxonomy_classifier.data.dna import normalize_sequence
+from taxonomy_classifier.data.kingdom import prokaryote_kingdom
 from taxonomy_classifier.data.records import SequenceRecord
 from taxonomy_classifier.data.sources.base import parse_fasta_file
 from taxonomy_classifier.data.taxonomy import Lineage, Rank, Taxon
@@ -70,6 +71,7 @@ def parse_record(record: FastaRecord, *, domain: str, backbone: BackboneIndex) -
         sequence=normalize_sequence(record.sequence),
         source_lineage=(Taxon(name=domain, rank=Rank.DOMAIN), Taxon(name=organism, rank=None)),
         lineage=map_organism(genus, species, domain=domain, backbone=backbone),
+        kingdom=prokaryote_kingdom(domain),
     )
 
 

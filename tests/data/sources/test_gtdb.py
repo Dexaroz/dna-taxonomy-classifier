@@ -5,6 +5,7 @@ import pytest
 from taxonomy_classifier.data.exclusions import ExclusionReason
 from taxonomy_classifier.data.fasta import FastaRecord
 from taxonomy_classifier.data.harmonize import BackboneIndex
+from taxonomy_classifier.data.kingdom import Kingdom
 from taxonomy_classifier.data.records import SequenceRecord
 from taxonomy_classifier.data.sources.gtdb import parse_record
 from taxonomy_classifier.data.taxonomy import Rank, Taxon
@@ -41,6 +42,7 @@ def test_parse_record_reads_the_full_lineage() -> None:
         "Escherichia coli",
     )
     assert record.source_lineage[-1] == Taxon(name="Escherichia coli", rank=Rank.SPECIES)
+    assert record.kingdom is Kingdom.BACTERIA
 
 
 def test_parse_record_treats_empty_ranks_as_missing() -> None:
