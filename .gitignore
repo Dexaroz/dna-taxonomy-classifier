@@ -1,7 +1,6 @@
 ﻿# Python
 __pycache__/
 *.py[cod]
-.python-version
 *$py.class
 .venv/
 .Python
@@ -9,9 +8,13 @@ __pycache__/
 dist/
 build/
 
-# Testing
+# Quality tooling
+.ruff_cache/
+.mypy_cache/
 .pytest_cache/
 .coverage
+.coverage.*
+coverage.xml
 htmlcov/
 
 # IDEs
@@ -20,9 +23,17 @@ htmlcov/
 *.swp
 *.swo
 
+# Notebooks
+.ipynb_checkpoints/
+
 # Project data
 data/
-*.jsonl
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
 
 # Environment
 .env
@@ -32,9 +43,3 @@ data/
 # OS
 .DS_Store
 Thumbs.db
-
-# Ruff
-.ruff_cache/
-
-# Generated artifacts
-checkpoints/
