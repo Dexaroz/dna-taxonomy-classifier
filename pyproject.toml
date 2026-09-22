@@ -8,6 +8,7 @@ dependencies = [
     "httpx>=0.28.1",
     "polars>=1.44.2",
     "pyarrow>=25.0.1",
+    "torch>=2.14.0",
 ]
 
 [project.scripts]
@@ -151,3 +152,11 @@ notebooks = [
 
 [tool.uv]
 default-groups = ["dev", "notebooks"]
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu130", marker = "sys_platform == 'win32' or sys_platform == 'linux'" }
