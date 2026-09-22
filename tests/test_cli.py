@@ -1,5 +1,3 @@
-import gzip
-import hashlib
 import json
 import runpy
 import sys
@@ -9,53 +7,37 @@ import httpx
 import pytest
 
 from taxonomy_classifier import cli
-from taxonomy_classifier.data.build import DATASET_FILENAME, REPORT_FILENAME
-from taxonomy_classifier.data.sources import LATEST_RELEASE, RemoteFile, SilvaRelease
+from taxonomy_classifier.data.build import DataLayout
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-
-def _remote(url: str, content: bytes) -> RemoteFile:
-    return RemoteFile(url=url, sha256=hashlib.sha256(content).hexdigest())
+    from taxonomy_classifier.data.sources.base import DataSource
 
 
 @pytest.fixture
-def fake_release(
-    silva_fasta: Path,
-    silva_taxonomy: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> tuple[SilvaRelease, httpx.MockTransport]:
-    contents = {
-        "https://example.org/test/silva.fasta.gz": gzip.compress(silva_fasta.read_bytes()),
-        "https://example.org/test/tax.txt.gz": gzip.compress(silva_taxonomy.read_bytes()),
-    }
-    fasta_url, taxonomy_url = contents
-    release = SilvaRelease(
-        version="test",
-        fasta=_remote(fasta_url, contents[fasta_url]),
-        taxonomy=_remote(taxonomy_url, contents[taxonomy_url]),
-    )
+def transport(
+    sources: tuple[DataSource, ...], fixtures_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> httpx.MockTransport:
+    monkeypatch.setattr(cli, "DEFAULT_SOURCES", sources)
 
-    monkeypatch.setattr(cli, "RELEASES", {"test": release})
+    def serve(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200, content=(fixtures_dir / request.url.path.rsplit("/")[-1]).read_bytes()
+        )
 
-    transport = httpx.MockTransport(
-        lambda request: httpx.Response(200, content=contents[str(request.url)])
-    )
-
-    return release, transport
+    return httpx.MockTransport(serve)
 
 
 def test_parser_defaults() -> None:
     args = cli.build_parser().parse_args(["build"])
 
     assert args.command == "build"
-    assert args.release == LATEST_RELEASE
     assert str(args.data_dir) == "data"
     assert args.verbose is False
 
 
-@pytest.mark.parametrize("argv", [[], ["build", "--release", "999"], ["unknown"]])
+@pytest.mark.parametrize("argv", [[], ["unknown"], ["build", "--release", "144"]])
 def test_invalid_arguments_exit_with_usage_error(argv: list[str]) -> None:
     with pytest.raises(SystemExit) as caught:
         cli.main(argv)
@@ -73,42 +55,33 @@ def test_build_without_raw_files_fails_cleanly(
     assert "run 'geneflow download' first" in caplog.text
 
 
-def test_download_only_fetches_raw_files(
-    fake_release: tuple[SilvaRelease, httpx.MockTransport],
+def test_download_fetches_every_source_file(
+    sources: tuple[DataSource, ...],
+    transport: httpx.MockTransport,
     tmp_path: Path,
 ) -> None:
-    release, transport = fake_release
+    exit_code = cli.main(["download", "--data-dir", str(tmp_path)], transport=transport)
 
-    exit_code = cli.main(
-        ["download", "--release", "test", "--data-dir", str(tmp_path)],
-        transport=transport,
-    )
-
-    raw_dir = tmp_path / "raw" / release.slug
+    layout = DataLayout(root=tmp_path)
 
     assert exit_code == 0
-    assert sorted(path.name for path in raw_dir.iterdir()) == ["silva.fasta.gz", "tax.txt.gz"]
-    assert not (tmp_path / "processed").exists()
+
+    for source in sources:
+        for remote in source.files:
+            assert (layout.raw_dir(source) / remote.filename).exists()
+
+    assert not layout.processed_dir.exists()
 
 
-def test_prepare_downloads_and_builds(
-    fake_release: tuple[SilvaRelease, httpx.MockTransport],
-    tmp_path: Path,
-) -> None:
-    release, transport = fake_release
+def test_prepare_downloads_and_builds(transport: httpx.MockTransport, tmp_path: Path) -> None:
+    exit_code = cli.main(["-v", "prepare", "--data-dir", str(tmp_path)], transport=transport)
 
-    exit_code = cli.main(
-        ["-v", "prepare", "--release", "test", "--data-dir", str(tmp_path)],
-        transport=transport,
-    )
-
-    processed_dir = tmp_path / "processed" / release.slug
-    report = json.loads((processed_dir / REPORT_FILENAME).read_text(encoding="utf-8"))
+    layout = DataLayout(root=tmp_path)
+    report = json.loads(layout.report_path.read_text(encoding="utf-8"))
 
     assert exit_code == 0
-    assert (processed_dir / DATASET_FILENAME).exists()
-    assert report["release"] == "test"
-    assert report["total"] == 13
+    assert layout.dataset_path.exists()
+    assert [source["read"] for source in report["sources"]] == [7, 4, 7, 5]
 
 
 def test_module_entrypoint_exits_with_command_status(
