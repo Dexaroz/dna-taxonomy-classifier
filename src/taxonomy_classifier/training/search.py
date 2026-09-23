@@ -158,14 +158,18 @@ class PruningMonitor:
 def create_study(architecture: str, *, storage: Path, config: SearchConfig) -> optuna.Study:
     storage.parent.mkdir(parents=True, exist_ok=True)
 
+    name = f"{architecture.lower()}-search"
+    journal = JournalStorage(
+        JournalFileBackend(str(storage), lock_obj=JournalFileOpenLock(str(storage)))
+    )
+    existing = _existing_trials(name, journal)
+
     return optuna.create_study(
-        study_name=f"{architecture.lower()}-search",
-        storage=JournalStorage(
-            JournalFileBackend(str(storage), lock_obj=JournalFileOpenLock(str(storage)))
-        ),
+        study_name=name,
+        storage=journal,
         load_if_exists=True,
         direction="maximize",
-        sampler=optuna.samplers.TPESampler(seed=config.seed),
+        sampler=optuna.samplers.TPESampler(seed=config.seed + existing),
         pruner=optuna.pruners.MedianPruner(
             n_startup_trials=config.startup_trials, n_warmup_steps=1
         ),
@@ -233,6 +237,13 @@ def trial_rows(study: optuna.Study) -> list[dict[str, Any]]:
         }
         for trial in study.trials
     ]
+
+
+def _existing_trials(name: str, storage: JournalStorage) -> int:
+    if name not in optuna.get_all_study_names(storage):
+        return 0
+
+    return len(optuna.load_study(study_name=name, storage=storage).trials)
 
 
 def _release_memory() -> None:

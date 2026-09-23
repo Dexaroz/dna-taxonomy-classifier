@@ -186,6 +186,7 @@ def test_run_search_resumes_from_its_storage(tmp_path: Path) -> None:
     study = run_search("CNN", DATA, SPACE, config=more, storage=_storage(tmp_path), device=CPU)
 
     assert len(study.trials) == 3
+    assert study.trials[2].params != study.trials[0].params
 
 
 def test_out_of_memory_trials_fail_without_stopping_the_search(
