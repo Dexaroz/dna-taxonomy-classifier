@@ -81,6 +81,7 @@ def _storage(tmp_path: Path) -> Path:
         ({"trials": None}, "needs a number of trials"),
         ({"time_budget_hours": -1.0}, "must be positive when given"),
         ({"validation_samples": 0}, "validation_samples must be positive"),
+        ({"pruning_start_epoch": 0}, "pruning_start_epoch must be positive"),
         ({"epochs": 0}, "must be positive"),
         ({"startup_trials": -1}, "startup_trials"),
         ({"objective_levels": ()}, "objective_levels"),
@@ -289,3 +290,15 @@ def test_no_best_summary_is_written_without_completed_trials(
 
     assert storage.with_name("journal-trials.json").exists()
     assert not storage.with_name("journal-best.json").exists()
+
+
+@pytest.mark.parametrize(("start", "epochs", "expected"), [(2, 6, 2), (2, 1, 1), (1, 6, 1)])
+def test_pruning_never_starts_before_the_configured_epoch(
+    start: int, epochs: int, expected: int, tmp_path: Path
+) -> None:
+    config = SearchConfig(pruning_start_epoch=start, epochs=epochs)
+
+    study = search.create_study("CNN", storage=_storage(tmp_path), config=config)
+
+    assert isinstance(study.pruner, optuna.pruners.HyperbandPruner)
+    assert study.pruner._min_resource == expected  # noqa: SLF001

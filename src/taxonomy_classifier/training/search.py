@@ -51,6 +51,7 @@ class SearchConfig:
     samples_per_epoch: int = 150_000
     batch_size: int = 128
     validation_samples: int | None = None
+    pruning_start_epoch: int = 2
     precision: Precision = Precision.BF16
     startup_trials: int = 5
     objective_levels: tuple[str, ...] = ("genus", "species")
@@ -69,6 +70,10 @@ class SearchConfig:
             self.time_budget_hours is not None and self.time_budget_hours <= 0
         ):
             msg = "trials and time_budget_hours must be positive when given"
+            raise ValueError(msg)
+
+        if self.pruning_start_epoch < 1:
+            msg = f"pruning_start_epoch must be positive, got {self.pruning_start_epoch}"
             raise ValueError(msg)
 
         if self.validation_samples is not None and self.validation_samples < 1:
@@ -213,7 +218,9 @@ def create_study(architecture: str, *, storage: Path, config: SearchConfig) -> o
         direction="maximize",
         sampler=optuna.samplers.TPESampler(seed=config.seed + existing),
         pruner=optuna.pruners.HyperbandPruner(
-            min_resource=1, max_resource=config.epochs, reduction_factor=3
+            min_resource=min(config.pruning_start_epoch, config.epochs),
+            max_resource=config.epochs,
+            reduction_factor=3,
         ),
     )
 
