@@ -15,6 +15,7 @@ from taxonomy_classifier.training.data import (
     LabeledSet,
     SequenceBank,
     TrainingData,
+    class_frequencies,
     iterate_batches,
     make_batch,
     sampling_weights,
@@ -99,16 +100,47 @@ def test_labeled_set_streams_sequences_in_chunks(monkeypatch: pytest.MonkeyPatch
 def test_training_data_needs_one_weight_per_sequence() -> None:
     labeled = LabeledSet.from_frame(FRAME, SPACE)
 
-    with pytest.raises(ValueError, match="one sampling weight per training sequence"):
-        TrainingData(train=labeled, weights=torch.ones(2), validation=labeled)
+    with pytest.raises(ValueError, match="one class frequency per training sequence"):
+        TrainingData(train=labeled, frequencies=torch.ones(2), validation=labeled)
 
 
-def test_sampling_weights_favor_rare_genera() -> None:
-    weights = sampling_weights(FRAME, rank=Rank.GENUS, power=1.0)
+def test_training_data_rejects_frequencies_below_one() -> None:
+    labeled = LabeledSet.from_frame(FRAME, SPACE)
 
-    assert weights.dtype == torch.double
-    assert weights[2] == pytest.approx(2 * weights[0])
-    assert float(weights.sum()) == pytest.approx(3.0)
+    with pytest.raises(ValueError, match="at least 1"):
+        TrainingData(train=labeled, frequencies=torch.tensor([1.0, 0.0, 1.0]), validation=labeled)
+
+
+def test_class_frequencies_count_each_sequence_genus() -> None:
+    frequencies = class_frequencies(FRAME, rank=Rank.GENUS)
+
+    assert frequencies.dtype == torch.double
+    assert frequencies.tolist() == [2.0, 2.0, 1.0]
+
+
+def test_power_zero_keeps_natural_frequencies() -> None:
+    assert sampling_weights(torch.tensor([2.0, 2.0, 1.0]), power=0.0).tolist() == [1.0, 1.0, 1.0]
+
+
+def test_power_one_gives_every_class_the_same_total_weight() -> None:
+    frequencies = torch.tensor([9.0] * 9 + [1.0])
+
+    weights = sampling_weights(frequencies, power=1.0)
+
+    assert float(weights[:9].sum()) == pytest.approx(float(weights[9]))
+    assert float(weights.sum()) == pytest.approx(10.0)
+
+
+def test_intermediate_power_favors_rare_classes_without_equalizing() -> None:
+    weights = sampling_weights(torch.tensor([4.0, 4.0, 4.0, 4.0, 1.0]), power=0.5)
+
+    assert float(weights[-1]) == pytest.approx(2 * float(weights[0]))
+
+
+@pytest.mark.parametrize("power", [-0.1, 1.1])
+def test_power_must_be_in_unit_interval(power: float) -> None:
+    with pytest.raises(ValueError, match="power must be in"):
+        sampling_weights(torch.ones(2), power=power)
 
 
 def test_make_batch_pads_masks_and_gathers_targets() -> None:
@@ -217,3 +249,12 @@ def test_labeled_set_rebuilds_a_stale_cache(tmp_path: Path) -> None:
 
     assert len(rebuilt) == 1
     assert rebuilt.bank.get(0).tolist() == [4, 4, 4, 4]
+
+
+def test_make_batch_truncates_sequences_to_max_length() -> None:
+    labeled = LabeledSet.from_frame(FRAME, SPACE)
+
+    batch = make_batch(labeled, [0, 1], crop=None, rng=random.Random(0), max_length=3)
+
+    assert batch.tokens.tolist() == [[1, 2, 3], [2, 2, 2]]
+    assert batch.mask.all()

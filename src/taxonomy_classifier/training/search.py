@@ -1,0 +1,240 @@
+from dataclasses import asdict, dataclass
+import gc
+import math
+from typing import TYPE_CHECKING, Any, Final
+
+import optuna
+from optuna.storages import JournalStorage
+from optuna.storages.journal import JournalFileBackend, JournalFileOpenLock
+import torch
+
+from taxonomy_classifier.model.classifier import build_classifier
+from taxonomy_classifier.model.encoders import CnnConfig, TransformerConfig
+from taxonomy_classifier.model.heads import HeadConfig
+from taxonomy_classifier.training.data import CropConfig
+from taxonomy_classifier.training.trainer import SilentMonitor, TrainingConfig, train_classifier
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Mapping, Sequence
+    from pathlib import Path
+
+    from optuna.trial import BaseTrial
+
+    from taxonomy_classifier.model.classifier import EncoderConfig
+    from taxonomy_classifier.model.labels import LabelSpace
+    from taxonomy_classifier.training.data import TrainingData
+    from taxonomy_classifier.training.trainer import EpochRecord, Evaluation, TrainingMonitor
+
+CNN_WIDTHS: Final = {
+    "small": (96, 128, 192, 256),
+    "base": (128, 192, 256, 320),
+    "large": (160, 256, 320, 384),
+}
+
+CNN_DEPTHS: Final = {"two": (1, 2), "three": (1, 2, 4)}
+
+TRANSFORMER_TOKENIZERS: Final = {"k6s3": (6, 3), "k8s4": (8, 4), "k12s6": (12, 6)}
+
+
+@dataclass(frozen=True, slots=True)
+class SearchConfig:
+    trials: int = 30
+    epochs: int = 3
+    samples_per_epoch: int = 150_000
+    batch_size: int = 128
+    startup_trials: int = 5
+    objective_levels: tuple[str, ...] = ("genus", "species")
+    seed: int = 20260923
+
+    def __post_init__(self) -> None:
+        if min(self.trials, self.epochs, self.samples_per_epoch, self.batch_size) < 1:
+            msg = "trials, epochs, samples_per_epoch and batch_size must be positive"
+            raise ValueError(msg)
+
+        if self.startup_trials < 0 or not self.objective_levels:
+            msg = "startup_trials must be non-negative and objective_levels not empty"
+            raise ValueError(msg)
+
+
+@dataclass(frozen=True, slots=True)
+class TrialSetup:
+    encoder: EncoderConfig
+    heads: HeadConfig
+    training: TrainingConfig
+
+
+def suggest_cnn(trial: BaseTrial, dropout: float) -> CnnConfig:
+    width = trial.suggest_categorical("cnn_width", sorted(CNN_WIDTHS))
+    depth = trial.suggest_categorical("cnn_blocks", sorted(CNN_DEPTHS))
+
+    return CnnConfig(
+        channels=CNN_WIDTHS[width],
+        blocks_per_stage=len(CNN_DEPTHS[depth]),
+        dilations=CNN_DEPTHS[depth],
+        kernel_size=trial.suggest_categorical("cnn_kernel", [5, 7, 9, 11]),
+        dropout=dropout,
+    )
+
+
+def suggest_transformer(trial: BaseTrial, dropout: float) -> TransformerConfig:
+    kernel, stride = TRANSFORMER_TOKENIZERS[
+        trial.suggest_categorical("transformer_tokenizer", sorted(TRANSFORMER_TOKENIZERS))
+    ]
+
+    return TransformerConfig(
+        model_dim=trial.suggest_categorical("transformer_dim", [192, 256, 320]),
+        layers=trial.suggest_int("transformer_layers", 4, 8, step=2),
+        token_kernel=kernel,
+        token_stride=stride,
+        dropout=dropout,
+    )
+
+
+SUGGESTERS: Final[Mapping[str, Callable[[BaseTrial, float], EncoderConfig]]] = {
+    "CNN": suggest_cnn,
+    "Transformer": suggest_transformer,
+}
+
+
+def suggest_setup(trial: BaseTrial, architecture: str, config: SearchConfig) -> TrialSetup:
+    dropout = trial.suggest_float("dropout", 0.0, 0.3)
+
+    training = TrainingConfig(
+        epochs=config.epochs,
+        samples_per_epoch=config.samples_per_epoch,
+        batch_size=config.batch_size,
+        learning_rate=trial.suggest_float("learning_rate", 1e-4, 3e-3, log=True),
+        weight_decay=trial.suggest_float("weight_decay", 1e-3, 0.2, log=True),
+        warmup_fraction=trial.suggest_float("warmup_fraction", 0.02, 0.1),
+        sampling_power=trial.suggest_float("sampling_power", 0.0, 1.0),
+        crop=CropConfig(probability=trial.suggest_float("crop_probability", 0.2, 0.8)),
+        seed=config.seed,
+    )
+
+    return TrialSetup(
+        encoder=SUGGESTERS[architecture](trial, dropout),
+        heads=HeadConfig(dropout=dropout),
+        training=training,
+    )
+
+
+def objective_value(evaluation: Evaluation, levels: Sequence[str]) -> float:
+    return sum(evaluation.accuracy[level] for level in levels) / len(levels)
+
+
+class PruningMonitor:
+    def __init__(self, trial: optuna.Trial, levels: Sequence[str], inner: TrainingMonitor) -> None:
+        self._trial = trial
+        self._levels = levels
+        self._inner = inner
+
+    def epoch_started(self, epoch: int, epochs: int, steps: int) -> None:
+        self._inner.epoch_started(epoch, epochs, steps)
+
+    def step_finished(self, step: int) -> None:
+        self._inner.step_finished(step)
+
+    def metrics_updated(
+        self, step: int, loss: float, sequences_per_second: float, learning_rate: float
+    ) -> None:
+        self._inner.metrics_updated(step, loss, sequences_per_second, learning_rate)
+
+    def evaluation_started(self, batches: int) -> None:
+        self._inner.evaluation_started(batches)
+
+    def evaluation_step(self) -> None:
+        self._inner.evaluation_step()
+
+    def epoch_finished(self, record: EpochRecord) -> None:
+        self._inner.epoch_finished(record)
+
+        value = objective_value(record.validation, self._levels)
+        self._trial.report(value, record.epoch)
+
+        if math.isnan(value) or self._trial.should_prune():
+            raise optuna.TrialPruned
+
+
+def create_study(architecture: str, *, storage: Path, config: SearchConfig) -> optuna.Study:
+    storage.parent.mkdir(parents=True, exist_ok=True)
+
+    return optuna.create_study(
+        study_name=f"{architecture.lower()}-search",
+        storage=JournalStorage(
+            JournalFileBackend(str(storage), lock_obj=JournalFileOpenLock(str(storage)))
+        ),
+        load_if_exists=True,
+        direction="maximize",
+        sampler=optuna.samplers.TPESampler(seed=config.seed),
+        pruner=optuna.pruners.MedianPruner(
+            n_startup_trials=config.startup_trials, n_warmup_steps=1
+        ),
+    )
+
+
+def run_search(
+    architecture: str,
+    data: TrainingData,
+    label_space: LabelSpace,
+    *,
+    config: SearchConfig,
+    storage: Path,
+    device: torch.device,
+    monitor_factory: Callable[[optuna.Trial], TrainingMonitor] | None = None,
+) -> optuna.Study:
+    if architecture not in SUGGESTERS:
+        msg = f"Unknown architecture {architecture!r}; expected one of {sorted(SUGGESTERS)}"
+        raise ValueError(msg)
+
+    study = create_study(architecture, storage=storage, config=config)
+    finished = sum(trial.state.is_finished() for trial in study.trials)
+
+    def objective(trial: optuna.Trial) -> float:
+        setup = suggest_setup(trial, architecture, config)
+        trial.set_user_attr("encoder", asdict(setup.encoder))
+
+        inner = monitor_factory(trial) if monitor_factory is not None else SilentMonitor()
+        model = build_classifier(setup.encoder, label_space, setup.heads)
+
+        try:
+            history = train_classifier(
+                model,
+                data,
+                config=setup.training,
+                checkpoint_dir=None,
+                device=device,
+                monitor=PruningMonitor(trial, config.objective_levels, inner),
+            )
+
+        finally:
+            del model
+            _release_memory()
+
+        return objective_value(history[-1].validation, config.objective_levels)
+
+    study.optimize(
+        objective,
+        n_trials=max(0, config.trials - finished),
+        catch=(torch.OutOfMemoryError,),
+        gc_after_trial=True,
+    )
+
+    return study
+
+
+def trial_rows(study: optuna.Study) -> list[dict[str, Any]]:
+    return [
+        {
+            "trial": trial.number,
+            "state": trial.state.name,
+            "value": trial.value,
+            "epochs": len(trial.intermediate_values),
+            **trial.params,
+        }
+        for trial in study.trials
+    ]
+
+
+def _release_memory() -> None:
+    gc.collect()
+    torch.cuda.empty_cache()

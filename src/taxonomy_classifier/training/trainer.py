@@ -11,7 +11,7 @@ import torch
 from taxonomy_classifier.data.files import write_text_atomic
 from taxonomy_classifier.model.heads import hierarchical_loss
 from taxonomy_classifier.model.labels import IGNORE_INDEX, LEVELS
-from taxonomy_classifier.training.data import CropConfig, iterate_batches
+from taxonomy_classifier.training.data import CropConfig, iterate_batches, sampling_weights
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
@@ -36,6 +36,7 @@ class TrainingConfig:
     epochs: int = 8
     samples_per_epoch: int | None = None
     batch_size: int = 128
+    max_length: int = 2048
     learning_rate: float = 3e-4
     weight_decay: float = 0.05
     warmup_fraction: float = 0.05
@@ -51,6 +52,7 @@ class TrainingConfig:
         positive = {
             "epochs": self.epochs,
             "batch_size": self.batch_size,
+            "max_length": self.max_length,
             "evaluation_batch_size": self.evaluation_batch_size,
             "log_every": self.log_every,
         }
@@ -162,6 +164,7 @@ def evaluate(
     batch_size: int,
     device: torch.device,
     mixed_precision: bool = False,
+    max_length: int | None = None,
     on_batch: Callable[[], None] | None = None,
 ) -> Evaluation:
     model.eval()
@@ -173,7 +176,12 @@ def evaluate(
 
     with torch.inference_mode(), _autocast(device, enabled=mixed_precision):
         for batch in iterate_batches(
-            data, torch.arange(len(data)), batch_size=batch_size, crop=None, rng=random.Random(0)
+            data,
+            torch.arange(len(data)),
+            batch_size=batch_size,
+            crop=None,
+            rng=random.Random(0),
+            max_length=max_length,
         ):
             on_device = batch.to(device)
             logits = model(on_device.tokens, on_device.mask)
@@ -203,7 +211,7 @@ def train_classifier(
     data: TrainingData,
     *,
     config: TrainingConfig,
-    checkpoint_dir: Path,
+    checkpoint_dir: Path | None,
     device: torch.device,
     metadata: Mapping[str, Any] | None = None,
     monitor: TrainingMonitor | None = None,
@@ -214,7 +222,6 @@ def train_classifier(
     generator = torch.Generator().manual_seed(config.seed)
 
     model.to(device)
-    checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
     samples = config.samples_per_epoch or len(data.train)
     steps_per_epoch = math.ceil(samples / config.batch_size)
@@ -232,12 +239,14 @@ def train_classifier(
         ),
     )
 
+    weights = sampling_weights(data.frequencies, power=config.sampling_power)
+
     history: list[EpochRecord] = []
     best_loss = math.inf
 
     for epoch in range(1, config.epochs + 1):
         started = time.perf_counter()
-        indices = torch.multinomial(data.weights, samples, replacement=True, generator=generator)
+        indices = torch.multinomial(weights, samples, replacement=True, generator=generator)
 
         watcher.epoch_started(epoch, config.epochs, steps_per_epoch)
 
@@ -260,6 +269,7 @@ def train_classifier(
             batch_size=config.evaluation_batch_size,
             device=device,
             mixed_precision=config.mixed_precision,
+            max_length=config.max_length,
             on_batch=watcher.evaluation_step,
         )
 
@@ -272,22 +282,18 @@ def train_classifier(
         )
         history.append(record)
 
-        state = {
-            "model": model.state_dict(),
-            "epoch": epoch,
-            "config": asdict(config),
-            "metadata": dict(metadata or {}),
-        }
-        torch.save(state, checkpoint_dir / LAST_CHECKPOINT)
+        improved = validation_result.loss < best_loss
+        best_loss = min(best_loss, validation_result.loss)
 
-        if validation_result.loss < best_loss:
-            best_loss = validation_result.loss
-            torch.save(state, checkpoint_dir / BEST_CHECKPOINT)
+        if checkpoint_dir is not None:
+            state = {
+                "model": model.state_dict(),
+                "epoch": epoch,
+                "config": asdict(config),
+                "metadata": dict(metadata or {}),
+            }
 
-        write_text_atomic(
-            checkpoint_dir / HISTORY_FILENAME,
-            json.dumps([item.to_dict() for item in history], indent=2),
-        )
+            _save_checkpoint(checkpoint_dir, state, history, improved=improved)
 
         _LOGGER.info(
             "Epoch %d/%d: train %.4f, val %.4f, genus %.3f, %.0f s",
@@ -342,7 +348,12 @@ def _train_epoch(
     started = time.perf_counter()
 
     for batch in iterate_batches(
-        train, indices, batch_size=config.batch_size, crop=config.crop, rng=rng
+        train,
+        indices,
+        batch_size=config.batch_size,
+        crop=config.crop,
+        rng=rng,
+        max_length=config.max_length,
     ):
         on_device = batch.to(device)
 
@@ -368,6 +379,25 @@ def _train_epoch(
             _LOGGER.debug("step %d: loss %.4f, %.0f sequences/s", steps, running_loss, rate)
 
     return loss_sum.item() / max(1, steps)
+
+
+def _save_checkpoint(
+    checkpoint_dir: Path,
+    state: dict[str, Any],
+    history: list[EpochRecord],
+    *,
+    improved: bool,
+) -> None:
+    checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    torch.save(state, checkpoint_dir / LAST_CHECKPOINT)
+
+    if improved:
+        torch.save(state, checkpoint_dir / BEST_CHECKPOINT)
+
+    write_text_atomic(
+        checkpoint_dir / HISTORY_FILENAME,
+        json.dumps([item.to_dict() for item in history], indent=2),
+    )
 
 
 def _optimizer(model: TaxonomyClassifier, config: TrainingConfig) -> torch.optim.AdamW:

@@ -1,4 +1,3 @@
-from collections import Counter
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -11,21 +10,6 @@ def balancing_keys(lineages: Iterable[Sequence[str | None]], *, depth: int) -> l
         raise ValueError(msg)
 
     return [_deepest_key(names[:depth]) for names in lineages]
-
-
-def balanced_weights(keys: Sequence[str], *, power: float = 0.5) -> list[float]:
-    if not 0.0 <= power <= 1.0:
-        msg = f"power must be in [0, 1], got {power}"
-        raise ValueError(msg)
-
-    if not keys:
-        return []
-
-    counts = Counter(keys)
-    raw = [counts[key] ** -power for key in keys]
-    scale = len(raw) / sum(raw)
-
-    return [weight * scale for weight in raw]
 
 
 def _deepest_key(names: Sequence[str | None]) -> str:

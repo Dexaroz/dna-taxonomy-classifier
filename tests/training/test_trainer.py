@@ -53,7 +53,7 @@ TRAIN = _labeled(["A" * 40, "C" * 40, "AAAAT" * 8, "CCCCG" * 8] * 4, [0, 1, 0, 1
 VALIDATION = _labeled(["A" * 30, "C" * 30], [0, 1])
 
 DATA = TrainingData(
-    train=TRAIN, weights=torch.ones(len(TRAIN), dtype=torch.double), validation=VALIDATION
+    train=TRAIN, frequencies=torch.ones(len(TRAIN), dtype=torch.double), validation=VALIDATION
 )
 
 CONFIG = TrainingConfig(
@@ -111,6 +111,7 @@ class _FirstClassModel(nn.Module):
     [
         ({"epochs": 0}, "epochs must be positive"),
         ({"batch_size": 0}, "batch_size must be positive"),
+        ({"max_length": 0}, "max_length must be positive"),
         ({"samples_per_epoch": 0}, "samples_per_epoch must be positive"),
         ({"learning_rate": 0.0}, "learning_rate and gradient_clip"),
         ({"weight_decay": -1.0}, "weight_decay non-negative"),

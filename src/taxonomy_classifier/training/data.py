@@ -1,3 +1,4 @@
+from collections import Counter
 from dataclasses import dataclass
 import hashlib
 import json
@@ -10,7 +11,7 @@ from taxonomy_classifier.data.columns import RANK_COLUMNS
 from taxonomy_classifier.data.files import partial_path, write_text_atomic
 from taxonomy_classifier.data.taxonomy import RANK_INDEX, Rank
 from taxonomy_classifier.model.tokens import PAD, encode_bytes
-from taxonomy_classifier.training.balancing import balanced_weights, balancing_keys
+from taxonomy_classifier.training.balancing import balancing_keys
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Sequence
@@ -134,12 +135,16 @@ class LabeledSet:
 @dataclass(frozen=True, slots=True)
 class TrainingData:
     train: LabeledSet
-    weights: torch.Tensor
+    frequencies: torch.Tensor
     validation: LabeledSet
 
     def __post_init__(self) -> None:
-        if len(self.weights) != len(self.train):
-            msg = f"Expected one sampling weight per training sequence, got {len(self.weights)}"
+        if len(self.frequencies) != len(self.train):
+            msg = f"Expected one class frequency per training sequence, got {len(self.frequencies)}"
+            raise ValueError(msg)
+
+        if len(self.frequencies) and float(self.frequencies.min()) < 1:
+            msg = "Class frequencies must be at least 1"
             raise ValueError(msg)
 
 
@@ -157,12 +162,23 @@ class Batch:
         )
 
 
-def sampling_weights(frame: pl.LazyFrame, *, rank: Rank = Rank.GENUS, power: float) -> torch.Tensor:
+def class_frequencies(frame: pl.LazyFrame, *, rank: Rank = Rank.GENUS) -> torch.Tensor:
     depth = RANK_INDEX[rank] + 1
     lineages = frame.select(RANK_COLUMNS[:depth]).collect()
     keys = balancing_keys(lineages.iter_rows(), depth=depth)
+    counts = Counter(keys)
 
-    return torch.tensor(balanced_weights(keys, power=power), dtype=torch.double)
+    return torch.tensor([counts[key] for key in keys], dtype=torch.double)
+
+
+def sampling_weights(frequencies: torch.Tensor, *, power: float) -> torch.Tensor:
+    if not 0.0 <= power <= 1.0:
+        msg = f"power must be in [0, 1], got {power}"
+        raise ValueError(msg)
+
+    weights = frequencies.double().pow(-power)
+
+    return weights * len(weights) / weights.sum()
 
 
 def make_batch(
@@ -171,8 +187,9 @@ def make_batch(
     *,
     crop: CropConfig | None,
     rng: random.Random,
+    max_length: int | None = None,
 ) -> Batch:
-    pieces = [_maybe_crop(data.bank.get(index), crop, rng) for index in indices]
+    pieces = [_maybe_crop(data.bank.get(index), crop, rng)[:max_length] for index in indices]
     lengths = torch.tensor([len(piece) for piece in pieces], dtype=torch.long)
 
     tokens = torch.full((len(pieces), max(1, int(lengths.max()))), PAD, dtype=torch.uint8)
@@ -192,11 +209,14 @@ def iterate_batches(
     batch_size: int,
     crop: CropConfig | None,
     rng: random.Random,
+    max_length: int | None = None,
 ) -> Iterator[Batch]:
     order = indices.tolist()
 
     for start in range(0, len(order), batch_size):
-        yield make_batch(data, order[start : start + batch_size], crop=crop, rng=rng)
+        yield make_batch(
+            data, order[start : start + batch_size], crop=crop, rng=rng, max_length=max_length
+        )
 
 
 def _bank(frame: pl.LazyFrame, labels: pl.DataFrame, cache: Path | None) -> SequenceBank:
