@@ -4,6 +4,7 @@ import sys
 from typing import TYPE_CHECKING
 
 import httpx
+import optuna
 import pytest
 
 from taxonomy_classifier import cli
@@ -106,3 +107,96 @@ def test_augment_without_dataset_fails_cleanly(
 
     assert exit_code == 1
     assert "run 'geneflow build' first" in caplog.text
+
+
+def test_cache_writes_the_label_space_and_token_caches(built_layout: DataLayout) -> None:
+    exit_code = cli.main(["cache", "--data-dir", str(built_layout.root), "--min-class-count", "1"])
+
+    assert exit_code == 0
+    assert (built_layout.processed_dir / "label_space.json").exists()
+    assert (built_layout.interim_dir / "train_tokens.bin").exists()
+
+
+def test_cache_requires_the_synthetic_data(
+    built_layout: DataLayout, caplog: pytest.LogCaptureFixture
+) -> None:
+    built_layout.synthetic_path.unlink()
+
+    exit_code = cli.main(["cache", "--data-dir", str(built_layout.root)])
+
+    assert exit_code == 1
+    assert "run 'geneflow augment' first" in caplog.text
+
+
+def test_search_runs_and_writes_its_results(built_layout: DataLayout, tmp_path: Path) -> None:
+    storage = tmp_path / "search" / "cnn.log"
+
+    exit_code = cli.main(
+        [
+            "search",
+            "--data-dir",
+            str(built_layout.root),
+            "--min-class-count",
+            "1",
+            "--architecture",
+            "CNN",
+            "--storage",
+            str(storage),
+            "--trials",
+            "1",
+            "--epochs",
+            "1",
+            "--samples-per-epoch",
+            "4",
+            "--batch-size",
+            "2",
+            "--validation-samples",
+            "2",
+            "--precision",
+            "fp32",
+            "--gpu-memory-fraction",
+            "0.9",
+        ]
+    )
+
+    assert exit_code == 0
+    assert storage.exists()
+    assert storage.with_name("cnn-trials.json").exists()
+
+
+def test_search_without_any_budget_fails_cleanly(
+    built_layout: DataLayout, caplog: pytest.LogCaptureFixture
+) -> None:
+    exit_code = cli.main(["search", "--data-dir", str(built_layout.root), "--architecture", "CNN"])
+
+    assert exit_code == 1
+    assert "needs a number of trials" in caplog.text
+
+
+def test_search_warns_when_no_trial_completes(
+    built_layout: DataLayout, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    monkeypatch.setattr(cli, "run_search", lambda *_, **__: optuna.create_study())
+
+    exit_code = cli.main(
+        ["search", "--data-dir", str(built_layout.root), "--architecture", "CNN", "--trials", "1"]
+    )
+
+    assert exit_code == 0
+    assert "finished without completed trials" in caplog.text
+
+
+def test_search_reports_the_best_trial(
+    built_layout: DataLayout, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    caplog.set_level("INFO")
+    study = optuna.create_study(direction="maximize")
+    study.add_trial(optuna.trial.create_trial(value=0.42, params={}, distributions={}))
+    monkeypatch.setattr(cli, "run_search", lambda *_, **__: study)
+
+    exit_code = cli.main(
+        ["search", "--data-dir", str(built_layout.root), "--architecture", "CNN", "--trials", "1"]
+    )
+
+    assert exit_code == 0
+    assert "best trial 0: 0.4200" in caplog.text

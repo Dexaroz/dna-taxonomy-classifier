@@ -1,3 +1,4 @@
+import json
 import math
 from typing import TYPE_CHECKING
 
@@ -76,7 +77,11 @@ def _storage(tmp_path: Path) -> Path:
 @pytest.mark.parametrize(
     ("kwargs", "message"),
     [
-        ({"trials": 0}, "must be positive"),
+        ({"trials": 0}, "must be positive when given"),
+        ({"trials": None}, "needs a number of trials"),
+        ({"time_budget_hours": -1.0}, "must be positive when given"),
+        ({"validation_samples": 0}, "validation_samples must be positive"),
+        ({"epochs": 0}, "must be positive"),
         ({"startup_trials": -1}, "startup_trials"),
         ({"objective_levels": ()}, "objective_levels"),
     ],
@@ -219,3 +224,68 @@ def test_trial_rows_summarize_each_trial(tmp_path: Path) -> None:
 
     assert [row["trial"] for row in rows] == [0, 1]
     assert {"state", "value", "epochs", "learning_rate", "cnn_width"} <= set(rows[0])
+
+
+def test_time_budget_is_converted_to_seconds() -> None:
+    assert SearchConfig(trials=None, time_budget_hours=0.5).time_budget_seconds == 1800
+    assert SearchConfig().time_budget_seconds is None
+
+
+def test_an_exhausted_time_budget_stops_the_running_trial(tmp_path: Path) -> None:
+    config = SearchConfig(
+        trials=None, time_budget_hours=1e-9, epochs=2, samples_per_epoch=8, batch_size=4
+    )
+
+    study = run_search("CNN", DATA, SPACE, config=config, storage=_storage(tmp_path), device=CPU)
+
+    assert [trial.state for trial in study.trials] == [optuna.trial.TrialState.PRUNED]
+    assert study.trials[0].user_attrs["stopped_by_deadline"] is True
+
+
+def test_search_validates_on_a_fixed_subset(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    seen: list[int] = []
+
+    def capture(model: object, data: TrainingData, **_: object) -> list[EpochRecord]:
+        del model
+        seen.append(len(data.validation))
+
+        return [_record(0.5, 0.5)]
+
+    monkeypatch.setattr(search, "train_classifier", capture)
+    config = SearchConfig(
+        trials=2, validation_samples=1, epochs=1, samples_per_epoch=8, batch_size=4
+    )
+
+    run_search("CNN", DATA, SPACE, config=config, storage=_storage(tmp_path), device=CPU)
+
+    assert seen == [1, 1]
+
+
+def test_results_are_written_after_every_trial(tmp_path: Path) -> None:
+    storage = _storage(tmp_path)
+
+    study = run_search("CNN", DATA, SPACE, config=TINY_SEARCH, storage=storage, device=CPU)
+
+    trials = json.loads(storage.with_name("journal-trials.json").read_text(encoding="utf-8"))
+    best = json.loads(storage.with_name("journal-best.json").read_text(encoding="utf-8"))
+
+    assert [row["trial"] for row in trials] == [0, 1]
+    assert best["trial"] == study.best_trial.number
+    assert best["encoder"]["channels"]
+
+
+def test_no_best_summary_is_written_without_completed_trials(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def pruned(*_: object, **__: object) -> list[EpochRecord]:
+        raise optuna.TrialPruned
+
+    monkeypatch.setattr(search, "train_classifier", pruned)
+    storage = _storage(tmp_path)
+
+    run_search("CNN", DATA, SPACE, config=TINY_SEARCH, storage=storage, device=CPU)
+
+    assert storage.with_name("journal-trials.json").exists()
+    assert not storage.with_name("journal-best.json").exists()

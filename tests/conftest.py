@@ -1,8 +1,11 @@
 from pathlib import Path
+import shutil
 from typing import TYPE_CHECKING, Protocol
 
 import pytest
 
+from taxonomy_classifier.data.build import BuildConfig, DataLayout, build_dataset
+from taxonomy_classifier.data.filters import FilterConfig
 from taxonomy_classifier.data.harmonize import BackboneIndex
 from taxonomy_classifier.data.kingdom import Kingdom
 from taxonomy_classifier.data.records import SequenceRecord
@@ -11,7 +14,9 @@ from taxonomy_classifier.data.sources.gtdb import GtdbSource
 from taxonomy_classifier.data.sources.pr2 import Pr2Source
 from taxonomy_classifier.data.sources.refseq import RefSeqSource
 from taxonomy_classifier.data.sources.silva import SilvaSource
+from taxonomy_classifier.data.split import SplitConfig
 from taxonomy_classifier.data.taxonomy import Lineage, Rank, Taxon
+from taxonomy_classifier.training.oversampling import OversamplingConfig, oversample_train
 
 if TYPE_CHECKING:
     from taxonomy_classifier.data.sources.base import DataSource
@@ -115,3 +120,32 @@ def backbone(fixtures_dir: Path) -> BackboneIndex:
         )
 
     return index
+
+
+@pytest.fixture
+def built_layout(sources: tuple[DataSource, ...], fixtures_dir: Path, tmp_path: Path) -> DataLayout:
+    layout = DataLayout(root=tmp_path / "built")
+
+    for source in sources:
+        raw_dir = layout.raw_dir(source)
+        raw_dir.mkdir(parents=True)
+
+        for remote in source.files:
+            shutil.copy(fixtures_dir / remote.filename, raw_dir / remote.filename)
+
+    build_dataset(
+        sources,
+        layout,
+        config=BuildConfig(
+            filters=FilterConfig(min_length=10, max_length=100),
+            split=SplitConfig(val_fraction=0.3, test_fraction=0.1, seed=3),
+        ),
+    )
+    oversample_train(
+        layout.dataset_path,
+        layout.synthetic_path,
+        layout.augment_report_path,
+        config=OversamplingConfig(floor=3),
+    )
+
+    return layout

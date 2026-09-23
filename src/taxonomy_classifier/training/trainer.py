@@ -1,4 +1,5 @@
 from dataclasses import asdict, dataclass, field
+from enum import StrEnum
 import json
 import logging
 import math
@@ -31,6 +32,15 @@ HISTORY_FILENAME: Final = "history.json"
 _MATRIX_NDIM: Final = 2
 
 
+class Precision(StrEnum):
+    BF16 = "bf16"
+    FP16 = "fp16"
+    FP32 = "fp32"
+
+
+_AUTOCAST_DTYPES: Final = {Precision.BF16: torch.bfloat16, Precision.FP16: torch.float16}
+
+
 @dataclass(frozen=True, slots=True)
 class TrainingConfig:
     epochs: int = 8
@@ -44,7 +54,7 @@ class TrainingConfig:
     sampling_power: float = 0.5
     crop: CropConfig = field(default_factory=CropConfig)
     evaluation_batch_size: int = 256
-    mixed_precision: bool = True
+    precision: Precision = Precision.BF16
     log_every: int = 500
     seed: int = 20260923
 
@@ -116,6 +126,51 @@ class TrainingMonitor(Protocol):
     def epoch_finished(self, record: EpochRecord) -> None: ...
 
 
+class LoggingMonitor:
+    def __init__(self, prefix: str, logger: logging.Logger | None = None) -> None:
+        self._prefix = prefix
+        self._logger = logger or _LOGGER
+
+    def epoch_started(self, epoch: int, epochs: int, steps: int) -> None:
+        self._logger.info(
+            "%s: epoch %d/%d started (%d batches)", self._prefix, epoch, epochs, steps
+        )
+
+    def step_finished(self, step: int) -> None:
+        pass
+
+    def metrics_updated(
+        self, step: int, loss: float, sequences_per_second: float, learning_rate: float
+    ) -> None:
+        self._logger.info(
+            "%s: step %d, loss %.4f, %.0f sequences/s, lr %.2e",
+            self._prefix,
+            step,
+            loss,
+            sequences_per_second,
+            learning_rate,
+        )
+
+    def evaluation_started(self, batches: int) -> None:
+        pass
+
+    def evaluation_step(self) -> None:
+        pass
+
+    def epoch_finished(self, record: EpochRecord) -> None:
+        accuracy = record.validation.accuracy
+
+        self._logger.info(
+            "%s: epoch %d done in %.1f min, val loss %.4f, genus %.3f, species %.3f",
+            self._prefix,
+            record.epoch,
+            record.seconds / 60,
+            record.validation.loss,
+            accuracy["genus"],
+            accuracy["species"],
+        )
+
+
 class SilentMonitor:
     def epoch_started(self, epoch: int, epochs: int, steps: int) -> None:
         pass
@@ -142,6 +197,7 @@ class SilentMonitor:
 class _Optimization:
     optimizer: torch.optim.Optimizer
     scheduler: torch.optim.lr_scheduler.LRScheduler
+    scaler: torch.amp.GradScaler
 
     @property
     def learning_rate(self) -> float:
@@ -163,7 +219,7 @@ def evaluate(
     *,
     batch_size: int,
     device: torch.device,
-    mixed_precision: bool = False,
+    precision: Precision = Precision.FP32,
     max_length: int | None = None,
     on_batch: Callable[[], None] | None = None,
 ) -> Evaluation:
@@ -174,7 +230,7 @@ def evaluate(
     loss_sum = 0.0
     batches = 0
 
-    with torch.inference_mode(), _autocast(device, enabled=mixed_precision):
+    with torch.inference_mode(), _autocast(device, precision):
         for batch in iterate_batches(
             data,
             torch.arange(len(data)),
@@ -237,6 +293,7 @@ def train_classifier(
                 step, total_steps=total_steps, warmup_steps=warmup_steps
             ),
         ),
+        scaler=torch.amp.GradScaler(device.type, enabled=config.precision is Precision.FP16),
     )
 
     weights = sampling_weights(data.frequencies, power=config.sampling_power)
@@ -268,7 +325,7 @@ def train_classifier(
             data.validation,
             batch_size=config.evaluation_batch_size,
             device=device,
-            mixed_precision=config.mixed_precision,
+            precision=config.precision,
             max_length=config.max_length,
             on_batch=watcher.evaluation_step,
         )
@@ -289,7 +346,7 @@ def train_classifier(
             state = {
                 "model": model.state_dict(),
                 "epoch": epoch,
-                "config": asdict(config),
+                "config": json.loads(json.dumps(asdict(config))),
                 "metadata": dict(metadata or {}),
             }
 
@@ -357,13 +414,15 @@ def _train_epoch(
     ):
         on_device = batch.to(device)
 
-        with _autocast(device, enabled=config.mixed_precision):
+        with _autocast(device, config.precision):
             loss = hierarchical_loss(model(on_device.tokens, on_device.mask), on_device.targets)
 
         optimization.optimizer.zero_grad(set_to_none=True)
-        torch.autograd.backward(loss)
+        torch.autograd.backward(optimization.scaler.scale(loss))
+        optimization.scaler.unscale_(optimization.optimizer)
         torch.nn.utils.clip_grad_norm_(model.parameters(), config.gradient_clip)
-        optimization.optimizer.step()
+        optimization.scaler.step(optimization.optimizer)
+        optimization.scaler.update()
         optimization.scheduler.step()
 
         loss_sum += loss.detach()
@@ -413,5 +472,9 @@ def _optimizer(model: TaxonomyClassifier, config: TrainingConfig) -> torch.optim
     )
 
 
-def _autocast(device: torch.device, *, enabled: bool) -> torch.autocast:
-    return torch.autocast(device_type=device.type, dtype=torch.bfloat16, enabled=enabled)
+def _autocast(device: torch.device, precision: Precision) -> torch.autocast:
+    return torch.autocast(
+        device_type=device.type,
+        dtype=_AUTOCAST_DTYPES.get(precision, torch.bfloat16),
+        enabled=precision is not Precision.FP32,
+    )

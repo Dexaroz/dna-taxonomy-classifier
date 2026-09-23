@@ -131,6 +131,18 @@ class LabeledSet:
     def __len__(self) -> int:
         return len(self.bank)
 
+    def take(self, indices: Sequence[int]) -> LabeledSet:
+        pieces = [self.bank.get(index) for index in indices]
+        offsets = torch.zeros(len(pieces) + 1, dtype=torch.long)
+        offsets[1:] = torch.tensor([len(piece) for piece in pieces], dtype=torch.long).cumsum(dim=0)
+
+        tokens = torch.cat(pieces) if pieces else torch.empty(0, dtype=torch.uint8)
+
+        return LabeledSet(
+            bank=SequenceBank(tokens=tokens, offsets=offsets),
+            targets=self.targets[list(indices)],
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class TrainingData:

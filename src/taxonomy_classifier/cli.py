@@ -4,15 +4,21 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
 import httpx
+import torch
 
 from taxonomy_classifier.data.build import BuildConfig, DataLayout, build_dataset
 from taxonomy_classifier.data.download import download_all
 from taxonomy_classifier.data.sources.registry import DEFAULT_SOURCES
 from taxonomy_classifier.exceptions import DataError, GeneflowError
 from taxonomy_classifier.training.oversampling import OversamplingConfig, oversample_train
+from taxonomy_classifier.training.search import SUGGESTERS, SearchConfig, run_search
+from taxonomy_classifier.training.setup import load_training_data
+from taxonomy_classifier.training.trainer import LoggingMonitor, Precision
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
+
+    import optuna
 
     from taxonomy_classifier.data.sources.base import DataSource
 
@@ -27,6 +33,8 @@ _COMMANDS: Final = {
     "build": "Build the harmonized dataset from already downloaded files",
     "augment": "Oversample rare classes of the training split with synthetic variants",
     "prepare": "Download, build and augment in one step",
+    "cache": "Write the label space and the encoded sequence caches used for training",
+    "search": "Run a hyperparameter search for one architecture",
 }
 
 
@@ -43,6 +51,12 @@ def build_parser() -> argparse.ArgumentParser:
         command = subparsers.add_parser(name, help=help_text)
         command.add_argument("--data-dir", type=Path, default=Path("data"))
 
+        if name in {"cache", "search"}:
+            command.add_argument("--min-class-count", type=int, default=3)
+
+        if name == "search":
+            _add_search_arguments(command)
+
     return parser
 
 
@@ -55,7 +69,7 @@ def main(argv: Sequence[str] | None = None, *, transport: httpx.BaseTransport | 
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO, format=_LOG_FORMAT)
 
     try:
-        _run(command, DEFAULT_SOURCES, layout, transport=transport)
+        _run(args, DEFAULT_SOURCES, layout, transport=transport)
 
     except GeneflowError:
         _LOGGER.exception("Command %r failed", command)
@@ -65,13 +79,29 @@ def main(argv: Sequence[str] | None = None, *, transport: httpx.BaseTransport | 
     return 0
 
 
+def _add_search_arguments(command: argparse.ArgumentParser) -> None:
+    command.add_argument("--architecture", choices=sorted(SUGGESTERS), required=True)
+    command.add_argument("--storage", type=Path, default=None)
+    command.add_argument("--trials", type=int, default=None)
+    command.add_argument("--hours", type=float, default=None)
+    command.add_argument("--epochs", type=int, default=6)
+    command.add_argument("--samples-per-epoch", type=int, default=100_000)
+    command.add_argument("--batch-size", type=int, default=128)
+    command.add_argument("--validation-samples", type=int, default=20_000)
+    command.add_argument("--precision", choices=[item.value for item in Precision], default="bf16")
+    command.add_argument("--gpu-memory-fraction", type=float, default=None)
+    command.add_argument("--seed", type=int, default=20260923)
+
+
 def _run(
-    command: str,
+    args: argparse.Namespace,
     sources: Sequence[DataSource],
     layout: DataLayout,
     *,
     transport: httpx.BaseTransport | None,
 ) -> None:
+    command: str = args.command
+
     if command in {"download", "prepare"}:
         with httpx.Client(transport=transport, timeout=_TIMEOUT, follow_redirects=True) as client:
             for source in sources:
@@ -92,6 +122,77 @@ def _run(
             config=OversamplingConfig(),
         )
 
+    if command == "cache":
+        _require_training_inputs(layout)
+
+        label_space, data = load_training_data(layout, min_class_count=args.min_class_count)
+        _LOGGER.info(
+            "Cached %d training and %d validation sequences; classes per level: %s",
+            len(data.train),
+            len(data.validation),
+            label_space.sizes,
+        )
+
+    if command == "search":
+        _search(args, layout)
+
+
+def _search(args: argparse.Namespace, layout: DataLayout) -> None:
+    _require_training_inputs(layout)
+
+    try:
+        config = SearchConfig(
+            trials=args.trials,
+            time_budget_hours=args.hours,
+            epochs=args.epochs,
+            samples_per_epoch=args.samples_per_epoch,
+            batch_size=args.batch_size,
+            validation_samples=args.validation_samples,
+            precision=Precision(args.precision),
+            seed=args.seed,
+        )
+
+    except ValueError as error:
+        raise DataError(str(error)) from error
+
+    architecture: str = args.architecture
+    storage: Path = args.storage or Path("checkpoints") / "search" / f"{architecture.lower()}.log"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    if args.gpu_memory_fraction is not None and device.type == "cuda":
+        torch.cuda.set_per_process_memory_fraction(args.gpu_memory_fraction)
+
+    label_space, data = load_training_data(layout, min_class_count=args.min_class_count)
+
+    def monitor(trial: optuna.Trial) -> LoggingMonitor:
+        _LOGGER.info("%s trial %d: %s", architecture, trial.number, trial.params)
+
+        return LoggingMonitor(f"{architecture} trial {trial.number}")
+
+    study = run_search(
+        architecture,
+        data,
+        label_space,
+        config=config,
+        storage=storage,
+        device=device,
+        monitor_factory=monitor,
+    )
+
+    completed = [trial for trial in study.trials if trial.value is not None]
+
+    if completed:
+        _LOGGER.info(
+            "%s best trial %d: %.4f %s",
+            architecture,
+            study.best_trial.number,
+            study.best_value,
+            study.best_params,
+        )
+
+    else:
+        _LOGGER.warning("%s search finished without completed trials", architecture)
+
 
 def _require_raw_files(sources: Sequence[DataSource], layout: DataLayout) -> None:
     missing = [
@@ -109,4 +210,12 @@ def _require_raw_files(sources: Sequence[DataSource], layout: DataLayout) -> Non
 def _require_dataset(layout: DataLayout) -> None:
     if not layout.dataset_path.exists():
         msg = f"Missing dataset {layout.dataset_path}; run 'geneflow build' first"
+        raise DataError(msg)
+
+
+def _require_training_inputs(layout: DataLayout) -> None:
+    _require_dataset(layout)
+
+    if not layout.synthetic_path.exists():
+        msg = f"Missing synthetic data {layout.synthetic_path}; run 'geneflow augment' first"
         raise DataError(msg)

@@ -258,3 +258,18 @@ def test_make_batch_truncates_sequences_to_max_length() -> None:
 
     assert batch.tokens.tolist() == [[1, 2, 3], [2, 2, 2]]
     assert batch.mask.all()
+
+
+def test_take_builds_a_compact_subset() -> None:
+    labeled = LabeledSet.from_frame(FRAME, SPACE)
+
+    subset = labeled.take([2, 0])
+
+    assert len(subset) == 2
+    assert subset.bank.get(0).tolist() == labeled.bank.get(2).tolist()
+    assert subset.bank.get(1).tolist() == labeled.bank.get(0).tolist()
+    assert torch.equal(subset.targets, labeled.targets[[2, 0]])
+
+
+def test_take_accepts_an_empty_selection() -> None:
+    assert len(LabeledSet.from_frame(FRAME, SPACE).take([])) == 0

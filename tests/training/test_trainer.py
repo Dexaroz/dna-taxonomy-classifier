@@ -19,6 +19,8 @@ from taxonomy_classifier.training.trainer import (
     LAST_CHECKPOINT,
     EpochRecord,
     Evaluation,
+    LoggingMonitor,
+    Precision,
     TrainingConfig,
     evaluate,
     learning_rate_factor,
@@ -63,7 +65,7 @@ CONFIG = TrainingConfig(
     warmup_fraction=0.1,
     crop=CropConfig(probability=0.0),
     evaluation_batch_size=2,
-    mixed_precision=False,
+    precision=Precision.FP32,
     log_every=1,
 )
 
@@ -201,7 +203,7 @@ def test_monitor_follows_every_step_and_evaluation(tmp_path: Path) -> None:
         batch_size=4,
         crop=CropConfig(probability=0.0),
         evaluation_batch_size=1,
-        mixed_precision=False,
+        precision=Precision.FP32,
         log_every=2,
     )
     monitor = _RecordingMonitor()
@@ -245,7 +247,7 @@ def test_best_checkpoint_keeps_the_lowest_validation_loss(
         epochs=2,
         batch_size=8,
         crop=CropConfig(probability=0.0),
-        mixed_precision=False,
+        precision=Precision.FP32,
         log_every=1000,
     )
 
@@ -257,3 +259,46 @@ def test_best_checkpoint_keeps_the_lowest_validation_loss(
     last = torch.load(tmp_path / LAST_CHECKPOINT, weights_only=True)
 
     assert (best["epoch"], last["epoch"]) == (1, 2)
+
+
+def test_float16_training_uses_loss_scaling(tmp_path: Path) -> None:
+    torch.manual_seed(0)
+    config = TrainingConfig(
+        epochs=1,
+        batch_size=8,
+        crop=CropConfig(probability=0.0),
+        precision=Precision.FP16,
+        log_every=1000,
+    )
+
+    history = train_classifier(
+        build_classifier(TINY_CNN, SPACE), DATA, config=config, checkpoint_dir=tmp_path, device=CPU
+    )
+
+    state = torch.load(tmp_path / LAST_CHECKPOINT, weights_only=True)
+
+    assert math.isfinite(history[0].train_loss)
+    assert state["config"]["precision"] == "fp16"
+
+
+def test_logging_monitor_reports_progress(caplog: pytest.LogCaptureFixture) -> None:
+    caplog.set_level("INFO")
+    monitor = LoggingMonitor("CNN trial 3")
+    record = EpochRecord(
+        epoch=1,
+        train_loss=1.0,
+        validation=Evaluation(loss=0.5, accuracy=dict.fromkeys(LEVELS, 0.25)),
+        learning_rate=1e-3,
+        seconds=90.0,
+    )
+
+    monitor.epoch_started(1, 2, 10)
+    monitor.step_finished(1)
+    monitor.metrics_updated(5, 1.2, 800.0, 1e-3)
+    monitor.evaluation_started(3)
+    monitor.evaluation_step()
+    monitor.epoch_finished(record)
+
+    assert [message.split(":")[0] for message in caplog.messages] == ["CNN trial 3"] * 3
+    assert "800 sequences/s" in caplog.messages[1]
+    assert "genus 0.250" in caplog.messages[2]
