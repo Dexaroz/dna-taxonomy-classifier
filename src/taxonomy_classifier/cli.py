@@ -9,7 +9,8 @@ import torch
 from taxonomy_classifier.data.build import BuildConfig, DataLayout, build_dataset
 from taxonomy_classifier.data.download import download_all
 from taxonomy_classifier.data.sources.registry import DEFAULT_SOURCES
-from taxonomy_classifier.exceptions import DataError, GeneflowError
+from taxonomy_classifier.exceptions import DataError, GeneflowError, TrainingDeadlineError
+from taxonomy_classifier.training.final import FinalConfig, load_search_choice, train_final
 from taxonomy_classifier.training.oversampling import OversamplingConfig, oversample_train
 from taxonomy_classifier.training.search import SUGGESTERS, SearchConfig, run_search
 from taxonomy_classifier.training.setup import load_training_data
@@ -35,6 +36,7 @@ _COMMANDS: Final = {
     "prepare": "Download, build and augment in one step",
     "cache": "Write the label space and the encoded sequence caches used for training",
     "search": "Run a hyperparameter search for one architecture",
+    "train": "Train one configuration chosen by a hyperparameter search",
 }
 
 
@@ -51,11 +53,17 @@ def build_parser() -> argparse.ArgumentParser:
         command = subparsers.add_parser(name, help=help_text)
         command.add_argument("--data-dir", type=Path, default=Path("data"))
 
-        if name in {"cache", "search"}:
+        if name in {"cache", "search", "train"}:
             command.add_argument("--min-class-count", type=int, default=3)
+
+        if name in {"search", "train"}:
+            _add_device_arguments(command)
 
         if name == "search":
             _add_search_arguments(command)
+
+        if name == "train":
+            _add_train_arguments(command)
 
     return parser
 
@@ -88,6 +96,19 @@ def _add_search_arguments(command: argparse.ArgumentParser) -> None:
     command.add_argument("--samples-per-epoch", type=int, default=100_000)
     command.add_argument("--batch-size", type=int, default=128)
     command.add_argument("--validation-samples", type=int, default=20_000)
+
+
+def _add_train_arguments(command: argparse.ArgumentParser) -> None:
+    command.add_argument("--params", type=Path, required=True)
+    command.add_argument("--trial", type=int, default=None)
+    command.add_argument("--output", type=Path, default=None)
+    command.add_argument("--hours", type=float, default=None)
+    command.add_argument("--epochs", type=int, default=10)
+    command.add_argument("--samples-per-epoch", type=int, default=None)
+    command.add_argument("--batch-size", type=int, default=128)
+
+
+def _add_device_arguments(command: argparse.ArgumentParser) -> None:
     command.add_argument("--precision", choices=[item.value for item in Precision], default="bf16")
     command.add_argument("--gpu-memory-fraction", type=float, default=None)
     command.add_argument("--seed", type=int, default=20260923)
@@ -136,6 +157,9 @@ def _run(
     if command == "search":
         _search(args, layout)
 
+    if command == "train":
+        _train(args, layout)
+
 
 def _search(args: argparse.Namespace, layout: DataLayout) -> None:
     _require_training_inputs(layout)
@@ -157,10 +181,7 @@ def _search(args: argparse.Namespace, layout: DataLayout) -> None:
 
     architecture: str = args.architecture
     storage: Path = args.storage or Path("checkpoints") / "search" / f"{architecture.lower()}.log"
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    if args.gpu_memory_fraction is not None and device.type == "cuda":
-        torch.cuda.set_per_process_memory_fraction(args.gpu_memory_fraction)
+    device = _device(args)
 
     label_space, data = load_training_data(layout, min_class_count=args.min_class_count)
 
@@ -192,6 +213,66 @@ def _search(args: argparse.Namespace, layout: DataLayout) -> None:
 
     else:
         _LOGGER.warning("%s search finished without completed trials", architecture)
+
+
+def _train(args: argparse.Namespace, layout: DataLayout) -> None:
+    _require_training_inputs(layout)
+
+    try:
+        config = FinalConfig(
+            epochs=args.epochs,
+            samples_per_epoch=args.samples_per_epoch,
+            batch_size=args.batch_size,
+            precision=Precision(args.precision),
+            time_budget_hours=args.hours,
+            seed=args.seed,
+        )
+
+    except ValueError as error:
+        raise DataError(str(error)) from error
+
+    choice = load_search_choice(args.params, trial=args.trial)
+    name = f"{choice.architecture.lower()}-trial{choice.trial}"
+    output: Path = args.output or Path("checkpoints") / name
+    device = _device(args)
+
+    label_space, data = load_training_data(layout, min_class_count=args.min_class_count)
+
+    _LOGGER.info("Training %s from %s: %s", name, args.params, choice.params)
+
+    try:
+        history = train_final(
+            choice,
+            data,
+            label_space,
+            config=config,
+            output_dir=output,
+            device=device,
+            monitor=LoggingMonitor(name),
+        )
+
+    except TrainingDeadlineError:
+        _LOGGER.warning("%s stopped by its time budget; checkpoints kept in %s", name, output)
+
+        return
+
+    last = history[-1].validation.accuracy
+    _LOGGER.info(
+        "%s finished: genus %.3f, species %.3f; checkpoints in %s",
+        name,
+        last["genus"],
+        last["species"],
+        output,
+    )
+
+
+def _device(args: argparse.Namespace) -> torch.device:
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    if args.gpu_memory_fraction is not None and device.type == "cuda":
+        torch.cuda.set_per_process_memory_fraction(args.gpu_memory_fraction)
+
+    return device
 
 
 def _require_raw_files(sources: Sequence[DataSource], layout: DataLayout) -> None:

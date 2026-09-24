@@ -200,3 +200,73 @@ def test_search_reports_the_best_trial(
 
     assert exit_code == 0
     assert "best trial 0: 0.4200" in caplog.text
+
+
+def _best_cnn(tmp_path: Path) -> Path:
+    path = tmp_path / "cnn-best.json"
+    params = {
+        "dropout": 0.0,
+        "learning_rate": 1e-3,
+        "weight_decay": 0.05,
+        "warmup_fraction": 0.05,
+        "sampling_power": 0.25,
+        "crop_probability": 0.2,
+        "cnn_width": "small",
+        "cnn_blocks": "two",
+        "cnn_kernel": 5,
+    }
+    path.write_text(json.dumps({"trial": 12, "value": 0.6, "params": params}), encoding="utf-8")
+
+    return path
+
+
+def _train_arguments(built_layout: DataLayout, tmp_path: Path, *extra: str) -> list[str]:
+    return [
+        "train",
+        "--data-dir",
+        str(built_layout.root),
+        "--min-class-count",
+        "1",
+        "--params",
+        str(_best_cnn(tmp_path)),
+        "--output",
+        str(tmp_path / "final"),
+        "--samples-per-epoch",
+        "4",
+        "--batch-size",
+        "2",
+        "--precision",
+        "fp32",
+        *extra,
+    ]
+
+
+def test_train_writes_checkpoints(
+    built_layout: DataLayout, tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    caplog.set_level("INFO")
+
+    exit_code = cli.main(_train_arguments(built_layout, tmp_path, "--epochs", "1"))
+
+    assert exit_code == 0
+    assert (tmp_path / "final" / "best.pt").exists()
+    assert (tmp_path / "final" / "run.json").exists()
+    assert "cnn-trial12 finished" in caplog.text
+
+
+def test_train_stops_cleanly_at_its_time_budget(
+    built_layout: DataLayout, tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    exit_code = cli.main(_train_arguments(built_layout, tmp_path, "--hours", "1e-9"))
+
+    assert exit_code == 0
+    assert "stopped by its time budget" in caplog.text
+
+
+def test_train_rejects_an_invalid_configuration(
+    built_layout: DataLayout, tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    exit_code = cli.main(_train_arguments(built_layout, tmp_path, "--epochs", "0"))
+
+    assert exit_code == 1
+    assert "epochs and batch_size must be positive" in caplog.text
