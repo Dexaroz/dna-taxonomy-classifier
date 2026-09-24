@@ -15,7 +15,7 @@ from taxonomy_classifier.model.labels import IGNORE_INDEX, LEVELS
 from taxonomy_classifier.training.data import CropConfig, iterate_batches, sampling_weights
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping
+    from collections.abc import Callable, Iterator, Mapping
     from pathlib import Path
 
     from taxonomy_classifier.model.classifier import TaxonomyClassifier
@@ -98,11 +98,13 @@ class EpochRecord:
     validation: Evaluation
     learning_rate: float
     seconds: float
+    train_accuracy: Mapping[str, float] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "epoch": self.epoch,
             "train_loss": self.train_loss,
+            "train_accuracy": dict(self.train_accuracy),
             "val_loss": self.validation.loss,
             "val_accuracy": dict(self.validation.accuracy),
             "learning_rate": self.learning_rate,
@@ -213,7 +215,7 @@ def learning_rate_factor(step: int, *, total_steps: int, warmup_steps: int) -> f
     return 0.5 * (1.0 + math.cos(math.pi * min(1.0, progress)))
 
 
-def evaluate(
+def predict_batches(
     model: TaxonomyClassifier,
     data: LabeledSet,
     *,
@@ -222,13 +224,8 @@ def evaluate(
     precision: Precision = Precision.FP32,
     max_length: int | None = None,
     on_batch: Callable[[], None] | None = None,
-) -> Evaluation:
+) -> Iterator[tuple[list[torch.Tensor], torch.Tensor]]:
     model.eval()
-
-    correct = torch.zeros(len(LEVELS), dtype=torch.long)
-    labeled = torch.zeros(len(LEVELS), dtype=torch.long)
-    loss_sum = 0.0
-    batches = 0
 
     with torch.inference_mode(), _autocast(device, precision):
         for batch in iterate_batches(
@@ -240,26 +237,61 @@ def evaluate(
             max_length=max_length,
         ):
             on_device = batch.to(device)
-            logits = model(on_device.tokens, on_device.mask)
 
-            loss_sum += float(hierarchical_loss(logits, on_device.targets))
-            batches += 1
-
-            predictions = torch.stack([level.argmax(dim=-1) for level in logits], dim=-1)
-            known = on_device.targets != IGNORE_INDEX
-
-            correct += ((predictions == on_device.targets) & known).sum(dim=0).cpu()
-            labeled += known.sum(dim=0).cpu()
+            yield model(on_device.tokens, on_device.mask), on_device.targets
 
             if on_batch is not None:
                 on_batch()
 
-    accuracy = {
-        level: float(hits) / float(total) if total else math.nan
-        for level, hits, total in zip(LEVELS, correct, labeled, strict=True)
-    }
 
-    return Evaluation(loss=loss_sum / max(1, batches), accuracy=accuracy)
+def evaluate(
+    model: TaxonomyClassifier,
+    data: LabeledSet,
+    *,
+    batch_size: int,
+    device: torch.device,
+    precision: Precision = Precision.FP32,
+    max_length: int | None = None,
+    on_batch: Callable[[], None] | None = None,
+) -> Evaluation:
+    correct = torch.zeros(len(LEVELS), dtype=torch.long, device=device)
+    labeled = torch.zeros(len(LEVELS), dtype=torch.long, device=device)
+    loss_sum = 0.0
+    batches = 0
+
+    for logits, targets in predict_batches(
+        model,
+        data,
+        batch_size=batch_size,
+        device=device,
+        precision=precision,
+        max_length=max_length,
+        on_batch=on_batch,
+    ):
+        loss_sum += float(hierarchical_loss(logits, targets))
+        batches += 1
+
+        hits, known = level_hits(logits, targets)
+        correct += hits
+        labeled += known
+
+    return Evaluation(loss=loss_sum / max(1, batches), accuracy=level_accuracy(correct, labeled))
+
+
+def level_hits(
+    logits: list[torch.Tensor], targets: torch.Tensor
+) -> tuple[torch.Tensor, torch.Tensor]:
+    predictions = torch.stack([level.argmax(dim=-1) for level in logits], dim=-1)
+    known = targets != IGNORE_INDEX
+
+    return ((predictions == targets) & known).sum(dim=0), known.sum(dim=0)
+
+
+def level_accuracy(correct: torch.Tensor, labeled: torch.Tensor) -> dict[str, float]:
+    return {
+        level: hits / total if total else math.nan
+        for level, hits, total in zip(LEVELS, correct.tolist(), labeled.tolist(), strict=True)
+    }
 
 
 def train_classifier(
@@ -307,7 +339,7 @@ def train_classifier(
 
         watcher.epoch_started(epoch, config.epochs, steps_per_epoch)
 
-        train_loss = _train_epoch(
+        train_loss, train_accuracy = _train_epoch(
             model,
             data.train,
             indices,
@@ -336,6 +368,7 @@ def train_classifier(
             validation=validation_result,
             learning_rate=optimization.learning_rate,
             seconds=time.perf_counter() - started,
+            train_accuracy=train_accuracy,
         )
         history.append(record)
 
@@ -352,7 +385,7 @@ def train_classifier(
 
             _save_checkpoint(checkpoint_dir, state, history, improved=improved)
 
-        _LOGGER.info(
+        _LOGGER.debug(
             "Epoch %d/%d: train %.4f, val %.4f, genus %.3f, %.0f s",
             epoch,
             config.epochs,
@@ -397,10 +430,12 @@ def _train_epoch(
     device: torch.device,
     rng: random.Random,
     monitor: TrainingMonitor,
-) -> float:
+) -> tuple[float, dict[str, float]]:
     model.train()
 
     loss_sum = torch.zeros((), device=device)
+    correct = torch.zeros(len(LEVELS), dtype=torch.long, device=device)
+    labeled = torch.zeros(len(LEVELS), dtype=torch.long, device=device)
     steps = 0
     started = time.perf_counter()
 
@@ -415,7 +450,8 @@ def _train_epoch(
         on_device = batch.to(device)
 
         with _autocast(device, config.precision):
-            loss = hierarchical_loss(model(on_device.tokens, on_device.mask), on_device.targets)
+            logits = model(on_device.tokens, on_device.mask)
+            loss = hierarchical_loss(logits, on_device.targets)
 
         optimization.optimizer.zero_grad(set_to_none=True)
         torch.autograd.backward(optimization.scaler.scale(loss))
@@ -428,6 +464,11 @@ def _train_epoch(
         loss_sum += loss.detach()
         steps += 1
 
+        with torch.no_grad():
+            hits, known = level_hits(logits, on_device.targets)
+            correct += hits
+            labeled += known
+
         monitor.step_finished(steps)
 
         if steps % config.log_every == 0:
@@ -437,7 +478,7 @@ def _train_epoch(
             monitor.metrics_updated(steps, running_loss, rate, optimization.learning_rate)
             _LOGGER.debug("step %d: loss %.4f, %.0f sequences/s", steps, running_loss, rate)
 
-    return loss_sum.item() / max(1, steps)
+    return loss_sum.item() / max(1, steps), level_accuracy(correct, labeled)
 
 
 def _save_checkpoint(

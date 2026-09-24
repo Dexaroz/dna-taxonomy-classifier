@@ -11,6 +11,7 @@ from taxonomy_classifier.model.encoders import CnnConfig, TransformerConfig
 from taxonomy_classifier.model.labels import LEVELS, LabelSpace
 from taxonomy_classifier.training.data import LabeledSet, SequenceBank, TrainingData
 from taxonomy_classifier.training.final import (
+    REPORT_FILENAME,
     RUN_FILENAME,
     DeadlineMonitor,
     FinalConfig,
@@ -231,7 +232,7 @@ def test_deadline_monitor_stops_training_once_the_deadline_passes() -> None:
 def test_train_final_writes_checkpoints_and_a_run_description(tmp_path: Path) -> None:
     monitor = RecordingMonitor()
 
-    history = train_final(
+    result = train_final(
         SearchChoice(trial=12, params=CNN_PARAMS),
         DATA,
         SPACE,
@@ -244,7 +245,11 @@ def test_train_final_writes_checkpoints_and_a_run_description(tmp_path: Path) ->
     run = json.loads((tmp_path / RUN_FILENAME).read_text(encoding="utf-8"))
     state = torch.load(tmp_path / BEST_CHECKPOINT, weights_only=True)
 
-    assert len(history) == 2
+    report = json.loads((tmp_path / REPORT_FILENAME).read_text(encoding="utf-8"))
+
+    assert len(result.history) == 2
+    assert [item.level for item in result.reports] == list(LEVELS)
+    assert [item["level"] for item in report] == list(LEVELS)
     assert "epoch_finished 2" in monitor.calls
     assert run["architecture"] == "CNN"
     assert run["search_trial"] == 12

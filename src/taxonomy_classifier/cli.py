@@ -1,6 +1,7 @@
 import argparse
 import logging
 from pathlib import Path
+import sys
 from typing import TYPE_CHECKING, Final
 
 import httpx
@@ -12,6 +13,8 @@ from taxonomy_classifier.data.sources.registry import DEFAULT_SOURCES
 from taxonomy_classifier.exceptions import DataError, GeneflowError, TrainingDeadlineError
 from taxonomy_classifier.training.final import FinalConfig, load_search_choice, train_final
 from taxonomy_classifier.training.oversampling import OversamplingConfig, oversample_train
+from taxonomy_classifier.training.progress import ProgressBarMonitor
+from taxonomy_classifier.training.report import format_report
 from taxonomy_classifier.training.search import SUGGESTERS, SearchConfig, run_search
 from taxonomy_classifier.training.setup import load_training_data
 from taxonomy_classifier.training.trainer import LoggingMonitor, Precision
@@ -107,6 +110,7 @@ def _add_train_arguments(command: argparse.ArgumentParser) -> None:
     command.add_argument("--samples-per-epoch", type=int, default=None)
     command.add_argument("--batch-size", type=int, default=128)
     command.add_argument("--log-every", type=int, default=500)
+    command.add_argument("--refresh-seconds", type=float, default=0.5)
 
 
 def _add_device_arguments(command: argparse.ArgumentParser) -> None:
@@ -242,30 +246,36 @@ def _train(args: argparse.Namespace, layout: DataLayout) -> None:
 
     _LOGGER.info("Training %s from %s: %s", name, args.params, choice.params)
 
+    monitor = ProgressBarMonitor(
+        sys.stdout, refresh_seconds=args.refresh_seconds, steps_path=output / "steps.json"
+    )
+
     try:
-        history = train_final(
+        result = train_final(
             choice,
             data,
             label_space,
             config=config,
             output_dir=output,
             device=device,
-            monitor=LoggingMonitor(name),
+            monitor=monitor,
         )
 
     except TrainingDeadlineError:
+        sys.stdout.write("\n")
         _LOGGER.warning("%s stopped by its time budget; checkpoints kept in %s", name, output)
 
         return
 
-    last = history[-1].validation.accuracy
-    _LOGGER.info(
-        "%s finished: genus %.3f, species %.3f; checkpoints in %s",
-        name,
-        last["genus"],
-        last["species"],
-        output,
+    best = min(result.history, key=lambda record: record.validation.loss)
+
+    sys.stdout.write(
+        f"Classification report on validation, best epoch {best.epoch}/{len(result.history)}\n\n"
+        f"{format_report(result.reports)}\n\n"
     )
+    sys.stdout.flush()
+
+    _LOGGER.info("%s finished; checkpoints and reports in %s", name, output)
 
 
 def _device(args: argparse.Namespace) -> torch.device:

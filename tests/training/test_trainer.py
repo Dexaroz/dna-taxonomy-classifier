@@ -176,6 +176,7 @@ def test_training_learns_a_separable_task_and_writes_checkpoints(tmp_path: Path)
     written = json.loads((tmp_path / HISTORY_FILENAME).read_text(encoding="utf-8"))
 
     assert written == [record.to_dict() for record in history]
+    assert set(history[0].train_accuracy) == set(LEVELS)
     assert load_history(tmp_path) == written
 
 

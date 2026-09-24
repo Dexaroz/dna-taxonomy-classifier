@@ -241,20 +241,24 @@ def _train_arguments(built_layout: DataLayout, tmp_path: Path, *extra: str) -> l
     ]
 
 
-def test_train_writes_checkpoints(
-    built_layout: DataLayout, tmp_path: Path, caplog: pytest.LogCaptureFixture
+def test_train_writes_checkpoints_progress_and_reports(
+    built_layout: DataLayout, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    caplog.set_level("INFO")
-
     exit_code = cli.main(
         _train_arguments(built_layout, tmp_path, "--epochs", "1", "--log-every", "1")
     )
 
+    output = capsys.readouterr().out
+    steps = json.loads((tmp_path / "final" / "steps.json").read_text(encoding="utf-8"))
+
     assert exit_code == 0
     assert (tmp_path / "final" / "best.pt").exists()
-    assert (tmp_path / "final" / "run.json").exists()
-    assert "cnn-trial12 finished" in caplog.text
-    assert "cnn-trial12: step 1," in caplog.text
+    assert (tmp_path / "final" / "report.json").exists()
+    assert "Epoch 1/1" in output
+    assert "val_loss:" in output
+    assert "Classification report on validation, best epoch 1/1" in output
+    assert "macro-f1" in output
+    assert steps[0]["step"] == 1
 
 
 def test_train_stops_cleanly_at_its_time_budget(

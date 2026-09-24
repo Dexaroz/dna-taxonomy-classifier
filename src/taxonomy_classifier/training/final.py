@@ -8,9 +8,16 @@ import optuna
 from taxonomy_classifier.data.files import write_text_atomic
 from taxonomy_classifier.exceptions import DataError, TrainingDeadlineError
 from taxonomy_classifier.model.classifier import build_classifier, parameter_counts
+from taxonomy_classifier.training.report import classification_report
 from taxonomy_classifier.training.search import SearchConfig, TrialSetup, suggest_setup
 from taxonomy_classifier.training.setup import LABEL_SPACE_FILENAME
-from taxonomy_classifier.training.trainer import Precision, SilentMonitor, train_classifier
+from taxonomy_classifier.training.trainer import (
+    BEST_CHECKPOINT,
+    Precision,
+    SilentMonitor,
+    load_weights,
+    train_classifier,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -19,9 +26,12 @@ if TYPE_CHECKING:
 
     from taxonomy_classifier.model.labels import LabelSpace
     from taxonomy_classifier.training.data import TrainingData
+    from taxonomy_classifier.training.report import LevelReport
     from taxonomy_classifier.training.trainer import EpochRecord, TrainingMonitor
 
 RUN_FILENAME: Final = "run.json"
+
+REPORT_FILENAME: Final = "report.json"
 
 _ROW_FIELDS: Final = frozenset({"trial", "state", "value", "epochs"})
 
@@ -50,6 +60,12 @@ class FinalConfig:
         if self.time_budget_hours is not None and self.time_budget_hours <= 0:
             msg = f"time_budget_hours must be positive, got {self.time_budget_hours}"
             raise ValueError(msg)
+
+
+@dataclass(frozen=True, slots=True)
+class FinalResult:
+    history: list[EpochRecord]
+    reports: list[LevelReport]
 
 
 @dataclass(frozen=True, slots=True)
@@ -149,7 +165,7 @@ def train_final(
     output_dir: Path,
     device: torch.device,
     monitor: TrainingMonitor | None = None,
-) -> list[EpochRecord]:
+) -> FinalResult:
     setup = final_setup(choice, config)
     model = build_classifier(setup.encoder, label_space, setup.heads)
 
@@ -166,7 +182,7 @@ def train_final(
         inner if budget is None else DeadlineMonitor(inner, time.monotonic() + budget * 3600)
     )
 
-    return train_classifier(
+    history = train_classifier(
         model,
         data,
         config=setup.training,
@@ -175,6 +191,24 @@ def train_final(
         metadata=description,
         monitor=watcher,
     )
+
+    load_weights(model, output_dir / BEST_CHECKPOINT, device=device)
+
+    reports = classification_report(
+        model,
+        data.validation,
+        label_space,
+        batch_size=setup.training.evaluation_batch_size,
+        device=device,
+        precision=setup.training.precision,
+        max_length=setup.training.max_length,
+    )
+    write_text_atomic(
+        output_dir / REPORT_FILENAME,
+        json.dumps([report.to_dict() for report in reports], indent=2),
+    )
+
+    return FinalResult(history=history, reports=reports)
 
 
 def _describe(
