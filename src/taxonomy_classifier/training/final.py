@@ -35,11 +35,12 @@ class FinalConfig:
     batch_size: int = 128
     precision: Precision = Precision.BF16
     time_budget_hours: float | None = None
+    log_every: int = 500
     seed: int = 20260923
 
     def __post_init__(self) -> None:
-        if min(self.epochs, self.batch_size) < 1:
-            msg = "epochs and batch_size must be positive"
+        if min(self.epochs, self.batch_size, self.log_every) < 1:
+            msg = "epochs, batch_size and log_every must be positive"
             raise ValueError(msg)
 
         if self.samples_per_epoch is not None and self.samples_per_epoch < 1:
@@ -100,7 +101,10 @@ def final_setup(choice: SearchChoice, config: FinalConfig) -> TrialSetup:
         optuna.trial.FixedTrial(choice.params), choice.architecture, search_config
     )
     training = replace(
-        setup.training, epochs=config.epochs, samples_per_epoch=config.samples_per_epoch
+        setup.training,
+        epochs=config.epochs,
+        samples_per_epoch=config.samples_per_epoch,
+        log_every=config.log_every,
     )
 
     return replace(setup, training=training)

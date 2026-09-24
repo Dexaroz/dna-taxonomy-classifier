@@ -246,12 +246,15 @@ def test_train_writes_checkpoints(
 ) -> None:
     caplog.set_level("INFO")
 
-    exit_code = cli.main(_train_arguments(built_layout, tmp_path, "--epochs", "1"))
+    exit_code = cli.main(
+        _train_arguments(built_layout, tmp_path, "--epochs", "1", "--log-every", "1")
+    )
 
     assert exit_code == 0
     assert (tmp_path / "final" / "best.pt").exists()
     assert (tmp_path / "final" / "run.json").exists()
     assert "cnn-trial12 finished" in caplog.text
+    assert "cnn-trial12: step 1," in caplog.text
 
 
 def test_train_stops_cleanly_at_its_time_budget(
@@ -269,4 +272,4 @@ def test_train_rejects_an_invalid_configuration(
     exit_code = cli.main(_train_arguments(built_layout, tmp_path, "--epochs", "0"))
 
     assert exit_code == 1
-    assert "epochs and batch_size must be positive" in caplog.text
+    assert "epochs, batch_size and log_every must be positive" in caplog.text

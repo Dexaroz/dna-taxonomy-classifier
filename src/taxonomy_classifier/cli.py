@@ -106,6 +106,7 @@ def _add_train_arguments(command: argparse.ArgumentParser) -> None:
     command.add_argument("--epochs", type=int, default=10)
     command.add_argument("--samples-per-epoch", type=int, default=None)
     command.add_argument("--batch-size", type=int, default=128)
+    command.add_argument("--log-every", type=int, default=500)
 
 
 def _add_device_arguments(command: argparse.ArgumentParser) -> None:
@@ -225,6 +226,7 @@ def _train(args: argparse.Namespace, layout: DataLayout) -> None:
             batch_size=args.batch_size,
             precision=Precision(args.precision),
             time_budget_hours=args.hours,
+            log_every=args.log_every,
             seed=args.seed,
         )
 

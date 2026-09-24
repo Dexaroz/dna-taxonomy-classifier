@@ -102,8 +102,9 @@ class RecordingMonitor:
 @pytest.mark.parametrize(
     ("kwargs", "message"),
     [
-        ({"epochs": 0}, "epochs and batch_size must be positive"),
-        ({"batch_size": 0}, "epochs and batch_size must be positive"),
+        ({"epochs": 0}, "epochs, batch_size and log_every must be positive"),
+        ({"batch_size": 0}, "epochs, batch_size and log_every must be positive"),
+        ({"log_every": 0}, "epochs, batch_size and log_every must be positive"),
         ({"samples_per_epoch": 0}, "samples_per_epoch must be positive"),
         ({"time_budget_hours": 0.0}, "time_budget_hours must be positive"),
     ],
@@ -166,7 +167,7 @@ def test_trial_rows_need_an_existing_trial(tmp_path: Path, trial: int | None, me
 
 
 def test_final_setup_rebuilds_the_searched_configuration() -> None:
-    config = FinalConfig(epochs=12, batch_size=64, precision=Precision.FP16, seed=5)
+    config = FinalConfig(epochs=12, batch_size=64, precision=Precision.FP16, log_every=20, seed=5)
 
     setup = final_setup(SearchChoice(trial=1, params=CNN_PARAMS), config)
 
@@ -180,6 +181,7 @@ def test_final_setup_rebuilds_the_searched_configuration() -> None:
     assert setup.training.learning_rate == 1e-3
     assert setup.training.crop.probability == 0.2
     assert setup.training.precision is Precision.FP16
+    assert setup.training.log_every == 20
     assert setup.training.seed == 5
 
 
