@@ -1,0 +1,609 @@
+[I 2026-09-23 17:11:40,616] A new study created in Journal with name: cnn-search
+2026-09-23 17:11:40,950 INFO     taxonomy_classifier.cli: CNN trial 0: {'dropout': 0.19254056920538143, 'learning_rate': 0.000609964795706954, 'weight_decay': 0.041140671167800145, 'warmup_fraction': 0.08121747527319668, 'sampling_power': 0.5051338218669291, 'crop_probability': 0.6265701597465221, 'cnn_width': 'large', 'cnn_blocks': 'two', 'cnn_kernel': 7}
+2026-09-23 17:11:47,004 INFO     taxonomy_classifier.training.trainer: CNN trial 0: epoch 1/6 started (782 batches)
+2026-09-23 17:15:26,740 INFO     taxonomy_classifier.training.trainer: CNN trial 0: step 500, loss 4.9010, 291 sequences/s, lr 6.09e-04
+2026-09-23 17:17:59,717 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.6573, val 3.5220, genus 0.173, 373 s
+2026-09-23 17:17:59,717 INFO     taxonomy_classifier.training.trainer: CNN trial 0: epoch 1 done in 6.2 min, val loss 3.5220, genus 0.173, species 0.033
+2026-09-23 17:17:59,749 INFO     taxonomy_classifier.training.trainer: CNN trial 0: epoch 2/6 started (782 batches)
+2026-09-23 17:21:44,638 INFO     taxonomy_classifier.training.trainer: CNN trial 0: step 500, loss 3.7540, 285 sequences/s, lr 5.47e-04
+2026-09-23 17:24:17,725 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 3.6360, val 2.6289, genus 0.244, 378 s
+2026-09-23 17:24:17,725 INFO     taxonomy_classifier.training.trainer: CNN trial 0: epoch 2 done in 6.3 min, val loss 2.6289, genus 0.244, species 0.058
+2026-09-23 17:24:17,758 INFO     taxonomy_classifier.training.trainer: CNN trial 0: epoch 3/6 started (782 batches)
+2026-09-23 17:28:01,936 INFO     taxonomy_classifier.training.trainer: CNN trial 0: step 500, loss 3.1605, 285 sequences/s, lr 4.08e-04
+2026-09-23 17:30:34,957 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 3.0891, val 2.2016, genus 0.288, 377 s
+2026-09-23 17:30:34,958 INFO     taxonomy_classifier.training.trainer: CNN trial 0: epoch 3 done in 6.3 min, val loss 2.2016, genus 0.288, species 0.075
+2026-09-23 17:30:34,987 INFO     taxonomy_classifier.training.trainer: CNN trial 0: epoch 4/6 started (782 batches)
+2026-09-23 17:34:18,978 INFO     taxonomy_classifier.training.trainer: CNN trial 0: step 500, loss 2.7884, 286 sequences/s, lr 2.37e-04
+2026-09-23 17:36:51,826 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 2.7411, val 1.9092, genus 0.378, 377 s
+2026-09-23 17:36:51,826 INFO     taxonomy_classifier.training.trainer: CNN trial 0: epoch 4 done in 6.3 min, val loss 1.9092, genus 0.378, species 0.105
+2026-09-23 17:36:51,854 INFO     taxonomy_classifier.training.trainer: CNN trial 0: epoch 5/6 started (782 batches)
+2026-09-23 17:40:35,620 INFO     taxonomy_classifier.training.trainer: CNN trial 0: step 500, loss 2.5433, 286 sequences/s, lr 8.72e-05
+2026-09-23 17:43:08,097 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 2.5194, val 1.7839, genus 0.418, 376 s
+2026-09-23 17:43:08,097 INFO     taxonomy_classifier.training.trainer: CNN trial 0: epoch 5 done in 6.3 min, val loss 1.7839, genus 0.418, species 0.121
+2026-09-23 17:43:08,125 INFO     taxonomy_classifier.training.trainer: CNN trial 0: epoch 6/6 started (782 batches)
+2026-09-23 17:46:52,081 INFO     taxonomy_classifier.training.trainer: CNN trial 0: step 500, loss 2.4521, 286 sequences/s, lr 6.42e-06
+2026-09-23 17:49:24,738 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 2.4465, val 1.7539, genus 0.447, 377 s
+2026-09-23 17:49:24,738 INFO     taxonomy_classifier.training.trainer: CNN trial 0: epoch 6 done in 6.3 min, val loss 1.7539, genus 0.447, species 0.122
+[I 2026-09-23 17:49:24,996] Trial 0 finished with value: 0.28460458825687834 and parameters: {'dropout': 0.19254056920538143, 'learning_rate': 0.000609964795706954, 'weight_decay': 0.041140671167800145, 'warmup_fraction': 0.08121747527319668, 'sampling_power': 0.5051338218669291, 'crop_probability': 0.6265701597465221, 'cnn_width': 'large', 'cnn_blocks': 'two', 'cnn_kernel': 7}. Best is trial 0 with value: 0.28460458825687834.
+2026-09-23 17:49:25,157 INFO     taxonomy_classifier.cli: CNN trial 1: {'dropout': 0.10246524499797267, 'learning_rate': 0.0013454834066347968, 'weight_decay': 0.02015649172553487, 'warmup_fraction': 0.04813139088185198, 'sampling_power': 0.8954658694290492, 'crop_probability': 0.2544255647538661, 'cnn_width': 'small', 'cnn_blocks': 'two', 'cnn_kernel': 9}
+2026-09-23 17:49:25,338 INFO     taxonomy_classifier.training.trainer: CNN trial 1: epoch 1/6 started (782 batches)
+2026-09-23 17:51:33,937 INFO     taxonomy_classifier.training.trainer: CNN trial 1: step 500, loss 4.6537, 498 sequences/s, lr 1.33e-03
+2026-09-23 17:53:00,978 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.3439, val 3.4654, genus 0.004, 216 s
+2026-09-23 17:53:00,978 INFO     taxonomy_classifier.training.trainer: CNN trial 1: epoch 1 done in 3.6 min, val loss 3.4654, genus 0.004, species 0.001
+2026-09-23 17:53:01,005 INFO     taxonomy_classifier.training.trainer: CNN trial 1: epoch 2/6 started (782 batches)
+2026-09-23 17:55:09,182 INFO     taxonomy_classifier.training.trainer: CNN trial 1: step 500, loss 3.2935, 499 sequences/s, lr 1.17e-03
+2026-09-23 17:56:36,064 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 3.1620, val 2.7307, genus 0.017, 215 s
+2026-09-23 17:56:36,064 INFO     taxonomy_classifier.training.trainer: CNN trial 1: epoch 2 done in 3.6 min, val loss 2.7307, genus 0.017, species 0.011
+2026-09-23 17:56:36,097 INFO     taxonomy_classifier.training.trainer: CNN trial 1: epoch 3/6 started (782 batches)
+2026-09-23 17:58:44,218 INFO     taxonomy_classifier.training.trainer: CNN trial 1: step 500, loss 2.6561, 500 sequences/s, lr 8.57e-04
+2026-09-23 18:00:11,136 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 2.5804, val 2.3849, genus 0.065, 215 s
+2026-09-23 18:00:11,137 INFO     taxonomy_classifier.training.trainer: CNN trial 1: epoch 3 done in 3.6 min, val loss 2.3849, genus 0.065, species 0.036
+2026-09-23 18:00:11,171 INFO     taxonomy_classifier.training.trainer: CNN trial 1: epoch 4/6 started (782 batches)
+2026-09-23 18:02:19,224 INFO     taxonomy_classifier.training.trainer: CNN trial 1: step 500, loss 2.2489, 500 sequences/s, lr 4.92e-04
+2026-09-23 18:03:45,954 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 2.1885, val 2.1423, genus 0.118, 215 s
+2026-09-23 18:03:45,954 INFO     taxonomy_classifier.training.trainer: CNN trial 1: epoch 4 done in 3.6 min, val loss 2.1423, genus 0.118, species 0.031
+2026-09-23 18:03:45,990 INFO     taxonomy_classifier.training.trainer: CNN trial 1: epoch 5/6 started (782 batches)
+2026-09-23 18:05:54,132 INFO     taxonomy_classifier.training.trainer: CNN trial 1: step 500, loss 1.9650, 499 sequences/s, lr 1.80e-04
+2026-09-23 18:07:21,129 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 1.9275, val 1.9857, genus 0.195, 215 s
+2026-09-23 18:07:21,130 INFO     taxonomy_classifier.training.trainer: CNN trial 1: epoch 5 done in 3.6 min, val loss 1.9857, genus 0.195, species 0.064
+2026-09-23 18:07:21,173 INFO     taxonomy_classifier.training.trainer: CNN trial 1: epoch 6/6 started (782 batches)
+2026-09-23 18:09:29,465 INFO     taxonomy_classifier.training.trainer: CNN trial 1: step 500, loss 1.8316, 499 sequences/s, lr 1.32e-05
+2026-09-23 18:10:56,541 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 1.8240, val 1.9500, genus 0.230, 215 s
+2026-09-23 18:10:56,541 INFO     taxonomy_classifier.training.trainer: CNN trial 1: epoch 6 done in 3.6 min, val loss 1.9500, genus 0.230, species 0.108
+[I 2026-09-23 18:10:56,774] Trial 1 finished with value: 0.16873506272956945 and parameters: {'dropout': 0.10246524499797267, 'learning_rate': 0.0013454834066347968, 'weight_decay': 0.02015649172553487, 'warmup_fraction': 0.04813139088185198, 'sampling_power': 0.8954658694290492, 'crop_probability': 0.2544255647538661, 'cnn_width': 'small', 'cnn_blocks': 'two', 'cnn_kernel': 9}. Best is trial 0 with value: 0.28460458825687834.
+2026-09-23 18:10:56,958 INFO     taxonomy_classifier.cli: CNN trial 2: {'dropout': 0.18397513707014945, 'learning_rate': 0.001768824514251102, 'weight_decay': 0.1906789320251259, 'warmup_fraction': 0.09591209878385994, 'sampling_power': 0.7487454574766922, 'crop_probability': 0.4020365992830327, 'cnn_width': 'large', 'cnn_blocks': 'two', 'cnn_kernel': 5}
+2026-09-23 18:10:57,175 INFO     taxonomy_classifier.training.trainer: CNN trial 2: epoch 1/6 started (782 batches)
+2026-09-23 18:14:27,244 INFO     taxonomy_classifier.training.trainer: CNN trial 2: step 500, loss 4.8085, 305 sequences/s, lr 1.77e-03
+2026-09-23 18:16:50,120 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.5853, val 3.6944, genus 0.004, 353 s
+2026-09-23 18:16:50,120 INFO     taxonomy_classifier.training.trainer: CNN trial 2: epoch 1 done in 5.9 min, val loss 3.6944, genus 0.004, species 0.004
+2026-09-23 18:16:50,151 INFO     taxonomy_classifier.training.trainer: CNN trial 2: epoch 2/6 started (782 batches)
+2026-09-23 18:20:19,731 INFO     taxonomy_classifier.training.trainer: CNN trial 2: step 500, loss 3.7054, 305 sequences/s, lr 1.61e-03
+2026-09-23 18:22:42,105 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 3.5890, val 2.9925, genus 0.017, 352 s
+2026-09-23 18:22:42,105 INFO     taxonomy_classifier.training.trainer: CNN trial 2: epoch 2 done in 5.9 min, val loss 2.9925, genus 0.017, species 0.008
+[I 2026-09-23 18:22:42,310] Trial 2 pruned. 
+2026-09-23 18:22:42,503 INFO     taxonomy_classifier.cli: CNN trial 3: {'dropout': 0.229859118518824, 'learning_rate': 0.00020153173913192062, 'weight_decay': 0.015213008331453172, 'warmup_fraction': 0.057453380043751986, 'sampling_power': 0.5936196427925672, 'crop_probability': 0.728776526586183, 'cnn_width': 'small', 'cnn_blocks': 'two', 'cnn_kernel': 5}
+2026-09-23 18:22:42,666 INFO     taxonomy_classifier.training.trainer: CNN trial 3: epoch 1/6 started (782 batches)
+2026-09-23 18:24:34,322 INFO     taxonomy_classifier.training.trainer: CNN trial 3: step 500, loss 5.0860, 573 sequences/s, lr 2.00e-04
+2026-09-23 18:25:50,970 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.8710, val 4.0013, genus 0.157, 188 s
+2026-09-23 18:25:50,970 INFO     taxonomy_classifier.training.trainer: CNN trial 3: epoch 1 done in 3.1 min, val loss 4.0013, genus 0.157, species 0.041
+2026-09-23 18:25:51,000 INFO     taxonomy_classifier.training.trainer: CNN trial 3: epoch 2/6 started (782 batches)
+2026-09-23 18:27:42,832 INFO     taxonomy_classifier.training.trainer: CNN trial 3: step 500, loss 4.1875, 572 sequences/s, lr 1.77e-04
+2026-09-23 18:28:59,341 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 4.0951, val 3.3492, genus 0.181, 188 s
+2026-09-23 18:28:59,341 INFO     taxonomy_classifier.training.trainer: CNN trial 3: epoch 2 done in 3.1 min, val loss 3.3492, genus 0.181, species 0.053
+[I 2026-09-23 18:28:59,535] Trial 3 pruned. 
+2026-09-23 18:28:59,713 INFO     taxonomy_classifier.cli: CNN trial 4: {'dropout': 0.12213727005921443, 'learning_rate': 0.00024362558848362408, 'weight_decay': 0.0011644414748505178, 'warmup_fraction': 0.0639440820119068, 'sampling_power': 0.6640400492774723, 'crop_probability': 0.39550945862124876, 'cnn_width': 'base', 'cnn_blocks': 'three', 'cnn_kernel': 5}
+2026-09-23 18:28:59,912 INFO     taxonomy_classifier.training.trainer: CNN trial 4: epoch 1/6 started (782 batches)
+2026-09-23 18:32:42,597 INFO     taxonomy_classifier.training.trainer: CNN trial 4: step 500, loss 4.9658, 287 sequences/s, lr 2.42e-04
+2026-09-23 18:35:14,397 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.6930, val 3.6812, genus 0.137, 375 s
+2026-09-23 18:35:14,397 INFO     taxonomy_classifier.training.trainer: CNN trial 4: epoch 1 done in 6.2 min, val loss 3.6812, genus 0.137, species 0.033
+2026-09-23 18:35:14,427 INFO     taxonomy_classifier.training.trainer: CNN trial 4: epoch 2/6 started (782 batches)
+2026-09-23 18:38:57,266 INFO     taxonomy_classifier.training.trainer: CNN trial 4: step 500, loss 3.7200, 287 sequences/s, lr 2.15e-04
+2026-09-23 18:41:29,068 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 3.5943, val 2.7518, genus 0.217, 375 s
+2026-09-23 18:41:29,069 INFO     taxonomy_classifier.training.trainer: CNN trial 4: epoch 2 done in 6.2 min, val loss 2.7518, genus 0.217, species 0.079
+[I 2026-09-23 18:41:29,308] Trial 4 pruned. 
+2026-09-23 18:41:29,505 INFO     taxonomy_classifier.cli: CNN trial 5: {'dropout': 0.22812482673228743, 'learning_rate': 0.002566665543320515, 'weight_decay': 0.0018038054142072476, 'warmup_fraction': 0.09316499123483021, 'sampling_power': 0.09355363351454027, 'crop_probability': 0.633594563859802, 'cnn_width': 'small', 'cnn_blocks': 'three', 'cnn_kernel': 11}
+2026-09-23 18:41:29,731 INFO     taxonomy_classifier.training.trainer: CNN trial 5: epoch 1/6 started (782 batches)
+2026-09-23 18:44:38,122 INFO     taxonomy_classifier.training.trainer: CNN trial 5: step 500, loss 4.5327, 340 sequences/s, lr 2.57e-03
+2026-09-23 18:46:45,816 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.2379, val 2.8864, genus 0.231, 316 s
+2026-09-23 18:46:45,816 INFO     taxonomy_classifier.training.trainer: CNN trial 5: epoch 1 done in 5.3 min, val loss 2.8864, genus 0.231, species 0.033
+2026-09-23 18:46:45,847 INFO     taxonomy_classifier.training.trainer: CNN trial 5: epoch 2/6 started (782 batches)
+2026-09-23 18:49:53,279 INFO     taxonomy_classifier.training.trainer: CNN trial 5: step 500, loss 3.2796, 341 sequences/s, lr 2.32e-03
+2026-09-23 18:52:01,229 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 3.1890, val 2.2636, genus 0.300, 315 s
+2026-09-23 18:52:01,229 INFO     taxonomy_classifier.training.trainer: CNN trial 5: epoch 2 done in 5.3 min, val loss 2.2636, genus 0.300, species 0.083
+2026-09-23 18:52:01,264 INFO     taxonomy_classifier.training.trainer: CNN trial 5: epoch 3/6 started (782 batches)
+2026-09-23 18:55:07,060 INFO     taxonomy_classifier.training.trainer: CNN trial 5: step 500, loss nan, 344 sequences/s, lr 1.75e-03
+2026-09-23 18:57:04,158 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train nan, val nan, genus 0.000, 303 s
+2026-09-23 18:57:04,158 INFO     taxonomy_classifier.training.trainer: CNN trial 5: epoch 3 done in 5.0 min, val loss nan, genus 0.000, species 0.000
+2026-09-23 18:57:04,190 INFO     taxonomy_classifier.training.trainer: CNN trial 5: epoch 4/6 started (782 batches)
+2026-09-23 18:59:56,662 INFO     taxonomy_classifier.training.trainer: CNN trial 5: step 500, loss nan, 371 sequences/s, lr 1.02e-03
+2026-09-23 19:01:52,777 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train nan, val nan, genus 0.000, 289 s
+2026-09-23 19:01:52,777 INFO     taxonomy_classifier.training.trainer: CNN trial 5: epoch 4 done in 4.8 min, val loss nan, genus 0.000, species 0.000
+2026-09-23 19:01:52,810 INFO     taxonomy_classifier.training.trainer: CNN trial 5: epoch 5/6 started (782 batches)
+2026-09-23 19:04:44,885 INFO     taxonomy_classifier.training.trainer: CNN trial 5: step 500, loss nan, 372 sequences/s, lr 3.76e-04
+2026-09-23 19:06:41,778 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train nan, val nan, genus 0.000, 289 s
+2026-09-23 19:06:41,778 INFO     taxonomy_classifier.training.trainer: CNN trial 5: epoch 5 done in 4.8 min, val loss nan, genus 0.000, species 0.000
+2026-09-23 19:06:41,811 INFO     taxonomy_classifier.training.trainer: CNN trial 5: epoch 6/6 started (782 batches)
+2026-09-23 19:09:33,976 INFO     taxonomy_classifier.training.trainer: CNN trial 5: step 500, loss nan, 372 sequences/s, lr 2.77e-05
+2026-09-23 19:11:30,258 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train nan, val nan, genus 0.000, 288 s
+2026-09-23 19:11:30,258 INFO     taxonomy_classifier.training.trainer: CNN trial 5: epoch 6 done in 4.8 min, val loss nan, genus 0.000, species 0.000
+[I 2026-09-23 19:11:30,480] Trial 5 pruned. 
+2026-09-23 19:11:30,663 INFO     taxonomy_classifier.cli: CNN trial 6: {'dropout': 0.14802635618120508, 'learning_rate': 0.0003224761328244722, 'weight_decay': 0.08421492551097452, 'warmup_fraction': 0.08711942869282302, 'sampling_power': 0.009574400560323881, 'crop_probability': 0.6380496334052349, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}
+2026-09-23 19:11:30,838 INFO     taxonomy_classifier.training.trainer: CNN trial 6: epoch 1/6 started (782 batches)
+2026-09-23 19:14:04,095 INFO     taxonomy_classifier.training.trainer: CNN trial 6: step 500, loss 4.5512, 418 sequences/s, lr 3.22e-04
+2026-09-23 19:15:49,016 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.1381, val 2.6941, genus 0.272, 258 s
+2026-09-23 19:15:49,016 INFO     taxonomy_classifier.training.trainer: CNN trial 6: epoch 1 done in 4.3 min, val loss 2.6941, genus 0.272, species 0.115
+2026-09-23 19:15:49,048 INFO     taxonomy_classifier.training.trainer: CNN trial 6: epoch 2/6 started (782 batches)
+2026-09-23 19:18:22,657 INFO     taxonomy_classifier.training.trainer: CNN trial 6: step 500, loss 2.8874, 417 sequences/s, lr 2.90e-04
+2026-09-23 19:20:07,281 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.7741, val 1.9251, genus 0.419, 258 s
+2026-09-23 19:20:07,281 INFO     taxonomy_classifier.training.trainer: CNN trial 6: epoch 2 done in 4.3 min, val loss 1.9251, genus 0.419, species 0.192
+2026-09-23 19:20:07,316 INFO     taxonomy_classifier.training.trainer: CNN trial 6: epoch 3/6 started (782 batches)
+2026-09-23 19:22:40,409 INFO     taxonomy_classifier.training.trainer: CNN trial 6: step 500, loss 2.3698, 418 sequences/s, lr 2.17e-04
+2026-09-23 19:24:24,796 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 2.3064, val 1.5691, genus 0.476, 258 s
+2026-09-23 19:24:24,796 INFO     taxonomy_classifier.training.trainer: CNN trial 6: epoch 3 done in 4.3 min, val loss 1.5691, genus 0.476, species 0.219
+2026-09-23 19:24:24,827 INFO     taxonomy_classifier.training.trainer: CNN trial 6: epoch 4/6 started (782 batches)
+2026-09-23 19:26:58,115 INFO     taxonomy_classifier.training.trainer: CNN trial 6: step 500, loss 2.0900, 418 sequences/s, lr 1.27e-04
+2026-09-23 19:28:42,494 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 2.0586, val 1.4083, genus 0.535, 258 s
+2026-09-23 19:28:42,495 INFO     taxonomy_classifier.training.trainer: CNN trial 6: epoch 4 done in 4.3 min, val loss 1.4083, genus 0.535, species 0.255
+2026-09-23 19:28:42,532 INFO     taxonomy_classifier.training.trainer: CNN trial 6: epoch 5/6 started (782 batches)
+2026-09-23 19:31:15,787 INFO     taxonomy_classifier.training.trainer: CNN trial 6: step 500, loss 1.9374, 418 sequences/s, lr 4.66e-05
+2026-09-23 19:32:59,818 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 1.9260, val 1.3264, genus 0.550, 257 s
+2026-09-23 19:32:59,818 INFO     taxonomy_classifier.training.trainer: CNN trial 6: epoch 5 done in 4.3 min, val loss 1.3264, genus 0.550, species 0.278
+2026-09-23 19:32:59,849 INFO     taxonomy_classifier.training.trainer: CNN trial 6: epoch 6/6 started (782 batches)
+2026-09-23 19:35:32,773 INFO     taxonomy_classifier.training.trainer: CNN trial 6: step 500, loss 1.8839, 419 sequences/s, lr 3.44e-06
+2026-09-23 19:37:17,416 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 1.8761, val 1.3119, genus 0.555, 258 s
+2026-09-23 19:37:17,417 INFO     taxonomy_classifier.training.trainer: CNN trial 6: epoch 6 done in 4.3 min, val loss 1.3119, genus 0.555, species 0.286
+[I 2026-09-23 19:37:17,658] Trial 6 finished with value: 0.42078010755169093 and parameters: {'dropout': 0.14802635618120508, 'learning_rate': 0.0003224761328244722, 'weight_decay': 0.08421492551097452, 'warmup_fraction': 0.08711942869282302, 'sampling_power': 0.009574400560323881, 'crop_probability': 0.6380496334052349, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}. Best is trial 6 with value: 0.42078010755169093.
+2026-09-23 19:37:17,816 INFO     taxonomy_classifier.cli: CNN trial 7: {'dropout': 0.03225241661536003, 'learning_rate': 0.0003754879499526223, 'weight_decay': 0.022517156655273984, 'warmup_fraction': 0.05916236074658639, 'sampling_power': 0.39088989931306595, 'crop_probability': 0.25747702202261075, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 9}
+2026-09-23 19:37:17,999 INFO     taxonomy_classifier.training.trainer: CNN trial 7: epoch 1/6 started (782 batches)
+2026-09-23 19:40:18,546 INFO     taxonomy_classifier.training.trainer: CNN trial 7: step 500, loss 4.6610, 354 sequences/s, lr 3.73e-04
+2026-09-23 19:42:19,749 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.2328, val 2.4807, genus 0.299, 302 s
+2026-09-23 19:42:19,749 INFO     taxonomy_classifier.training.trainer: CNN trial 7: epoch 1 done in 5.0 min, val loss 2.4807, genus 0.299, species 0.098
+2026-09-23 19:42:19,778 INFO     taxonomy_classifier.training.trainer: CNN trial 7: epoch 2/6 started (782 batches)
+2026-09-23 19:45:20,027 INFO     taxonomy_classifier.training.trainer: CNN trial 7: step 500, loss 2.9167, 355 sequences/s, lr 3.29e-04
+2026-09-23 19:47:21,411 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.7867, val 1.6173, genus 0.475, 302 s
+2026-09-23 19:47:21,411 INFO     taxonomy_classifier.training.trainer: CNN trial 7: epoch 2 done in 5.0 min, val loss 1.6173, genus 0.475, species 0.193
+2026-09-23 19:47:21,445 INFO     taxonomy_classifier.training.trainer: CNN trial 7: epoch 3/6 started (782 batches)
+2026-09-23 19:50:21,440 INFO     taxonomy_classifier.training.trainer: CNN trial 7: step 500, loss 2.3023, 356 sequences/s, lr 2.43e-04
+2026-09-23 19:52:22,374 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 2.2253, val 1.3042, genus 0.591, 301 s
+2026-09-23 19:52:22,374 INFO     taxonomy_classifier.training.trainer: CNN trial 7: epoch 3 done in 5.0 min, val loss 1.3042, genus 0.591, species 0.265
+2026-09-23 19:52:22,410 INFO     taxonomy_classifier.training.trainer: CNN trial 7: epoch 4/6 started (782 batches)
+2026-09-23 19:55:22,009 INFO     taxonomy_classifier.training.trainer: CNN trial 7: step 500, loss 1.9549, 356 sequences/s, lr 1.40e-04
+2026-09-23 19:57:23,174 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 1.9111, val 1.1421, genus 0.655, 301 s
+2026-09-23 19:57:23,174 INFO     taxonomy_classifier.training.trainer: CNN trial 7: epoch 4 done in 5.0 min, val loss 1.1421, genus 0.655, species 0.301
+2026-09-23 19:57:23,202 INFO     taxonomy_classifier.training.trainer: CNN trial 7: epoch 5/6 started (782 batches)
+2026-09-23 20:00:22,689 INFO     taxonomy_classifier.training.trainer: CNN trial 7: step 500, loss 1.7356, 357 sequences/s, lr 5.13e-05
+2026-09-23 20:02:23,868 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 1.7167, val 1.0638, genus 0.691, 301 s
+2026-09-23 20:02:23,868 INFO     taxonomy_classifier.training.trainer: CNN trial 7: epoch 5 done in 5.0 min, val loss 1.0638, genus 0.691, species 0.325
+2026-09-23 20:02:23,900 INFO     taxonomy_classifier.training.trainer: CNN trial 7: epoch 6/6 started (782 batches)
+2026-09-23 20:05:23,531 INFO     taxonomy_classifier.training.trainer: CNN trial 7: step 500, loss 1.6514, 356 sequences/s, lr 3.77e-06
+2026-09-23 20:07:24,462 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 1.6454, val 1.0470, genus 0.699, 301 s
+2026-09-23 20:07:24,463 INFO     taxonomy_classifier.training.trainer: CNN trial 7: epoch 6 done in 5.0 min, val loss 1.0470, genus 0.699, species 0.335
+[I 2026-09-23 20:07:24,700] Trial 7 finished with value: 0.5172207319783595 and parameters: {'dropout': 0.03225241661536003, 'learning_rate': 0.0003754879499526223, 'weight_decay': 0.022517156655273984, 'warmup_fraction': 0.05916236074658639, 'sampling_power': 0.39088989931306595, 'crop_probability': 0.25747702202261075, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 9}. Best is trial 7 with value: 0.5172207319783595.
+2026-09-23 20:07:24,882 INFO     taxonomy_classifier.cli: CNN trial 8: {'dropout': 0.2060166617741494, 'learning_rate': 0.00023104296442345482, 'weight_decay': 0.007462904073467409, 'warmup_fraction': 0.050466414072564296, 'sampling_power': 0.1860708188161151, 'crop_probability': 0.32700958357735843, 'cnn_width': 'small', 'cnn_blocks': 'three', 'cnn_kernel': 9}
+2026-09-23 20:07:25,054 INFO     taxonomy_classifier.training.trainer: CNN trial 8: epoch 1/6 started (782 batches)
+2026-09-23 20:10:23,364 INFO     taxonomy_classifier.training.trainer: CNN trial 8: step 500, loss 4.7952, 359 sequences/s, lr 2.29e-04
+2026-09-23 20:12:24,576 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.5222, val 3.1207, genus 0.213, 300 s
+2026-09-23 20:12:24,576 INFO     taxonomy_classifier.training.trainer: CNN trial 8: epoch 1 done in 5.0 min, val loss 3.1207, genus 0.213, species 0.100
+2026-09-23 20:12:24,609 INFO     taxonomy_classifier.training.trainer: CNN trial 8: epoch 2/6 started (782 batches)
+2026-09-23 20:15:23,143 INFO     taxonomy_classifier.training.trainer: CNN trial 8: step 500, loss 3.4667, 358 sequences/s, lr 2.01e-04
+2026-09-23 20:17:24,811 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 3.3263, val 2.1091, genus 0.362, 300 s
+2026-09-23 20:17:24,811 INFO     taxonomy_classifier.training.trainer: CNN trial 8: epoch 2 done in 5.0 min, val loss 2.1091, genus 0.362, species 0.174
+2026-09-23 20:17:24,842 INFO     taxonomy_classifier.training.trainer: CNN trial 8: epoch 3/6 started (782 batches)
+2026-09-23 20:20:23,858 INFO     taxonomy_classifier.training.trainer: CNN trial 8: step 500, loss 2.8073, 358 sequences/s, lr 1.48e-04
+2026-09-23 20:22:25,260 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 2.7386, val 1.6842, genus 0.454, 300 s
+2026-09-23 20:22:25,260 INFO     taxonomy_classifier.training.trainer: CNN trial 8: epoch 3 done in 5.0 min, val loss 1.6842, genus 0.454, species 0.213
+2026-09-23 20:22:25,291 INFO     taxonomy_classifier.training.trainer: CNN trial 8: epoch 4/6 started (782 batches)
+2026-09-23 20:25:24,086 INFO     taxonomy_classifier.training.trainer: CNN trial 8: step 500, loss 2.4828, 358 sequences/s, lr 8.48e-05
+2026-09-23 20:27:26,181 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 2.4444, val 1.4951, genus 0.515, 301 s
+2026-09-23 20:27:26,181 INFO     taxonomy_classifier.training.trainer: CNN trial 8: epoch 4 done in 5.0 min, val loss 1.4951, genus 0.515, species 0.243
+2026-09-23 20:27:26,212 INFO     taxonomy_classifier.training.trainer: CNN trial 8: epoch 5/6 started (782 batches)
+2026-09-23 20:30:25,925 INFO     taxonomy_classifier.training.trainer: CNN trial 8: step 500, loss 2.3143, 356 sequences/s, lr 3.10e-05
+2026-09-23 20:32:27,801 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 2.2950, val 1.4148, genus 0.537, 302 s
+2026-09-23 20:32:27,802 INFO     taxonomy_classifier.training.trainer: CNN trial 8: epoch 5 done in 5.0 min, val loss 1.4148, genus 0.537, species 0.263
+2026-09-23 20:32:27,833 INFO     taxonomy_classifier.training.trainer: CNN trial 8: epoch 6/6 started (782 batches)
+2026-09-23 20:35:26,564 INFO     taxonomy_classifier.training.trainer: CNN trial 8: step 500, loss 2.2507, 358 sequences/s, lr 2.28e-06
+2026-09-23 20:37:28,325 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 2.2498, val 1.4012, genus 0.541, 301 s
+2026-09-23 20:37:28,325 INFO     taxonomy_classifier.training.trainer: CNN trial 8: epoch 6 done in 5.0 min, val loss 1.4012, genus 0.541, species 0.270
+[I 2026-09-23 20:37:28,615] Trial 8 finished with value: 0.40591133037870475 and parameters: {'dropout': 0.2060166617741494, 'learning_rate': 0.00023104296442345482, 'weight_decay': 0.007462904073467409, 'warmup_fraction': 0.050466414072564296, 'sampling_power': 0.1860708188161151, 'crop_probability': 0.32700958357735843, 'cnn_width': 'small', 'cnn_blocks': 'three', 'cnn_kernel': 9}. Best is trial 7 with value: 0.5172207319783595.
+2026-09-23 20:37:28,842 INFO     taxonomy_classifier.cli: CNN trial 9: {'dropout': 0.014266133748304932, 'learning_rate': 0.0008100603904198557, 'weight_decay': 0.1903303086067523, 'warmup_fraction': 0.09398372057973683, 'sampling_power': 0.6553111299213352, 'crop_probability': 0.3645688559217384, 'cnn_width': 'large', 'cnn_blocks': 'three', 'cnn_kernel': 11}
+2026-09-23 20:37:29,133 INFO     taxonomy_classifier.training.trainer: CNN trial 9: epoch 1/6 started (782 batches)
+2026-09-23 20:43:45,597 INFO     taxonomy_classifier.training.trainer: CNN trial 9: step 500, loss 4.7271, 170 sequences/s, lr 8.10e-04
+2026-09-23 20:47:58,917 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.3523, val 2.8723, genus 0.048, 630 s
+2026-09-23 20:47:58,917 INFO     taxonomy_classifier.training.trainer: CNN trial 9: epoch 1 done in 10.5 min, val loss 2.8723, genus 0.048, species 0.064
+2026-09-23 20:47:58,947 INFO     taxonomy_classifier.training.trainer: CNN trial 9: epoch 2/6 started (782 batches)
+2026-09-23 20:54:12,839 INFO     taxonomy_classifier.training.trainer: CNN trial 9: step 500, loss 3.0909, 171 sequences/s, lr 7.34e-04
+2026-09-23 20:58:25,365 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.9484, val 2.1045, genus 0.189, 626 s
+2026-09-23 20:58:25,365 INFO     taxonomy_classifier.training.trainer: CNN trial 9: epoch 2 done in 10.4 min, val loss 2.1045, genus 0.189, species 0.063
+[I 2026-09-23 20:58:25,599] Trial 9 pruned. 
+2026-09-23 20:58:25,832 INFO     taxonomy_classifier.cli: CNN trial 10: {'dropout': 0.0761838375121165, 'learning_rate': 0.0003162607209750559, 'weight_decay': 0.007297505772484691, 'warmup_fraction': 0.0694902318941398, 'sampling_power': 0.15952301230125204, 'crop_probability': 0.42321521037806065, 'cnn_width': 'large', 'cnn_blocks': 'two', 'cnn_kernel': 9}
+2026-09-23 20:58:26,116 INFO     taxonomy_classifier.training.trainer: CNN trial 10: epoch 1/6 started (782 batches)
+2026-09-23 21:02:25,628 INFO     taxonomy_classifier.training.trainer: CNN trial 10: step 500, loss 4.5954, 267 sequences/s, lr 3.15e-04
+2026-09-23 21:05:08,136 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.1561, val 2.3548, genus 0.316, 402 s
+2026-09-23 21:05:08,136 INFO     taxonomy_classifier.training.trainer: CNN trial 10: epoch 1 done in 6.7 min, val loss 2.3548, genus 0.316, species 0.151
+2026-09-23 21:05:08,171 INFO     taxonomy_classifier.training.trainer: CNN trial 10: epoch 2/6 started (782 batches)
+2026-09-23 21:09:06,247 INFO     taxonomy_classifier.training.trainer: CNN trial 10: step 500, loss 2.8514, 269 sequences/s, lr 2.80e-04
+2026-09-23 21:11:48,617 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.7371, val 1.6241, genus 0.464, 400 s
+2026-09-23 21:11:48,618 INFO     taxonomy_classifier.training.trainer: CNN trial 10: epoch 2 done in 6.7 min, val loss 1.6241, genus 0.464, species 0.209
+2026-09-23 21:11:48,654 INFO     taxonomy_classifier.training.trainer: CNN trial 10: epoch 3/6 started (782 batches)
+2026-09-23 21:15:47,034 INFO     taxonomy_classifier.training.trainer: CNN trial 10: step 500, loss 2.2959, 268 sequences/s, lr 2.08e-04
+2026-09-23 21:18:28,854 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 2.2385, val 1.3235, genus 0.562, 400 s
+2026-09-23 21:18:28,854 INFO     taxonomy_classifier.training.trainer: CNN trial 10: epoch 3 done in 6.7 min, val loss 1.3235, genus 0.562, species 0.256
+2026-09-23 21:18:28,891 INFO     taxonomy_classifier.training.trainer: CNN trial 10: epoch 4/6 started (782 batches)
+2026-09-23 21:22:27,278 INFO     taxonomy_classifier.training.trainer: CNN trial 10: step 500, loss 2.0121, 268 sequences/s, lr 1.20e-04
+2026-09-23 21:25:09,217 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 1.9784, val 1.1740, genus 0.615, 400 s
+2026-09-23 21:25:09,217 INFO     taxonomy_classifier.training.trainer: CNN trial 10: epoch 4 done in 6.7 min, val loss 1.1740, genus 0.615, species 0.308
+2026-09-23 21:25:09,255 INFO     taxonomy_classifier.training.trainer: CNN trial 10: epoch 5/6 started (782 batches)
+2026-09-23 21:29:07,602 INFO     taxonomy_classifier.training.trainer: CNN trial 10: step 500, loss 1.8350, 269 sequences/s, lr 4.41e-05
+2026-09-23 21:31:49,828 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 1.8217, val 1.0982, genus 0.645, 401 s
+2026-09-23 21:31:49,828 INFO     taxonomy_classifier.training.trainer: CNN trial 10: epoch 5 done in 6.7 min, val loss 1.0982, genus 0.645, species 0.339
+2026-09-23 21:31:49,865 INFO     taxonomy_classifier.training.trainer: CNN trial 10: epoch 6/6 started (782 batches)
+2026-09-23 21:35:49,134 INFO     taxonomy_classifier.training.trainer: CNN trial 10: step 500, loss 1.7731, 267 sequences/s, lr 3.24e-06
+2026-09-23 21:38:31,149 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 1.7684, val 1.0844, genus 0.651, 401 s
+2026-09-23 21:38:31,149 INFO     taxonomy_classifier.training.trainer: CNN trial 10: epoch 6 done in 6.7 min, val loss 1.0844, genus 0.651, species 0.340
+[I 2026-09-23 21:38:31,419] Trial 10 finished with value: 0.49554643352431194 and parameters: {'dropout': 0.0761838375121165, 'learning_rate': 0.0003162607209750559, 'weight_decay': 0.007297505772484691, 'warmup_fraction': 0.0694902318941398, 'sampling_power': 0.15952301230125204, 'crop_probability': 0.42321521037806065, 'cnn_width': 'large', 'cnn_blocks': 'two', 'cnn_kernel': 9}. Best is trial 7 with value: 0.5172207319783595.
+2026-09-23 21:38:31,618 INFO     taxonomy_classifier.cli: CNN trial 11: {'dropout': 0.0017062304301136942, 'learning_rate': 0.00045576484524347346, 'weight_decay': 0.027469484578866523, 'warmup_fraction': 0.040191802598240976, 'sampling_power': 0.36156987702907156, 'crop_probability': 0.3330919435239104, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}
+2026-09-23 21:38:31,809 INFO     taxonomy_classifier.training.trainer: CNN trial 11: epoch 1/6 started (782 batches)
+2026-09-23 21:41:08,698 INFO     taxonomy_classifier.training.trainer: CNN trial 11: step 500, loss 4.5242, 408 sequences/s, lr 4.50e-04
+2026-09-23 21:42:55,296 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.1172, val 2.3049, genus 0.315, 264 s
+2026-09-23 21:42:55,297 INFO     taxonomy_classifier.training.trainer: CNN trial 11: epoch 1 done in 4.4 min, val loss 2.3049, genus 0.315, species 0.103
+2026-09-23 21:42:55,330 INFO     taxonomy_classifier.training.trainer: CNN trial 11: epoch 2/6 started (782 batches)
+2026-09-23 21:45:32,037 INFO     taxonomy_classifier.training.trainer: CNN trial 11: step 500, loss 2.8589, 408 sequences/s, lr 3.93e-04
+2026-09-23 21:47:18,593 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.7337, val 1.5627, genus 0.477, 263 s
+2026-09-23 21:47:18,593 INFO     taxonomy_classifier.training.trainer: CNN trial 11: epoch 2 done in 4.4 min, val loss 1.5627, genus 0.477, species 0.190
+2026-09-23 21:47:18,626 INFO     taxonomy_classifier.training.trainer: CNN trial 11: epoch 3/6 started (782 batches)
+2026-09-23 21:49:55,201 INFO     taxonomy_classifier.training.trainer: CNN trial 11: step 500, loss 2.2608, 409 sequences/s, lr 2.87e-04
+2026-09-23 21:51:41,910 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 2.1910, val 1.2981, genus 0.609, 263 s
+2026-09-23 21:51:41,910 INFO     taxonomy_classifier.training.trainer: CNN trial 11: epoch 3 done in 4.4 min, val loss 1.2981, genus 0.609, species 0.274
+2026-09-23 21:51:41,943 INFO     taxonomy_classifier.training.trainer: CNN trial 11: epoch 4/6 started (782 batches)
+2026-09-23 21:54:18,790 INFO     taxonomy_classifier.training.trainer: CNN trial 11: step 500, loss 1.9129, 408 sequences/s, lr 1.64e-04
+2026-09-23 21:56:05,366 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 1.8678, val 1.1079, genus 0.672, 263 s
+2026-09-23 21:56:05,366 INFO     taxonomy_classifier.training.trainer: CNN trial 11: epoch 4 done in 4.4 min, val loss 1.1079, genus 0.672, species 0.313
+2026-09-23 21:56:05,401 INFO     taxonomy_classifier.training.trainer: CNN trial 11: epoch 5/6 started (782 batches)
+2026-09-23 21:58:42,256 INFO     taxonomy_classifier.training.trainer: CNN trial 11: step 500, loss 1.6947, 408 sequences/s, lr 5.99e-05
+2026-09-23 22:00:28,673 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 1.6745, val 1.0245, genus 0.709, 263 s
+2026-09-23 22:00:28,673 INFO     taxonomy_classifier.training.trainer: CNN trial 11: epoch 5 done in 4.4 min, val loss 1.0245, genus 0.709, species 0.341
+2026-09-23 22:00:28,711 INFO     taxonomy_classifier.training.trainer: CNN trial 11: epoch 6/6 started (782 batches)
+2026-09-23 22:03:05,431 INFO     taxonomy_classifier.training.trainer: CNN trial 11: step 500, loss 1.6064, 408 sequences/s, lr 4.39e-06
+2026-09-23 22:04:52,481 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 1.6018, val 1.0017, genus 0.715, 264 s
+2026-09-23 22:04:52,481 INFO     taxonomy_classifier.training.trainer: CNN trial 11: epoch 6 done in 4.4 min, val loss 1.0017, genus 0.715, species 0.349
+[I 2026-09-23 22:04:52,751] Trial 11 finished with value: 0.5318999684117345 and parameters: {'dropout': 0.0017062304301136942, 'learning_rate': 0.00045576484524347346, 'weight_decay': 0.027469484578866523, 'warmup_fraction': 0.040191802598240976, 'sampling_power': 0.36156987702907156, 'crop_probability': 0.3330919435239104, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}. Best is trial 11 with value: 0.5318999684117345.
+2026-09-23 22:04:52,945 INFO     taxonomy_classifier.cli: CNN trial 12: {'dropout': 0.04939432528895943, 'learning_rate': 0.0008181673254533757, 'weight_decay': 0.0622781226114446, 'warmup_fraction': 0.020518582431743756, 'sampling_power': 0.25791613685487813, 'crop_probability': 0.21075665296050294, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}
+2026-09-23 22:04:53,126 INFO     taxonomy_classifier.training.trainer: CNN trial 12: epoch 1/6 started (782 batches)
+2026-09-23 22:07:31,051 INFO     taxonomy_classifier.training.trainer: CNN trial 12: step 500, loss 4.2625, 405 sequences/s, lr 8.03e-04
+2026-09-23 22:09:18,452 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 3.8257, val 1.9751, genus 0.398, 265 s
+2026-09-23 22:09:18,452 INFO     taxonomy_classifier.training.trainer: CNN trial 12: epoch 1 done in 4.4 min, val loss 1.9751, genus 0.398, species 0.167
+2026-09-23 22:09:18,490 INFO     taxonomy_classifier.training.trainer: CNN trial 12: epoch 2/6 started (782 batches)
+2026-09-23 22:11:56,993 INFO     taxonomy_classifier.training.trainer: CNN trial 12: step 500, loss 2.5351, 404 sequences/s, lr 6.91e-04
+2026-09-23 22:13:44,461 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.4101, val 1.3304, genus 0.568, 266 s
+2026-09-23 22:13:44,461 INFO     taxonomy_classifier.training.trainer: CNN trial 12: epoch 2 done in 4.4 min, val loss 1.3304, genus 0.568, species 0.237
+2026-09-23 22:13:44,496 INFO     taxonomy_classifier.training.trainer: CNN trial 12: epoch 3/6 started (782 batches)
+2026-09-23 22:16:22,304 INFO     taxonomy_classifier.training.trainer: CNN trial 12: step 500, loss 1.9352, 406 sequences/s, lr 5.01e-04
+2026-09-23 22:18:09,535 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 1.8596, val 1.0587, genus 0.668, 265 s
+2026-09-23 22:18:09,535 INFO     taxonomy_classifier.training.trainer: CNN trial 12: epoch 3 done in 4.4 min, val loss 1.0587, genus 0.668, species 0.323
+2026-09-23 22:18:09,569 INFO     taxonomy_classifier.training.trainer: CNN trial 12: epoch 4/6 started (782 batches)
+2026-09-23 22:20:47,218 INFO     taxonomy_classifier.training.trainer: CNN trial 12: step 500, loss 1.5827, 406 sequences/s, lr 2.85e-04
+2026-09-23 22:22:34,371 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 1.5376, val 0.9173, genus 0.736, 265 s
+2026-09-23 22:22:34,371 INFO     taxonomy_classifier.training.trainer: CNN trial 12: epoch 4 done in 4.4 min, val loss 0.9173, genus 0.736, species 0.378
+2026-09-23 22:22:34,405 INFO     taxonomy_classifier.training.trainer: CNN trial 12: epoch 5/6 started (782 batches)
+2026-09-23 22:25:11,830 INFO     taxonomy_classifier.training.trainer: CNN trial 12: step 500, loss 1.3768, 407 sequences/s, lr 1.04e-04
+2026-09-23 22:26:59,068 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 1.3471, val 0.8417, genus 0.774, 265 s
+2026-09-23 22:26:59,069 INFO     taxonomy_classifier.training.trainer: CNN trial 12: epoch 5 done in 4.4 min, val loss 0.8417, genus 0.774, species 0.417
+2026-09-23 22:26:59,103 INFO     taxonomy_classifier.training.trainer: CNN trial 12: epoch 6/6 started (782 batches)
+2026-09-23 22:29:36,779 INFO     taxonomy_classifier.training.trainer: CNN trial 12: step 500, loss 1.2713, 406 sequences/s, lr 7.58e-06
+2026-09-23 22:31:24,140 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 1.2670, val 0.8206, genus 0.783, 265 s
+2026-09-23 22:31:24,140 INFO     taxonomy_classifier.training.trainer: CNN trial 12: epoch 6 done in 4.4 min, val loss 0.8206, genus 0.783, species 0.428
+[I 2026-09-23 22:31:24,401] Trial 12 finished with value: 0.6053725576218338 and parameters: {'dropout': 0.04939432528895943, 'learning_rate': 0.0008181673254533757, 'weight_decay': 0.0622781226114446, 'warmup_fraction': 0.020518582431743756, 'sampling_power': 0.25791613685487813, 'crop_probability': 0.21075665296050294, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}. Best is trial 12 with value: 0.6053725576218338.
+2026-09-23 22:31:24,600 INFO     taxonomy_classifier.cli: CNN trial 13: {'dropout': 0.004914895139775836, 'learning_rate': 0.0005850207499185269, 'weight_decay': 0.021301848585776283, 'warmup_fraction': 0.024422404870007908, 'sampling_power': 0.5332833297003512, 'crop_probability': 0.25807278568315384, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 9}
+2026-09-23 22:31:24,799 INFO     taxonomy_classifier.training.trainer: CNN trial 13: epoch 1/6 started (782 batches)
+2026-09-23 22:34:25,020 INFO     taxonomy_classifier.training.trainer: CNN trial 13: step 500, loss 4.4885, 355 sequences/s, lr 5.75e-04
+2026-09-23 22:36:26,494 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.0907, val 2.4763, genus 0.258, 302 s
+2026-09-23 22:36:26,494 INFO     taxonomy_classifier.training.trainer: CNN trial 13: epoch 1 done in 5.0 min, val loss 2.4763, genus 0.258, species 0.075
+2026-09-23 22:36:26,533 INFO     taxonomy_classifier.training.trainer: CNN trial 13: epoch 2/6 started (782 batches)
+2026-09-23 22:39:27,050 INFO     taxonomy_classifier.training.trainer: CNN trial 13: step 500, loss 2.8394, 355 sequences/s, lr 4.96e-04
+2026-09-23 22:41:28,618 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.7033, val 1.7188, genus 0.432, 302 s
+2026-09-23 22:41:28,618 INFO     taxonomy_classifier.training.trainer: CNN trial 13: epoch 2 done in 5.0 min, val loss 1.7188, genus 0.432, species 0.168
+2026-09-23 22:41:28,651 INFO     taxonomy_classifier.training.trainer: CNN trial 13: epoch 3/6 started (782 batches)
+2026-09-23 22:44:28,571 INFO     taxonomy_classifier.training.trainer: CNN trial 13: step 500, loss 2.1916, 356 sequences/s, lr 3.60e-04
+2026-09-23 22:46:30,195 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 2.1133, val 1.4162, genus 0.557, 302 s
+2026-09-23 22:46:30,195 INFO     taxonomy_classifier.training.trainer: CNN trial 13: epoch 3 done in 5.0 min, val loss 1.4162, genus 0.557, species 0.217
+2026-09-23 22:46:30,229 INFO     taxonomy_classifier.training.trainer: CNN trial 13: epoch 4/6 started (782 batches)
+2026-09-23 22:49:30,376 INFO     taxonomy_classifier.training.trainer: CNN trial 13: step 500, loss 1.8202, 355 sequences/s, lr 2.05e-04
+2026-09-23 22:51:32,053 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 1.7679, val 1.1780, genus 0.662, 302 s
+2026-09-23 22:51:32,053 INFO     taxonomy_classifier.training.trainer: CNN trial 13: epoch 4 done in 5.0 min, val loss 1.1780, genus 0.662, species 0.303
+2026-09-23 22:51:32,085 INFO     taxonomy_classifier.training.trainer: CNN trial 13: epoch 5/6 started (782 batches)
+2026-09-23 22:54:32,390 INFO     taxonomy_classifier.training.trainer: CNN trial 13: step 500, loss 1.5716, 355 sequences/s, lr 7.46e-05
+2026-09-23 22:56:34,167 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 1.5465, val 1.0905, genus 0.715, 302 s
+2026-09-23 22:56:34,167 INFO     taxonomy_classifier.training.trainer: CNN trial 13: epoch 5 done in 5.0 min, val loss 1.0905, genus 0.715, species 0.325
+2026-09-23 22:56:34,200 INFO     taxonomy_classifier.training.trainer: CNN trial 13: epoch 6/6 started (782 batches)
+2026-09-23 22:59:34,253 INFO     taxonomy_classifier.training.trainer: CNN trial 13: step 500, loss 1.4769, 355 sequences/s, lr 5.46e-06
+2026-09-23 23:01:36,023 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 1.4675, val 1.0705, genus 0.729, 302 s
+2026-09-23 23:01:36,023 INFO     taxonomy_classifier.training.trainer: CNN trial 13: epoch 6 done in 5.0 min, val loss 1.0705, genus 0.729, species 0.338
+[I 2026-09-23 23:01:36,285] Trial 13 finished with value: 0.5331720258600223 and parameters: {'dropout': 0.004914895139775836, 'learning_rate': 0.0005850207499185269, 'weight_decay': 0.021301848585776283, 'warmup_fraction': 0.024422404870007908, 'sampling_power': 0.5332833297003512, 'crop_probability': 0.25807278568315384, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 9}. Best is trial 12 with value: 0.6053725576218338.
+2026-09-23 23:01:36,484 INFO     taxonomy_classifier.cli: CNN trial 14: {'dropout': 0.044419217375487964, 'learning_rate': 0.000998276180961553, 'weight_decay': 0.07809808202824083, 'warmup_fraction': 0.032926212625004676, 'sampling_power': 0.31186158832169625, 'crop_probability': 0.33354512884842613, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 9}
+2026-09-23 23:01:36,677 INFO     taxonomy_classifier.training.trainer: CNN trial 14: epoch 1/6 started (782 batches)
+2026-09-23 23:04:36,235 INFO     taxonomy_classifier.training.trainer: CNN trial 14: step 500, loss 4.5655, 356 sequences/s, lr 9.84e-04
+2026-09-23 23:06:37,532 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.2421, val 2.5730, genus 0.269, 301 s
+2026-09-23 23:06:37,532 INFO     taxonomy_classifier.training.trainer: CNN trial 14: epoch 1 done in 5.0 min, val loss 2.5730, genus 0.269, species 0.075
+2026-09-23 23:06:37,561 INFO     taxonomy_classifier.training.trainer: CNN trial 14: epoch 2/6 started (782 batches)
+2026-09-23 23:09:36,796 INFO     taxonomy_classifier.training.trainer: CNN trial 14: step 500, loss 3.0716, 357 sequences/s, lr 8.54e-04
+2026-09-23 23:11:37,853 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.9305, val 1.7459, genus 0.426, 300 s
+2026-09-23 23:11:37,853 INFO     taxonomy_classifier.training.trainer: CNN trial 14: epoch 2 done in 5.0 min, val loss 1.7459, genus 0.426, species 0.171
+2026-09-23 23:11:37,885 INFO     taxonomy_classifier.training.trainer: CNN trial 14: epoch 3/6 started (782 batches)
+2026-09-23 23:14:36,654 INFO     taxonomy_classifier.training.trainer: CNN trial 14: step 500, loss 2.4016, 358 sequences/s, lr 6.22e-04
+2026-09-23 23:16:37,084 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 2.3206, val 1.3536, genus 0.543, 299 s
+2026-09-23 23:16:37,085 INFO     taxonomy_classifier.training.trainer: CNN trial 14: epoch 3 done in 5.0 min, val loss 1.3536, genus 0.543, species 0.244
+2026-09-23 23:16:37,114 INFO     taxonomy_classifier.training.trainer: CNN trial 14: epoch 4/6 started (782 batches)
+2026-09-23 23:19:35,638 INFO     taxonomy_classifier.training.trainer: CNN trial 14: step 500, loss 2.0226, 358 sequences/s, lr 3.55e-04
+2026-09-23 23:21:36,517 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 1.9595, val 1.1469, genus 0.633, 299 s
+2026-09-23 23:21:36,517 INFO     taxonomy_classifier.training.trainer: CNN trial 14: epoch 4 done in 5.0 min, val loss 1.1469, genus 0.633, species 0.286
+2026-09-23 23:21:36,547 INFO     taxonomy_classifier.training.trainer: CNN trial 14: epoch 5/6 started (782 batches)
+2026-09-23 23:24:35,199 INFO     taxonomy_classifier.training.trainer: CNN trial 14: step 500, loss 1.7641, 358 sequences/s, lr 1.29e-04
+2026-09-23 23:26:35,847 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 1.7401, val 1.0520, genus 0.683, 299 s
+2026-09-23 23:26:35,847 INFO     taxonomy_classifier.training.trainer: CNN trial 14: epoch 5 done in 5.0 min, val loss 1.0520, genus 0.683, species 0.334
+2026-09-23 23:26:35,877 INFO     taxonomy_classifier.training.trainer: CNN trial 14: epoch 6/6 started (782 batches)
+2026-09-23 23:29:34,656 INFO     taxonomy_classifier.training.trainer: CNN trial 14: step 500, loss 1.6511, 358 sequences/s, lr 9.48e-06
+2026-09-23 23:31:35,571 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 1.6471, val 1.0233, genus 0.692, 300 s
+2026-09-23 23:31:35,571 INFO     taxonomy_classifier.training.trainer: CNN trial 14: epoch 6 done in 5.0 min, val loss 1.0233, genus 0.692, species 0.336
+[I 2026-09-23 23:31:35,789] Trial 14 pruned. 
+2026-09-23 23:31:35,978 INFO     taxonomy_classifier.cli: CNN trial 15: {'dropout': 0.020237554778669467, 'learning_rate': 0.002112910117409617, 'weight_decay': 0.16826512400257432, 'warmup_fraction': 0.03279791033034725, 'sampling_power': 0.32378943382608677, 'crop_probability': 0.21193631230190937, 'cnn_width': 'base', 'cnn_blocks': 'three', 'cnn_kernel': 5}
+2026-09-23 23:31:36,148 INFO     taxonomy_classifier.training.trainer: CNN trial 15: epoch 1/6 started (782 batches)
+2026-09-23 23:35:19,807 INFO     taxonomy_classifier.training.trainer: CNN trial 15: step 500, loss 4.5029, 286 sequences/s, lr 2.08e-03
+2026-09-23 23:37:51,378 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.1657, val 2.6181, genus 0.178, 375 s
+2026-09-23 23:37:51,378 INFO     taxonomy_classifier.training.trainer: CNN trial 15: epoch 1 done in 6.3 min, val loss 2.6181, genus 0.178, species 0.072
+2026-09-23 23:37:51,408 INFO     taxonomy_classifier.training.trainer: CNN trial 15: epoch 2/6 started (782 batches)
+2026-09-23 23:41:34,391 INFO     taxonomy_classifier.training.trainer: CNN trial 15: step 500, loss 3.0738, 287 sequences/s, lr 1.81e-03
+2026-09-23 23:44:05,850 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.9487, val 1.8747, genus 0.394, 374 s
+2026-09-23 23:44:05,850 INFO     taxonomy_classifier.training.trainer: CNN trial 15: epoch 2 done in 6.2 min, val loss 1.8747, genus 0.394, species 0.158
+[I 2026-09-23 23:44:06,102] Trial 15 pruned. 
+2026-09-23 23:44:06,280 INFO     taxonomy_classifier.cli: CNN trial 16: {'dropout': 0.09897492460998485, 'learning_rate': 0.00031876518874483166, 'weight_decay': 0.026067240447336097, 'warmup_fraction': 0.0207454437962263, 'sampling_power': 0.13054617940970764, 'crop_probability': 0.3421727094166656, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 9}
+2026-09-23 23:44:06,462 INFO     taxonomy_classifier.training.trainer: CNN trial 16: epoch 1/6 started (782 batches)
+2026-09-23 23:47:05,499 INFO     taxonomy_classifier.training.trainer: CNN trial 16: step 500, loss 4.3273, 357 sequences/s, lr 3.13e-04
+2026-09-23 23:49:06,451 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 3.9276, val 2.2355, genus 0.350, 300 s
+2026-09-23 23:49:06,451 INFO     taxonomy_classifier.training.trainer: CNN trial 16: epoch 1 done in 5.0 min, val loss 2.2355, genus 0.350, species 0.142
+2026-09-23 23:49:06,481 INFO     taxonomy_classifier.training.trainer: CNN trial 16: epoch 2/6 started (782 batches)
+2026-09-23 23:52:05,798 INFO     taxonomy_classifier.training.trainer: CNN trial 16: step 500, loss 2.7377, 357 sequences/s, lr 2.69e-04
+2026-09-23 23:54:07,319 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.6250, val 1.6103, genus 0.495, 301 s
+2026-09-23 23:54:07,319 INFO     taxonomy_classifier.training.trainer: CNN trial 16: epoch 2 done in 5.0 min, val loss 1.6103, genus 0.495, species 0.233
+2026-09-23 23:54:07,352 INFO     taxonomy_classifier.training.trainer: CNN trial 16: epoch 3/6 started (782 batches)
+2026-09-23 23:57:07,203 INFO     taxonomy_classifier.training.trainer: CNN trial 16: step 500, loss 2.2386, 356 sequences/s, lr 1.95e-04
+2026-09-23 23:59:08,607 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 2.1799, val 1.3148, genus 0.566, 301 s
+2026-09-23 23:59:08,607 INFO     taxonomy_classifier.training.trainer: CNN trial 16: epoch 3 done in 5.0 min, val loss 1.3148, genus 0.566, species 0.291
+2026-09-23 23:59:08,636 INFO     taxonomy_classifier.training.trainer: CNN trial 16: epoch 4/6 started (782 batches)
+2026-09-24 00:02:07,862 INFO     taxonomy_classifier.training.trainer: CNN trial 16: step 500, loss 1.9661, 357 sequences/s, lr 1.11e-04
+2026-09-24 00:04:09,181 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 1.9338, val 1.1700, genus 0.618, 301 s
+2026-09-24 00:04:09,181 INFO     taxonomy_classifier.training.trainer: CNN trial 16: epoch 4 done in 5.0 min, val loss 1.1700, genus 0.618, species 0.318
+2026-09-24 00:04:09,210 INFO     taxonomy_classifier.training.trainer: CNN trial 16: epoch 5/6 started (782 batches)
+2026-09-24 00:07:08,666 INFO     taxonomy_classifier.training.trainer: CNN trial 16: step 500, loss 1.7995, 357 sequences/s, lr 4.03e-05
+2026-09-24 00:09:09,744 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 1.7869, val 1.1007, genus 0.648, 301 s
+2026-09-24 00:09:09,744 INFO     taxonomy_classifier.training.trainer: CNN trial 16: epoch 5 done in 5.0 min, val loss 1.1007, genus 0.648, species 0.343
+2026-09-24 00:09:09,775 INFO     taxonomy_classifier.training.trainer: CNN trial 16: epoch 6/6 started (782 batches)
+2026-09-24 00:12:08,973 INFO     taxonomy_classifier.training.trainer: CNN trial 16: step 500, loss 1.7591, 357 sequences/s, lr 2.95e-06
+2026-09-24 00:14:10,043 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 1.7501, val 1.0857, genus 0.652, 300 s
+2026-09-24 00:14:10,043 INFO     taxonomy_classifier.training.trainer: CNN trial 16: epoch 6 done in 5.0 min, val loss 1.0857, genus 0.652, species 0.345
+[I 2026-09-24 00:14:10,258] Trial 16 pruned. 
+2026-09-24 00:14:10,454 INFO     taxonomy_classifier.cli: CNN trial 17: {'dropout': 0.09738889590169274, 'learning_rate': 0.000882578378415988, 'weight_decay': 0.08380949712516272, 'warmup_fraction': 0.024349863288007353, 'sampling_power': 0.3364666745598598, 'crop_probability': 0.20282484387941596, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}
+2026-09-24 00:14:10,616 INFO     taxonomy_classifier.training.trainer: CNN trial 17: epoch 1/6 started (782 batches)
+2026-09-24 00:16:49,034 INFO     taxonomy_classifier.training.trainer: CNN trial 17: step 500, loss 4.5181, 404 sequences/s, lr 8.67e-04
+2026-09-24 00:18:36,703 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.1289, val 2.3398, genus 0.313, 266 s
+2026-09-24 00:18:36,703 INFO     taxonomy_classifier.training.trainer: CNN trial 17: epoch 1 done in 4.4 min, val loss 2.3398, genus 0.313, species 0.102
+2026-09-24 00:18:36,735 INFO     taxonomy_classifier.training.trainer: CNN trial 17: epoch 2/6 started (782 batches)
+2026-09-24 00:21:15,451 INFO     taxonomy_classifier.training.trainer: CNN trial 17: step 500, loss 2.8687, 403 sequences/s, lr 7.48e-04
+2026-09-24 00:23:03,193 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.7335, val 1.5557, genus 0.473, 266 s
+2026-09-24 00:23:03,193 INFO     taxonomy_classifier.training.trainer: CNN trial 17: epoch 2 done in 4.4 min, val loss 1.5557, genus 0.473, species 0.216
+2026-09-24 00:23:03,228 INFO     taxonomy_classifier.training.trainer: CNN trial 17: epoch 3/6 started (782 batches)
+2026-09-24 00:25:41,764 INFO     taxonomy_classifier.training.trainer: CNN trial 17: step 500, loss 2.2125, 404 sequences/s, lr 5.43e-04
+2026-09-24 00:27:29,356 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 2.1327, val 1.2677, genus 0.580, 266 s
+2026-09-24 00:27:29,357 INFO     taxonomy_classifier.training.trainer: CNN trial 17: epoch 3 done in 4.4 min, val loss 1.2677, genus 0.580, species 0.246
+2026-09-24 00:27:29,386 INFO     taxonomy_classifier.training.trainer: CNN trial 17: epoch 4/6 started (782 batches)
+2026-09-24 00:30:08,035 INFO     taxonomy_classifier.training.trainer: CNN trial 17: step 500, loss 1.8345, 403 sequences/s, lr 3.09e-04
+2026-09-24 00:31:55,739 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 1.7834, val 1.0849, genus 0.666, 266 s
+2026-09-24 00:31:55,740 INFO     taxonomy_classifier.training.trainer: CNN trial 17: epoch 4 done in 4.4 min, val loss 1.0849, genus 0.666, species 0.309
+2026-09-24 00:31:55,770 INFO     taxonomy_classifier.training.trainer: CNN trial 17: epoch 5/6 started (782 batches)
+2026-09-24 00:34:34,300 INFO     taxonomy_classifier.training.trainer: CNN trial 17: step 500, loss 1.5875, 404 sequences/s, lr 1.12e-04
+2026-09-24 00:36:22,055 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 1.5629, val 0.9795, genus 0.717, 266 s
+2026-09-24 00:36:22,055 INFO     taxonomy_classifier.training.trainer: CNN trial 17: epoch 5 done in 4.4 min, val loss 0.9795, genus 0.717, species 0.358
+2026-09-24 00:36:22,085 INFO     taxonomy_classifier.training.trainer: CNN trial 17: epoch 6/6 started (782 batches)
+2026-09-24 00:39:00,746 INFO     taxonomy_classifier.training.trainer: CNN trial 17: step 500, loss 1.4931, 403 sequences/s, lr 8.24e-06
+2026-09-24 00:40:48,455 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 1.4875, val 0.9576, genus 0.728, 266 s
+2026-09-24 00:40:48,456 INFO     taxonomy_classifier.training.trainer: CNN trial 17: epoch 6 done in 4.4 min, val loss 0.9576, genus 0.728, species 0.367
+[I 2026-09-24 00:40:48,701] Trial 17 finished with value: 0.5477070307632255 and parameters: {'dropout': 0.09738889590169274, 'learning_rate': 0.000882578378415988, 'weight_decay': 0.08380949712516272, 'warmup_fraction': 0.024349863288007353, 'sampling_power': 0.3364666745598598, 'crop_probability': 0.20282484387941596, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}. Best is trial 12 with value: 0.6053725576218338.
+2026-09-24 00:40:48,881 INFO     taxonomy_classifier.cli: CNN trial 18: {'dropout': 0.05992962427586748, 'learning_rate': 0.0012255877823983418, 'weight_decay': 0.042042826962327855, 'warmup_fraction': 0.02233626834719534, 'sampling_power': 0.12071140896235108, 'crop_probability': 0.20647011164273862, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}
+2026-09-24 00:40:49,037 INFO     taxonomy_classifier.training.trainer: CNN trial 18: epoch 1/6 started (782 batches)
+2026-09-24 00:43:27,510 INFO     taxonomy_classifier.training.trainer: CNN trial 18: step 500, loss 4.1922, 404 sequences/s, lr 1.20e-03
+2026-09-24 00:45:15,186 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 3.7959, val 2.1568, genus 0.350, 266 s
+2026-09-24 00:45:15,186 INFO     taxonomy_classifier.training.trainer: CNN trial 18: epoch 1 done in 4.4 min, val loss 2.1568, genus 0.350, species 0.153
+2026-09-24 00:45:15,217 INFO     taxonomy_classifier.training.trainer: CNN trial 18: epoch 2/6 started (782 batches)
+2026-09-24 00:47:52,693 INFO     taxonomy_classifier.training.trainer: CNN trial 18: step 500, loss 2.5895, 406 sequences/s, lr 1.04e-03
+2026-09-24 00:49:39,813 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.4693, val 1.4729, genus 0.522, 265 s
+2026-09-24 00:49:39,813 INFO     taxonomy_classifier.training.trainer: CNN trial 18: epoch 2 done in 4.4 min, val loss 1.4729, genus 0.522, species 0.249
+2026-09-24 00:49:39,848 INFO     taxonomy_classifier.training.trainer: CNN trial 18: epoch 3/6 started (782 batches)
+2026-09-24 00:52:17,421 INFO     taxonomy_classifier.training.trainer: CNN trial 18: step 500, loss 2.0146, 406 sequences/s, lr 7.52e-04
+2026-09-24 00:54:04,413 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 1.9464, val 1.1855, genus 0.612, 265 s
+2026-09-24 00:54:04,413 INFO     taxonomy_classifier.training.trainer: CNN trial 18: epoch 3 done in 4.4 min, val loss 1.1855, genus 0.612, species 0.305
+2026-09-24 00:54:04,443 INFO     taxonomy_classifier.training.trainer: CNN trial 18: epoch 4/6 started (782 batches)
+2026-09-24 00:56:42,151 INFO     taxonomy_classifier.training.trainer: CNN trial 18: step 500, loss 1.6573, 406 sequences/s, lr 4.28e-04
+2026-09-24 00:58:29,262 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 1.6208, val 0.9997, genus 0.680, 265 s
+2026-09-24 00:58:29,262 INFO     taxonomy_classifier.training.trainer: CNN trial 18: epoch 4 done in 4.4 min, val loss 0.9997, genus 0.680, species 0.356
+2026-09-24 00:58:29,298 INFO     taxonomy_classifier.training.trainer: CNN trial 18: epoch 5/6 started (782 batches)
+2026-09-24 01:01:06,817 INFO     taxonomy_classifier.training.trainer: CNN trial 18: step 500, loss 1.4553, 406 sequences/s, lr 1.56e-04
+2026-09-24 01:02:53,575 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 1.4299, val 0.9000, genus 0.724, 264 s
+2026-09-24 01:02:53,575 INFO     taxonomy_classifier.training.trainer: CNN trial 18: epoch 5 done in 4.4 min, val loss 0.9000, genus 0.724, species 0.404
+2026-09-24 01:02:53,612 INFO     taxonomy_classifier.training.trainer: CNN trial 18: epoch 6/6 started (782 batches)
+2026-09-24 01:05:31,516 INFO     taxonomy_classifier.training.trainer: CNN trial 18: step 500, loss 1.3519, 405 sequences/s, lr 1.14e-05
+2026-09-24 01:07:18,740 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 1.3523, val 0.8799, genus 0.732, 265 s
+2026-09-24 01:07:18,740 INFO     taxonomy_classifier.training.trainer: CNN trial 18: epoch 6 done in 4.4 min, val loss 0.8799, genus 0.732, species 0.407
+[I 2026-09-24 01:07:19,005] Trial 18 finished with value: 0.5696243716064071 and parameters: {'dropout': 0.05992962427586748, 'learning_rate': 0.0012255877823983418, 'weight_decay': 0.042042826962327855, 'warmup_fraction': 0.02233626834719534, 'sampling_power': 0.12071140896235108, 'crop_probability': 0.20647011164273862, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}. Best is trial 12 with value: 0.6053725576218338.
+2026-09-24 01:07:19,201 INFO     taxonomy_classifier.cli: CNN trial 19: {'dropout': 0.09055890542125608, 'learning_rate': 0.0016156160103516285, 'weight_decay': 0.009350478131011513, 'warmup_fraction': 0.026248630940195316, 'sampling_power': 0.5029474762499214, 'crop_probability': 0.23514927395656465, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}
+2026-09-24 01:07:19,371 INFO     taxonomy_classifier.training.trainer: CNN trial 19: epoch 1/6 started (782 batches)
+2026-09-24 01:09:57,767 INFO     taxonomy_classifier.training.trainer: CNN trial 19: step 500, loss 4.7134, 404 sequences/s, lr 1.59e-03
+2026-09-24 01:11:45,242 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.4673, val 3.1996, genus 0.193, 266 s
+2026-09-24 01:11:45,242 INFO     taxonomy_classifier.training.trainer: CNN trial 19: epoch 1 done in 4.4 min, val loss 3.1996, genus 0.193, species 0.024
+2026-09-24 01:11:45,273 INFO     taxonomy_classifier.training.trainer: CNN trial 19: epoch 2/6 started (782 batches)
+2026-09-24 01:14:22,995 INFO     taxonomy_classifier.training.trainer: CNN trial 19: step 500, loss 3.4494, 406 sequences/s, lr 1.37e-03
+2026-09-24 01:16:10,049 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 3.3030, val 2.2968, genus 0.239, 265 s
+2026-09-24 01:16:10,049 INFO     taxonomy_classifier.training.trainer: CNN trial 19: epoch 2 done in 4.4 min, val loss 2.2968, genus 0.239, species 0.059
+[I 2026-09-24 01:16:10,280] Trial 19 pruned. 
+2026-09-24 01:16:10,494 INFO     taxonomy_classifier.cli: CNN trial 20: {'dropout': 0.03191732223877103, 'learning_rate': 0.000896574758949686, 'weight_decay': 0.02741573668261287, 'warmup_fraction': 0.023194280044200568, 'sampling_power': 0.1557182648578359, 'crop_probability': 0.22242492515089246, 'cnn_width': 'large', 'cnn_blocks': 'two', 'cnn_kernel': 5}
+2026-09-24 01:16:10,681 INFO     taxonomy_classifier.training.trainer: CNN trial 20: epoch 1/6 started (782 batches)
+2026-09-24 01:19:43,544 INFO     taxonomy_classifier.training.trainer: CNN trial 20: step 500, loss 4.1512, 301 sequences/s, lr 8.80e-04
+2026-09-24 01:22:08,041 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 3.7236, val 1.9639, genus 0.388, 357 s
+2026-09-24 01:22:08,041 INFO     taxonomy_classifier.training.trainer: CNN trial 20: epoch 1 done in 6.0 min, val loss 1.9639, genus 0.388, species 0.167
+2026-09-24 01:22:08,074 INFO     taxonomy_classifier.training.trainer: CNN trial 20: epoch 2/6 started (782 batches)
+2026-09-24 01:25:40,253 INFO     taxonomy_classifier.training.trainer: CNN trial 20: step 500, loss 2.4381, 302 sequences/s, lr 7.59e-04
+2026-09-24 01:28:04,339 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.3144, val 1.3360, genus 0.547, 356 s
+2026-09-24 01:28:04,339 INFO     taxonomy_classifier.training.trainer: CNN trial 20: epoch 2 done in 5.9 min, val loss 1.3360, genus 0.547, species 0.261
+2026-09-24 01:28:04,377 INFO     taxonomy_classifier.training.trainer: CNN trial 20: epoch 3/6 started (782 batches)
+2026-09-24 01:31:36,417 INFO     taxonomy_classifier.training.trainer: CNN trial 20: step 500, loss 1.8802, 302 sequences/s, lr 5.51e-04
+2026-09-24 01:34:00,917 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 1.8197, val 1.0667, genus 0.642, 357 s
+2026-09-24 01:34:00,917 INFO     taxonomy_classifier.training.trainer: CNN trial 20: epoch 3 done in 5.9 min, val loss 1.0667, genus 0.642, species 0.323
+2026-09-24 01:34:00,949 INFO     taxonomy_classifier.training.trainer: CNN trial 20: epoch 4/6 started (782 batches)
+2026-09-24 01:37:32,831 INFO     taxonomy_classifier.training.trainer: CNN trial 20: step 500, loss 1.5533, 302 sequences/s, lr 3.13e-04
+2026-09-24 01:39:56,857 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 1.5060, val 0.9053, genus 0.718, 356 s
+2026-09-24 01:39:56,857 INFO     taxonomy_classifier.training.trainer: CNN trial 20: epoch 4 done in 5.9 min, val loss 0.9053, genus 0.718, species 0.382
+2026-09-24 01:39:56,893 INFO     taxonomy_classifier.training.trainer: CNN trial 20: epoch 5/6 started (782 batches)
+2026-09-24 01:43:28,520 INFO     taxonomy_classifier.training.trainer: CNN trial 20: step 500, loss 1.3458, 302 sequences/s, lr 1.14e-04
+2026-09-24 01:45:52,645 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 1.3203, val 0.8235, genus 0.753, 356 s
+2026-09-24 01:45:52,645 INFO     taxonomy_classifier.training.trainer: CNN trial 20: epoch 5 done in 5.9 min, val loss 0.8235, genus 0.753, species 0.413
+2026-09-24 01:45:52,680 INFO     taxonomy_classifier.training.trainer: CNN trial 20: epoch 6/6 started (782 batches)
+2026-09-24 01:49:24,732 INFO     taxonomy_classifier.training.trainer: CNN trial 20: step 500, loss 1.2563, 302 sequences/s, lr 8.35e-06
+2026-09-24 01:51:48,832 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 1.2517, val 0.8061, genus 0.764, 356 s
+2026-09-24 01:51:48,832 INFO     taxonomy_classifier.training.trainer: CNN trial 20: epoch 6 done in 5.9 min, val loss 0.8061, genus 0.764, species 0.430
+[I 2026-09-24 01:51:49,112] Trial 20 finished with value: 0.5969877345239234 and parameters: {'dropout': 0.03191732223877103, 'learning_rate': 0.000896574758949686, 'weight_decay': 0.02741573668261287, 'warmup_fraction': 0.023194280044200568, 'sampling_power': 0.1557182648578359, 'crop_probability': 0.22242492515089246, 'cnn_width': 'large', 'cnn_blocks': 'two', 'cnn_kernel': 5}. Best is trial 12 with value: 0.6053725576218338.
+2026-09-24 01:51:49,322 INFO     taxonomy_classifier.cli: CNN trial 21: {'dropout': 0.05660718033281808, 'learning_rate': 0.0014496616931831967, 'weight_decay': 0.026815726058493698, 'warmup_fraction': 0.02614123761768564, 'sampling_power': 0.019236895870196072, 'crop_probability': 0.2560740875244967, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}
+2026-09-24 01:51:49,494 INFO     taxonomy_classifier.training.trainer: CNN trial 21: epoch 1/6 started (782 batches)
+2026-09-24 01:54:27,555 INFO     taxonomy_classifier.training.trainer: CNN trial 21: step 500, loss 3.9002, 405 sequences/s, lr 1.43e-03
+2026-09-24 01:56:14,757 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 3.4990, val 2.0875, genus 0.363, 265 s
+2026-09-24 01:56:14,757 INFO     taxonomy_classifier.training.trainer: CNN trial 21: epoch 1 done in 4.4 min, val loss 2.0875, genus 0.363, species 0.140
+2026-09-24 01:56:14,789 INFO     taxonomy_classifier.training.trainer: CNN trial 21: epoch 2/6 started (782 batches)
+2026-09-24 01:58:52,342 INFO     taxonomy_classifier.training.trainer: CNN trial 21: step 500, loss 2.3376, 406 sequences/s, lr 1.23e-03
+2026-09-24 02:00:39,234 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.2470, val 1.4680, genus 0.511, 264 s
+2026-09-24 02:00:39,235 INFO     taxonomy_classifier.training.trainer: CNN trial 21: epoch 2 done in 4.4 min, val loss 1.4680, genus 0.511, species 0.237
+2026-09-24 02:00:39,270 INFO     taxonomy_classifier.training.trainer: CNN trial 21: epoch 3/6 started (782 batches)
+2026-09-24 02:03:16,454 INFO     taxonomy_classifier.training.trainer: CNN trial 21: step 500, loss 1.8782, 407 sequences/s, lr 8.94e-04
+2026-09-24 02:05:03,319 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 1.8176, val 1.1903, genus 0.597, 264 s
+2026-09-24 02:05:03,319 INFO     taxonomy_classifier.training.trainer: CNN trial 21: epoch 3 done in 4.4 min, val loss 1.1903, genus 0.597, species 0.299
+2026-09-24 02:05:03,352 INFO     taxonomy_classifier.training.trainer: CNN trial 21: epoch 4/6 started (782 batches)
+2026-09-24 02:07:40,475 INFO     taxonomy_classifier.training.trainer: CNN trial 21: step 500, loss 1.5856, 407 sequences/s, lr 5.09e-04
+2026-09-24 02:09:27,083 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 1.5535, val 1.0062, genus 0.662, 264 s
+2026-09-24 02:09:27,083 INFO     taxonomy_classifier.training.trainer: CNN trial 21: epoch 4 done in 4.4 min, val loss 1.0062, genus 0.662, species 0.345
+2026-09-24 02:09:27,122 INFO     taxonomy_classifier.training.trainer: CNN trial 21: epoch 5/6 started (782 batches)
+2026-09-24 02:12:04,743 INFO     taxonomy_classifier.training.trainer: CNN trial 21: step 500, loss 1.4022, 406 sequences/s, lr 1.85e-04
+2026-09-24 02:13:51,808 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 1.3844, val 0.9128, genus 0.701, 265 s
+2026-09-24 02:13:51,809 INFO     taxonomy_classifier.training.trainer: CNN trial 21: epoch 5 done in 4.4 min, val loss 0.9128, genus 0.701, species 0.382
+2026-09-24 02:13:51,844 INFO     taxonomy_classifier.training.trainer: CNN trial 21: epoch 6/6 started (782 batches)
+2026-09-24 02:16:29,170 INFO     taxonomy_classifier.training.trainer: CNN trial 21: step 500, loss 1.3096, 407 sequences/s, lr 1.36e-05
+2026-09-24 02:18:16,528 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 1.3036, val 0.8947, genus 0.708, 265 s
+2026-09-24 02:18:16,528 INFO     taxonomy_classifier.training.trainer: CNN trial 21: epoch 6 done in 4.4 min, val loss 0.8947, genus 0.708, species 0.391
+[I 2026-09-24 02:18:16,791] Trial 21 finished with value: 0.5497374183626133 and parameters: {'dropout': 0.05660718033281808, 'learning_rate': 0.0014496616931831967, 'weight_decay': 0.026815726058493698, 'warmup_fraction': 0.02614123761768564, 'sampling_power': 0.019236895870196072, 'crop_probability': 0.2560740875244967, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}. Best is trial 12 with value: 0.6053725576218338.
+2026-09-24 02:18:16,996 INFO     taxonomy_classifier.cli: CNN trial 22: {'dropout': 0.06254149162125633, 'learning_rate': 0.00043965190420558166, 'weight_decay': 0.017427190431155093, 'warmup_fraction': 0.030402928432111766, 'sampling_power': 0.25130516813574416, 'crop_probability': 0.209675436306961, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}
+2026-09-24 02:18:17,162 INFO     taxonomy_classifier.training.trainer: CNN trial 22: epoch 1/6 started (782 batches)
+2026-09-24 02:20:55,790 INFO     taxonomy_classifier.training.trainer: CNN trial 22: step 500, loss 4.4061, 403 sequences/s, lr 4.33e-04
+2026-09-24 02:22:43,361 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 3.9863, val 2.1708, genus 0.359, 266 s
+2026-09-24 02:22:43,361 INFO     taxonomy_classifier.training.trainer: CNN trial 22: epoch 1 done in 4.4 min, val loss 2.1708, genus 0.359, species 0.153
+2026-09-24 02:22:43,395 INFO     taxonomy_classifier.training.trainer: CNN trial 22: epoch 2/6 started (782 batches)
+2026-09-24 02:25:21,835 INFO     taxonomy_classifier.training.trainer: CNN trial 22: step 500, loss 2.6856, 404 sequences/s, lr 3.75e-04
+2026-09-24 02:27:09,694 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.5671, val 1.4429, genus 0.530, 266 s
+2026-09-24 02:27:09,694 INFO     taxonomy_classifier.training.trainer: CNN trial 22: epoch 2 done in 4.4 min, val loss 1.4429, genus 0.530, species 0.243
+2026-09-24 02:27:09,730 INFO     taxonomy_classifier.training.trainer: CNN trial 22: epoch 3/6 started (782 batches)
+2026-09-24 02:29:48,316 INFO     taxonomy_classifier.training.trainer: CNN trial 22: step 500, loss 2.1050, 404 sequences/s, lr 2.73e-04
+2026-09-24 02:31:36,118 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 2.0417, val 1.1679, genus 0.631, 266 s
+2026-09-24 02:31:36,118 INFO     taxonomy_classifier.training.trainer: CNN trial 22: epoch 3 done in 4.4 min, val loss 1.1679, genus 0.631, species 0.292
+2026-09-24 02:31:36,154 INFO     taxonomy_classifier.training.trainer: CNN trial 22: epoch 4/6 started (782 batches)
+2026-09-24 02:34:15,376 INFO     taxonomy_classifier.training.trainer: CNN trial 22: step 500, loss 1.7688, 402 sequences/s, lr 1.56e-04
+2026-09-24 02:36:03,291 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 1.7284, val 1.0267, genus 0.698, 267 s
+2026-09-24 02:36:03,291 INFO     taxonomy_classifier.training.trainer: CNN trial 22: epoch 4 done in 4.5 min, val loss 1.0267, genus 0.698, species 0.349
+2026-09-24 02:36:03,323 INFO     taxonomy_classifier.training.trainer: CNN trial 22: epoch 5/6 started (782 batches)
+2026-09-24 02:38:42,476 INFO     taxonomy_classifier.training.trainer: CNN trial 22: step 500, loss 1.5818, 402 sequences/s, lr 5.67e-05
+2026-09-24 02:40:30,307 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 1.5570, val 0.9520, genus 0.725, 267 s
+2026-09-24 02:40:30,307 INFO     taxonomy_classifier.training.trainer: CNN trial 22: epoch 5 done in 4.5 min, val loss 0.9520, genus 0.725, species 0.374
+2026-09-24 02:40:30,339 INFO     taxonomy_classifier.training.trainer: CNN trial 22: epoch 6/6 started (782 batches)
+2026-09-24 02:43:09,005 INFO     taxonomy_classifier.training.trainer: CNN trial 22: step 500, loss 1.5177, 403 sequences/s, lr 4.15e-06
+2026-09-24 02:44:56,622 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 1.5109, val 0.9355, genus 0.727, 266 s
+2026-09-24 02:44:56,622 INFO     taxonomy_classifier.training.trainer: CNN trial 22: epoch 6 done in 4.4 min, val loss 0.9355, genus 0.727, species 0.382
+[I 2026-09-24 02:44:56,885] Trial 22 finished with value: 0.5543215623016677 and parameters: {'dropout': 0.06254149162125633, 'learning_rate': 0.00043965190420558166, 'weight_decay': 0.017427190431155093, 'warmup_fraction': 0.030402928432111766, 'sampling_power': 0.25130516813574416, 'crop_probability': 0.209675436306961, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}. Best is trial 12 with value: 0.6053725576218338.
+2026-09-24 02:44:57,083 INFO     taxonomy_classifier.cli: CNN trial 23: {'dropout': 0.029384133854181562, 'learning_rate': 0.0019092565532176971, 'weight_decay': 0.12087220141283835, 'warmup_fraction': 0.02961016207677272, 'sampling_power': 0.03562461796833834, 'crop_probability': 0.21676242309047955, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}
+2026-09-24 02:44:57,257 INFO     taxonomy_classifier.training.trainer: CNN trial 23: epoch 1/6 started (782 batches)
+2026-09-24 02:47:35,757 INFO     taxonomy_classifier.training.trainer: CNN trial 23: step 500, loss 3.9526, 404 sequences/s, lr 1.88e-03
+2026-09-24 02:49:23,319 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 3.5593, val 2.1452, genus 0.350, 266 s
+2026-09-24 02:49:23,319 INFO     taxonomy_classifier.training.trainer: CNN trial 23: epoch 1 done in 4.4 min, val loss 2.1452, genus 0.350, species 0.153
+2026-09-24 02:49:23,352 INFO     taxonomy_classifier.training.trainer: CNN trial 23: epoch 2/6 started (782 batches)
+2026-09-24 02:52:00,949 INFO     taxonomy_classifier.training.trainer: CNN trial 23: step 500, loss 2.4013, 406 sequences/s, lr 1.63e-03
+2026-09-24 02:53:48,064 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.2961, val 1.4748, genus 0.507, 265 s
+2026-09-24 02:53:48,064 INFO     taxonomy_classifier.training.trainer: CNN trial 23: epoch 2 done in 4.4 min, val loss 1.4748, genus 0.507, species 0.233
+2026-09-24 02:53:48,103 INFO     taxonomy_classifier.training.trainer: CNN trial 23: epoch 3/6 started (782 batches)
+2026-09-24 02:56:25,813 INFO     taxonomy_classifier.training.trainer: CNN trial 23: step 500, loss 1.9239, 406 sequences/s, lr 1.18e-03
+2026-09-24 02:58:13,041 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 1.8586, val 1.1925, genus 0.590, 265 s
+2026-09-24 02:58:13,041 INFO     taxonomy_classifier.training.trainer: CNN trial 23: epoch 3 done in 4.4 min, val loss 1.1925, genus 0.590, species 0.291
+2026-09-24 02:58:13,073 INFO     taxonomy_classifier.training.trainer: CNN trial 23: epoch 4/6 started (782 batches)
+2026-09-24 03:00:50,509 INFO     taxonomy_classifier.training.trainer: CNN trial 23: step 500, loss 1.5999, 407 sequences/s, lr 6.75e-04
+2026-09-24 03:02:37,416 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 1.5493, val 0.9999, genus 0.662, 264 s
+2026-09-24 03:02:37,416 INFO     taxonomy_classifier.training.trainer: CNN trial 23: epoch 4 done in 4.4 min, val loss 0.9999, genus 0.662, species 0.342
+2026-09-24 03:02:37,448 INFO     taxonomy_classifier.training.trainer: CNN trial 23: epoch 5/6 started (782 batches)
+2026-09-24 03:05:15,062 INFO     taxonomy_classifier.training.trainer: CNN trial 23: step 500, loss 1.3937, 406 sequences/s, lr 2.46e-04
+2026-09-24 03:07:02,219 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 1.3625, val 0.8948, genus 0.705, 265 s
+2026-09-24 03:07:02,219 INFO     taxonomy_classifier.training.trainer: CNN trial 23: epoch 5 done in 4.4 min, val loss 0.8948, genus 0.705, species 0.393
+2026-09-24 03:07:02,253 INFO     taxonomy_classifier.training.trainer: CNN trial 23: epoch 6/6 started (782 batches)
+2026-09-24 03:09:39,857 INFO     taxonomy_classifier.training.trainer: CNN trial 23: step 500, loss 1.2664, 406 sequences/s, lr 1.80e-05
+2026-09-24 03:11:26,957 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 1.2613, val 0.8691, genus 0.720, 265 s
+2026-09-24 03:11:26,957 INFO     taxonomy_classifier.training.trainer: CNN trial 23: epoch 6 done in 4.4 min, val loss 0.8691, genus 0.720, species 0.404
+[I 2026-09-24 03:11:27,216] Trial 23 finished with value: 0.5618137995467073 and parameters: {'dropout': 0.029384133854181562, 'learning_rate': 0.0019092565532176971, 'weight_decay': 0.12087220141283835, 'warmup_fraction': 0.02961016207677272, 'sampling_power': 0.03562461796833834, 'crop_probability': 0.21676242309047955, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}. Best is trial 12 with value: 0.6053725576218338.
+2026-09-24 03:11:27,411 INFO     taxonomy_classifier.cli: CNN trial 24: {'dropout': 0.033905914106262015, 'learning_rate': 0.0008151763294855798, 'weight_decay': 0.08714175739505457, 'warmup_fraction': 0.022121698305623255, 'sampling_power': 0.12280213598337225, 'crop_probability': 0.30512021555781, 'cnn_width': 'large', 'cnn_blocks': 'two', 'cnn_kernel': 5}
+2026-09-24 03:11:27,590 INFO     taxonomy_classifier.training.trainer: CNN trial 24: epoch 1/6 started (782 batches)
+2026-09-24 03:14:59,325 INFO     taxonomy_classifier.training.trainer: CNN trial 24: step 500, loss 4.2546, 302 sequences/s, lr 8.00e-04
+2026-09-24 03:17:23,615 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 3.8511, val 2.1762, genus 0.338, 356 s
+2026-09-24 03:17:23,616 INFO     taxonomy_classifier.training.trainer: CNN trial 24: epoch 1 done in 5.9 min, val loss 2.1762, genus 0.338, species 0.158
+2026-09-24 03:17:23,651 INFO     taxonomy_classifier.training.trainer: CNN trial 24: epoch 2/6 started (782 batches)
+2026-09-24 03:20:54,680 INFO     taxonomy_classifier.training.trainer: CNN trial 24: step 500, loss 2.6032, 303 sequences/s, lr 6.89e-04
+2026-09-24 03:23:19,015 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.4867, val 1.4942, genus 0.497, 355 s
+2026-09-24 03:23:19,015 INFO     taxonomy_classifier.training.trainer: CNN trial 24: epoch 2 done in 5.9 min, val loss 1.4942, genus 0.497, species 0.221
+2026-09-24 03:23:19,048 INFO     taxonomy_classifier.training.trainer: CNN trial 24: epoch 3/6 started (782 batches)
+2026-09-24 03:26:50,426 INFO     taxonomy_classifier.training.trainer: CNN trial 24: step 500, loss 2.0560, 303 sequences/s, lr 5.00e-04
+2026-09-24 03:29:14,084 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 1.9938, val 1.1893, genus 0.595, 355 s
+2026-09-24 03:29:14,084 INFO     taxonomy_classifier.training.trainer: CNN trial 24: epoch 3 done in 5.9 min, val loss 1.1893, genus 0.595, species 0.283
+2026-09-24 03:29:14,120 INFO     taxonomy_classifier.training.trainer: CNN trial 24: epoch 4/6 started (782 batches)
+2026-09-24 03:32:44,814 INFO     taxonomy_classifier.training.trainer: CNN trial 24: step 500, loss 1.7437, 304 sequences/s, lr 2.84e-04
+2026-09-24 03:35:08,172 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 1.6984, val 1.0228, genus 0.653, 354 s
+2026-09-24 03:35:08,172 INFO     taxonomy_classifier.training.trainer: CNN trial 24: epoch 4 done in 5.9 min, val loss 1.0228, genus 0.653, species 0.333
+2026-09-24 03:35:08,205 INFO     taxonomy_classifier.training.trainer: CNN trial 24: epoch 5/6 started (782 batches)
+2026-09-24 03:38:39,679 INFO     taxonomy_classifier.training.trainer: CNN trial 24: step 500, loss 1.5219, 303 sequences/s, lr 1.03e-04
+2026-09-24 03:41:03,587 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 1.5047, val 0.9387, genus 0.696, 355 s
+2026-09-24 03:41:03,587 INFO     taxonomy_classifier.training.trainer: CNN trial 24: epoch 5 done in 5.9 min, val loss 0.9387, genus 0.696, species 0.366
+2026-09-24 03:41:03,620 INFO     taxonomy_classifier.training.trainer: CNN trial 24: epoch 6/6 started (782 batches)
+2026-09-24 03:44:35,410 INFO     taxonomy_classifier.training.trainer: CNN trial 24: step 500, loss 1.4484, 302 sequences/s, lr 7.57e-06
+2026-09-24 03:46:59,586 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 1.4386, val 0.9184, genus 0.704, 356 s
+2026-09-24 03:46:59,586 INFO     taxonomy_classifier.training.trainer: CNN trial 24: epoch 6 done in 5.9 min, val loss 0.9184, genus 0.704, species 0.376
+[I 2026-09-24 03:46:59,820] Trial 24 pruned. 
+2026-09-24 03:47:00,025 INFO     taxonomy_classifier.cli: CNN trial 25: {'dropout': 0.0903230242949218, 'learning_rate': 0.00183664138924546, 'weight_decay': 0.025820690968266738, 'warmup_fraction': 0.04116316164774653, 'sampling_power': 0.08922435146655534, 'crop_probability': 0.30051079496188715, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}
+2026-09-24 03:47:00,189 INFO     taxonomy_classifier.training.trainer: CNN trial 25: epoch 1/6 started (782 batches)
+2026-09-24 03:49:37,637 INFO     taxonomy_classifier.training.trainer: CNN trial 25: step 500, loss 4.3386, 406 sequences/s, lr 1.82e-03
+2026-09-24 03:51:24,272 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.0087, val 2.5908, genus 0.270, 264 s
+2026-09-24 03:51:24,272 INFO     taxonomy_classifier.training.trainer: CNN trial 25: epoch 1 done in 4.4 min, val loss 2.5908, genus 0.270, species 0.074
+2026-09-24 03:51:24,306 INFO     taxonomy_classifier.training.trainer: CNN trial 25: epoch 2/6 started (782 batches)
+2026-09-24 03:54:00,931 INFO     taxonomy_classifier.training.trainer: CNN trial 25: step 500, loss 2.8588, 409 sequences/s, lr 1.58e-03
+2026-09-24 03:55:47,705 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.7286, val 1.7036, genus 0.447, 263 s
+2026-09-24 03:55:47,706 INFO     taxonomy_classifier.training.trainer: CNN trial 25: epoch 2 done in 4.4 min, val loss 1.7036, genus 0.447, species 0.178
+[I 2026-09-24 03:55:47,920] Trial 25 pruned. 
+2026-09-24 03:55:48,123 INFO     taxonomy_classifier.cli: CNN trial 26: {'dropout': 0.10397704263307464, 'learning_rate': 0.0015857827496618437, 'weight_decay': 0.09768393527582352, 'warmup_fraction': 0.029025132129398373, 'sampling_power': 0.16381546173678813, 'crop_probability': 0.24101211326029537, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}
+2026-09-24 03:55:48,295 INFO     taxonomy_classifier.training.trainer: CNN trial 26: epoch 1/6 started (782 batches)
+2026-09-24 03:58:26,402 INFO     taxonomy_classifier.training.trainer: CNN trial 26: step 500, loss 4.4287, 405 sequences/s, lr 1.56e-03
+2026-09-24 04:00:13,669 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.0925, val 2.5115, genus 0.280, 265 s
+2026-09-24 04:00:13,669 INFO     taxonomy_classifier.training.trainer: CNN trial 26: epoch 1 done in 4.4 min, val loss 2.5115, genus 0.280, species 0.109
+2026-09-24 04:00:13,702 INFO     taxonomy_classifier.training.trainer: CNN trial 26: epoch 2/6 started (782 batches)
+2026-09-24 04:02:51,275 INFO     taxonomy_classifier.training.trainer: CNN trial 26: step 500, loss 2.9546, 406 sequences/s, lr 1.35e-03
+2026-09-24 04:04:38,475 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.8329, val 1.7249, genus 0.425, 265 s
+2026-09-24 04:04:38,475 INFO     taxonomy_classifier.training.trainer: CNN trial 26: epoch 2 done in 4.4 min, val loss 1.7249, genus 0.425, species 0.193
+[I 2026-09-24 04:04:38,702] Trial 26 pruned. 
+2026-09-24 04:04:38,893 INFO     taxonomy_classifier.cli: CNN trial 27: {'dropout': 0.012523776299417103, 'learning_rate': 0.00034299140284919797, 'weight_decay': 0.1436965315682684, 'warmup_fraction': 0.021666657005048707, 'sampling_power': 0.19264205842589888, 'crop_probability': 0.3734884828806978, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}
+2026-09-24 04:04:39,065 INFO     taxonomy_classifier.training.trainer: CNN trial 27: epoch 1/6 started (782 batches)
+2026-09-24 04:07:16,280 INFO     taxonomy_classifier.training.trainer: CNN trial 27: step 500, loss 4.3550, 407 sequences/s, lr 3.37e-04
+2026-09-24 04:09:03,222 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 3.9612, val 2.2466, genus 0.347, 264 s
+2026-09-24 04:09:03,222 INFO     taxonomy_classifier.training.trainer: CNN trial 27: epoch 1 done in 4.4 min, val loss 2.2466, genus 0.347, species 0.166
+2026-09-24 04:09:03,258 INFO     taxonomy_classifier.training.trainer: CNN trial 27: epoch 2/6 started (782 batches)
+2026-09-24 04:11:40,093 INFO     taxonomy_classifier.training.trainer: CNN trial 27: step 500, loss 2.7835, 408 sequences/s, lr 2.90e-04
+2026-09-24 04:13:26,555 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 2.6729, val 1.6015, genus 0.498, 263 s
+2026-09-24 04:13:26,556 INFO     taxonomy_classifier.training.trainer: CNN trial 27: epoch 2 done in 4.4 min, val loss 1.6015, genus 0.498, species 0.232
+2026-09-24 04:13:26,592 INFO     taxonomy_classifier.training.trainer: CNN trial 27: epoch 3/6 started (782 batches)
+2026-09-24 04:16:03,797 INFO     taxonomy_classifier.training.trainer: CNN trial 27: step 500, loss 2.2634, 407 sequences/s, lr 2.10e-04
+2026-09-24 04:17:50,562 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 2.2045, val 1.2999, genus 0.590, 264 s
+2026-09-24 04:17:50,562 INFO     taxonomy_classifier.training.trainer: CNN trial 27: epoch 3 done in 4.4 min, val loss 1.2999, genus 0.590, species 0.284
+2026-09-24 04:17:50,600 INFO     taxonomy_classifier.training.trainer: CNN trial 27: epoch 4/6 started (782 batches)
+2026-09-24 04:20:27,380 INFO     taxonomy_classifier.training.trainer: CNN trial 27: step 500, loss 1.9678, 408 sequences/s, lr 1.20e-04
+2026-09-24 04:22:14,146 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 1.9255, val 1.1373, genus 0.631, 264 s
+2026-09-24 04:22:14,146 INFO     taxonomy_classifier.training.trainer: CNN trial 27: epoch 4 done in 4.4 min, val loss 1.1373, genus 0.631, species 0.315
+2026-09-24 04:22:14,181 INFO     taxonomy_classifier.training.trainer: CNN trial 27: epoch 5/6 started (782 batches)
+2026-09-24 04:24:51,307 INFO     taxonomy_classifier.training.trainer: CNN trial 27: step 500, loss 1.8000, 407 sequences/s, lr 4.35e-05
+2026-09-24 04:26:38,007 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 1.7856, val 1.0684, genus 0.665, 264 s
+2026-09-24 04:26:38,007 INFO     taxonomy_classifier.training.trainer: CNN trial 27: epoch 5 done in 4.4 min, val loss 1.0684, genus 0.665, species 0.344
+2026-09-24 04:26:38,039 INFO     taxonomy_classifier.training.trainer: CNN trial 27: epoch 6/6 started (782 batches)
+2026-09-24 04:29:15,172 INFO     taxonomy_classifier.training.trainer: CNN trial 27: step 500, loss 1.7289, 407 sequences/s, lr 3.18e-06
+2026-09-24 04:31:01,941 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 1.7252, val 1.0548, genus 0.668, 264 s
+2026-09-24 04:31:01,942 INFO     taxonomy_classifier.training.trainer: CNN trial 27: epoch 6 done in 4.4 min, val loss 1.0548, genus 0.668, species 0.344
+[I 2026-09-24 04:31:02,171] Trial 27 pruned. 
+2026-09-24 04:31:02,381 INFO     taxonomy_classifier.cli: CNN trial 28: {'dropout': 0.04965191253976906, 'learning_rate': 0.0007595090389429127, 'weight_decay': 0.06709221385893366, 'warmup_fraction': 0.036417009750172154, 'sampling_power': 0.019107565436550178, 'crop_probability': 0.21188884182605364, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}
+2026-09-24 04:31:02,554 INFO     taxonomy_classifier.training.trainer: CNN trial 28: epoch 1/6 started (782 batches)
+2026-09-24 04:33:41,092 INFO     taxonomy_classifier.training.trainer: CNN trial 28: step 500, loss 3.7729, 404 sequences/s, lr 7.50e-04
+2026-09-24 04:35:28,806 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 3.2966, val 1.7428, genus 0.462, 266 s
+2026-09-24 04:35:28,806 INFO     taxonomy_classifier.training.trainer: CNN trial 28: epoch 1 done in 4.4 min, val loss 1.7428, genus 0.462, species 0.230
+2026-09-24 04:35:28,839 INFO     taxonomy_classifier.training.trainer: CNN trial 28: epoch 2/6 started (782 batches)
+[I 2026-09-24 04:35:41,016] Trial 28 pruned. 
+2026-09-24 04:35:41,190 INFO     taxonomy_classifier.cli: CNN best trial 12: 0.6054 {'dropout': 0.04939432528895943, 'learning_rate': 0.0008181673254533757, 'weight_decay': 0.0622781226114446, 'warmup_fraction': 0.020518582431743756, 'sampling_power': 0.25791613685487813, 'crop_probability': 0.21075665296050294, 'cnn_width': 'base', 'cnn_blocks': 'two', 'cnn_kernel': 5}

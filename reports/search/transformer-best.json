@@ -1,0 +1,25 @@
+{
+  "trial": 16,
+  "value": 0.32770557284327606,
+  "params": {
+    "dropout": 0.08501520343154548,
+    "learning_rate": 0.0008712527489399975,
+    "weight_decay": 0.0066987747669526925,
+    "warmup_fraction": 0.05137230491541184,
+    "sampling_power": 0.3098116197938878,
+    "crop_probability": 0.47275022885694473,
+    "transformer_tokenizer": "k6s3",
+    "transformer_dim": 320,
+    "transformer_layers": 4
+  },
+  "encoder": {
+    "embedding_dim": 64,
+    "model_dim": 320,
+    "token_kernel": 6,
+    "token_stride": 3,
+    "layers": 4,
+    "heads": 8,
+    "ffn_multiplier": 4,
+    "dropout": 0.08501520343154548
+  }
+}

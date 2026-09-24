@@ -1,0 +1,32 @@
+{
+  "trial": 12,
+  "value": 0.6053725576218338,
+  "params": {
+    "dropout": 0.04939432528895943,
+    "learning_rate": 0.0008181673254533757,
+    "weight_decay": 0.0622781226114446,
+    "warmup_fraction": 0.020518582431743756,
+    "sampling_power": 0.25791613685487813,
+    "crop_probability": 0.21075665296050294,
+    "cnn_width": "base",
+    "cnn_blocks": "two",
+    "cnn_kernel": 5
+  },
+  "encoder": {
+    "embedding_dim": 64,
+    "channels": [
+      128,
+      192,
+      256,
+      320
+    ],
+    "blocks_per_stage": 2,
+    "kernel_size": 5,
+    "dilations": [
+      1,
+      2
+    ],
+    "output_dim": 256,
+    "dropout": 0.04939432528895943
+  }
+}

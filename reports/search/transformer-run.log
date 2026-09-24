@@ -1,0 +1,393 @@
+[I 2026-09-23 17:11:40,904] A new study created in Journal with name: transformer-search
+2026-09-23 17:11:41,168 INFO     taxonomy_classifier.cli: Transformer trial 0: {'dropout': 0.19254056920538143, 'learning_rate': 0.000609964795706954, 'weight_decay': 0.041140671167800145, 'warmup_fraction': 0.08121747527319668, 'sampling_power': 0.5051338218669291, 'crop_probability': 0.6265701597465221, 'transformer_tokenizer': 'k6s3', 'transformer_dim': 320, 'transformer_layers': 8}
+2026-09-23 17:11:47,006 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: epoch 1/6 started (782 batches)
+2026-09-23 17:22:05,640 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: step 500, loss 4.7986, 103 sequences/s, lr 6.09e-04
+2026-09-23 17:29:01,539 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.6148, val 3.6937, genus 0.129, 1035 s
+2026-09-23 17:29:01,539 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: epoch 1 done in 17.2 min, val loss 3.6937, genus 0.129, species 0.034
+2026-09-23 17:29:01,572 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: epoch 2/6 started (782 batches)
+2026-09-23 17:39:30,145 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: step 500, loss 4.0537, 102 sequences/s, lr 5.47e-04
+2026-09-23 17:46:26,243 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 3.9922, val 3.1705, genus 0.172, 1045 s
+2026-09-23 17:46:26,243 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: epoch 2 done in 17.4 min, val loss 3.1705, genus 0.172, species 0.052
+2026-09-23 17:46:26,275 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: epoch 3/6 started (782 batches)
+2026-09-23 17:56:54,149 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: step 500, loss 3.7066, 102 sequences/s, lr 4.08e-04
+2026-09-23 18:03:51,846 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 3.6548, val 2.8127, genus 0.213, 1046 s
+2026-09-23 18:03:51,846 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: epoch 3 done in 17.4 min, val loss 2.8127, genus 0.213, species 0.059
+2026-09-23 18:03:51,883 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: epoch 4/6 started (782 batches)
+2026-09-23 18:14:15,099 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: step 500, loss 3.4349, 103 sequences/s, lr 2.37e-04
+2026-09-23 18:21:10,220 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 3.3976, val 2.5779, genus 0.238, 1038 s
+2026-09-23 18:21:10,220 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: epoch 4 done in 17.3 min, val loss 2.5779, genus 0.238, species 0.068
+2026-09-23 18:21:10,250 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: epoch 5/6 started (782 batches)
+2026-09-23 18:31:33,535 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: step 500, loss 3.2360, 103 sequences/s, lr 8.72e-05
+2026-09-23 18:38:30,404 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 3.2173, val 2.4583, genus 0.273, 1040 s
+2026-09-23 18:38:30,404 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: epoch 5 done in 17.3 min, val loss 2.4583, genus 0.273, species 0.078
+2026-09-23 18:38:30,437 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: epoch 6/6 started (782 batches)
+2026-09-23 18:48:53,213 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: step 500, loss 3.1590, 103 sequences/s, lr 6.42e-06
+2026-09-23 18:55:47,056 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 3.1550, val 2.4264, genus 0.283, 1037 s
+2026-09-23 18:55:47,057 INFO     taxonomy_classifier.training.trainer: Transformer trial 0: epoch 6 done in 17.3 min, val loss 2.4264, genus 0.283, species 0.081
+[I 2026-09-23 18:55:47,379] Trial 0 finished with value: 0.1818502676085632 and parameters: {'dropout': 0.19254056920538143, 'learning_rate': 0.000609964795706954, 'weight_decay': 0.041140671167800145, 'warmup_fraction': 0.08121747527319668, 'sampling_power': 0.5051338218669291, 'crop_probability': 0.6265701597465221, 'transformer_tokenizer': 'k6s3', 'transformer_dim': 320, 'transformer_layers': 8}. Best is trial 0 with value: 0.1818502676085632.
+2026-09-23 18:55:47,558 INFO     taxonomy_classifier.cli: Transformer trial 1: {'dropout': 0.12323495811558338, 'learning_rate': 0.0005104159164307088, 'weight_decay': 0.006108276308418397, 'warmup_fraction': 0.08113937322491065, 'sampling_power': 0.5668830684760718, 'crop_probability': 0.4109854316138899, 'transformer_tokenizer': 'k12s6', 'transformer_dim': 256, 'transformer_layers': 8}
+2026-09-23 18:55:47,753 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: epoch 1/6 started (782 batches)
+2026-09-23 18:59:08,713 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: step 500, loss 4.8277, 318 sequences/s, lr 5.09e-04
+2026-09-23 19:01:22,264 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.6056, val 3.6055, genus 0.157, 335 s
+2026-09-23 19:01:22,264 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: epoch 1 done in 5.6 min, val loss 3.6055, genus 0.157, species 0.026
+2026-09-23 19:01:22,295 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: epoch 2/6 started (782 batches)
+2026-09-23 19:04:43,395 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: step 500, loss 3.9164, 318 sequences/s, lr 4.57e-04
+2026-09-23 19:06:57,299 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 3.8265, val 3.0414, genus 0.170, 335 s
+2026-09-23 19:06:57,299 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: epoch 2 done in 5.6 min, val loss 3.0414, genus 0.170, species 0.026
+2026-09-23 19:06:57,330 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: epoch 3/6 started (782 batches)
+2026-09-23 19:10:18,506 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: step 500, loss 3.4629, 318 sequences/s, lr 3.41e-04
+2026-09-23 19:12:32,291 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 3.4022, val 2.6468, genus 0.234, 335 s
+2026-09-23 19:12:32,291 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: epoch 3 done in 5.6 min, val loss 2.6468, genus 0.234, species 0.055
+2026-09-23 19:12:32,327 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: epoch 4/6 started (782 batches)
+2026-09-23 19:15:55,149 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: step 500, loss 3.1428, 316 sequences/s, lr 1.98e-04
+2026-09-23 19:18:10,428 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 3.0987, val 2.3911, genus 0.288, 338 s
+2026-09-23 19:18:10,428 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: epoch 4 done in 5.6 min, val loss 2.3911, genus 0.288, species 0.069
+2026-09-23 19:18:10,457 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: epoch 5/6 started (782 batches)
+2026-09-23 19:21:33,001 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: step 500, loss 2.9441, 316 sequences/s, lr 7.29e-05
+2026-09-23 19:23:48,225 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 2.9189, val 2.2522, genus 0.340, 338 s
+2026-09-23 19:23:48,225 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: epoch 5 done in 5.6 min, val loss 2.2522, genus 0.340, species 0.102
+2026-09-23 19:23:48,254 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: epoch 6/6 started (782 batches)
+2026-09-23 19:27:10,760 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: step 500, loss 2.8463, 316 sequences/s, lr 5.37e-06
+2026-09-23 19:29:25,830 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 2.8414, val 2.2164, genus 0.347, 338 s
+2026-09-23 19:29:25,830 INFO     taxonomy_classifier.training.trainer: Transformer trial 1: epoch 6 done in 5.6 min, val loss 2.2164, genus 0.347, species 0.098
+[I 2026-09-23 19:29:26,173] Trial 1 finished with value: 0.22208250489372902 and parameters: {'dropout': 0.12323495811558338, 'learning_rate': 0.0005104159164307088, 'weight_decay': 0.006108276308418397, 'warmup_fraction': 0.08113937322491065, 'sampling_power': 0.5668830684760718, 'crop_probability': 0.4109854316138899, 'transformer_tokenizer': 'k12s6', 'transformer_dim': 256, 'transformer_layers': 8}. Best is trial 1 with value: 0.22208250489372902.
+2026-09-23 19:29:26,358 INFO     taxonomy_classifier.cli: Transformer trial 2: {'dropout': 0.1066682454286515, 'learning_rate': 0.0010703290710719618, 'weight_decay': 0.0948991787500155, 'warmup_fraction': 0.03172869825333056, 'sampling_power': 0.6132504569004982, 'crop_probability': 0.7068039246773643, 'transformer_tokenizer': 'k12s6', 'transformer_dim': 320, 'transformer_layers': 4}
+2026-09-23 19:29:26,558 INFO     taxonomy_classifier.training.trainer: Transformer trial 2: epoch 1/6 started (782 batches)
+2026-09-23 19:31:42,526 INFO     taxonomy_classifier.training.trainer: Transformer trial 2: step 500, loss 4.7357, 471 sequences/s, lr 1.05e-03
+2026-09-23 19:33:13,425 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.6022, val 3.8658, genus 0.044, 227 s
+2026-09-23 19:33:13,426 INFO     taxonomy_classifier.training.trainer: Transformer trial 2: epoch 1 done in 3.8 min, val loss 3.8658, genus 0.044, species 0.041
+2026-09-23 19:33:13,456 INFO     taxonomy_classifier.training.trainer: Transformer trial 2: epoch 2/6 started (782 batches)
+2026-09-23 19:35:29,328 INFO     taxonomy_classifier.training.trainer: Transformer trial 2: step 500, loss 4.2475, 471 sequences/s, lr 9.14e-04
+2026-09-23 19:37:01,187 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 4.1994, val 3.7058, genus 0.072, 228 s
+2026-09-23 19:37:01,187 INFO     taxonomy_classifier.training.trainer: Transformer trial 2: epoch 2 done in 3.8 min, val loss 3.7058, genus 0.072, species 0.012
+[I 2026-09-23 19:37:01,407] Trial 2 pruned. 
+2026-09-23 19:37:01,565 INFO     taxonomy_classifier.cli: Transformer trial 3: {'dropout': 0.0684715827044741, 'learning_rate': 0.0003838140220993488, 'weight_decay': 0.1483329257565296, 'warmup_fraction': 0.08879784572990343, 'sampling_power': 0.9176277362442854, 'crop_probability': 0.5743346867920319, 'transformer_tokenizer': 'k12s6', 'transformer_dim': 320, 'transformer_layers': 6}
+2026-09-23 19:37:01,788 INFO     taxonomy_classifier.training.trainer: Transformer trial 3: epoch 1/6 started (782 batches)
+2026-09-23 19:40:22,499 INFO     taxonomy_classifier.training.trainer: Transformer trial 3: step 500, loss 4.8331, 319 sequences/s, lr 3.83e-04
+2026-09-23 19:42:37,336 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.6172, val 4.1555, genus 0.001, 336 s
+2026-09-23 19:42:37,336 INFO     taxonomy_classifier.training.trainer: Transformer trial 3: epoch 1 done in 5.6 min, val loss 4.1555, genus 0.001, species 0.000
+2026-09-23 19:42:37,364 INFO     taxonomy_classifier.training.trainer: Transformer trial 3: epoch 2/6 started (782 batches)
+2026-09-23 19:45:58,371 INFO     taxonomy_classifier.training.trainer: Transformer trial 3: step 500, loss 3.9831, 318 sequences/s, lr 3.46e-04
+2026-09-23 19:48:13,270 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 3.9183, val 3.7168, genus 0.002, 336 s
+2026-09-23 19:48:13,270 INFO     taxonomy_classifier.training.trainer: Transformer trial 3: epoch 2 done in 5.6 min, val loss 3.7168, genus 0.002, species 0.004
+[I 2026-09-23 19:48:13,501] Trial 3 pruned. 
+2026-09-23 19:48:13,664 INFO     taxonomy_classifier.cli: Transformer trial 4: {'dropout': 0.0447164299423119, 'learning_rate': 0.0020194172273842173, 'weight_decay': 0.0022477491384343194, 'warmup_fraction': 0.09554504453184312, 'sampling_power': 0.984226240371099, 'crop_probability': 0.20161888396987504, 'transformer_tokenizer': 'k12s6', 'transformer_dim': 320, 'transformer_layers': 6}
+2026-09-23 19:48:13,861 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: epoch 1/6 started (782 batches)
+2026-09-23 19:51:38,492 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: step 500, loss 4.6760, 313 sequences/s, lr 2.02e-03
+2026-09-23 19:53:54,359 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.5653, val 4.5614, genus 0.000, 341 s
+2026-09-23 19:53:54,359 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: epoch 1 done in 5.7 min, val loss 4.5614, genus 0.000, species 0.000
+2026-09-23 19:53:54,388 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: epoch 2/6 started (782 batches)
+2026-09-23 19:57:17,388 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: step 500, loss 4.3937, 315 sequences/s, lr 1.83e-03
+2026-09-23 19:59:33,008 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 4.3753, val 4.7058, genus 0.000, 339 s
+2026-09-23 19:59:33,008 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: epoch 2 done in 5.6 min, val loss 4.7058, genus 0.000, species 0.001
+2026-09-23 19:59:33,037 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: epoch 3/6 started (782 batches)
+2026-09-23 20:02:55,749 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: step 500, loss 4.2852, 316 sequences/s, lr 1.38e-03
+2026-09-23 20:05:11,433 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 4.2631, val 4.4231, genus 0.000, 338 s
+2026-09-23 20:05:11,433 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: epoch 3 done in 5.6 min, val loss 4.4231, genus 0.000, species 0.000
+2026-09-23 20:05:11,462 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: epoch 4/6 started (782 batches)
+2026-09-23 20:08:34,009 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: step 500, loss 4.1958, 316 sequences/s, lr 8.05e-04
+2026-09-23 20:10:49,759 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 4.1732, val 4.2902, genus 0.003, 338 s
+2026-09-23 20:10:49,759 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: epoch 4 done in 5.6 min, val loss 4.2902, genus 0.003, species 0.000
+2026-09-23 20:10:49,788 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: epoch 5/6 started (782 batches)
+2026-09-23 20:14:12,237 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: step 500, loss 4.0721, 316 sequences/s, lr 2.97e-04
+2026-09-23 20:16:27,881 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 4.0476, val 4.2645, genus 0.001, 338 s
+2026-09-23 20:16:27,882 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: epoch 5 done in 5.6 min, val loss 4.2645, genus 0.001, species 0.000
+2026-09-23 20:16:27,910 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: epoch 6/6 started (782 batches)
+2026-09-23 20:19:50,483 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: step 500, loss 3.9632, 316 sequences/s, lr 2.19e-05
+2026-09-23 20:22:06,280 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 3.9581, val 4.2349, genus 0.001, 338 s
+2026-09-23 20:22:06,280 INFO     taxonomy_classifier.training.trainer: Transformer trial 4: epoch 6 done in 5.6 min, val loss 4.2349, genus 0.001, species 0.001
+[I 2026-09-23 20:22:06,508] Trial 4 pruned. 
+2026-09-23 20:22:06,689 INFO     taxonomy_classifier.cli: Transformer trial 5: {'dropout': 0.09775472931062437, 'learning_rate': 0.002544892080245041, 'weight_decay': 0.0048554174298040586, 'warmup_fraction': 0.057791833437718446, 'sampling_power': 0.6903747458703876, 'crop_probability': 0.3943020868717159, 'transformer_tokenizer': 'k12s6', 'transformer_dim': 320, 'transformer_layers': 4}
+2026-09-23 20:22:06,898 INFO     taxonomy_classifier.training.trainer: Transformer trial 5: epoch 1/6 started (782 batches)
+2026-09-23 20:24:27,884 INFO     taxonomy_classifier.training.trainer: Transformer trial 5: step 500, loss 4.7566, 454 sequences/s, lr 2.53e-03
+2026-09-23 20:26:02,259 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.6543, val 4.2316, genus 0.003, 235 s
+2026-09-23 20:26:02,259 INFO     taxonomy_classifier.training.trainer: Transformer trial 5: epoch 1 done in 3.9 min, val loss 4.2316, genus 0.003, species 0.000
+2026-09-23 20:26:02,288 INFO     taxonomy_classifier.training.trainer: Transformer trial 5: epoch 2/6 started (782 batches)
+2026-09-23 20:28:23,330 INFO     taxonomy_classifier.training.trainer: Transformer trial 5: step 500, loss 4.4516, 454 sequences/s, lr 2.23e-03
+2026-09-23 20:29:57,370 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 4.4334, val 4.1546, genus 0.005, 235 s
+2026-09-23 20:29:57,370 INFO     taxonomy_classifier.training.trainer: Transformer trial 5: epoch 2 done in 3.9 min, val loss 4.1546, genus 0.005, species 0.013
+[I 2026-09-23 20:29:57,563] Trial 5 pruned. 
+2026-09-23 20:29:57,732 INFO     taxonomy_classifier.cli: Transformer trial 6: {'dropout': 0.2743687171306133, 'learning_rate': 0.00013746434293163248, 'weight_decay': 0.04601048688337019, 'warmup_fraction': 0.024922614617436452, 'sampling_power': 0.4259316201493918, 'crop_probability': 0.5954801441911141, 'transformer_tokenizer': 'k12s6', 'transformer_dim': 320, 'transformer_layers': 6}
+2026-09-23 20:29:57,948 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: epoch 1/6 started (782 batches)
+2026-09-23 20:33:17,015 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: step 500, loss 4.8627, 322 sequences/s, lr 1.35e-04
+2026-09-23 20:35:30,834 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.6845, val 3.7343, genus 0.164, 333 s
+2026-09-23 20:35:30,834 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: epoch 1 done in 5.5 min, val loss 3.7343, genus 0.164, species 0.049
+2026-09-23 20:35:30,869 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: epoch 2/6 started (782 batches)
+2026-09-23 20:38:50,245 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: step 500, loss 4.1789, 321 sequences/s, lr 1.17e-04
+2026-09-23 20:41:04,307 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 4.1240, val 3.2848, genus 0.197, 333 s
+2026-09-23 20:41:04,307 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: epoch 2 done in 5.6 min, val loss 3.2848, genus 0.197, species 0.059
+2026-09-23 20:41:04,340 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: epoch 3/6 started (782 batches)
+2026-09-23 20:44:23,998 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: step 500, loss 3.8820, 321 sequences/s, lr 8.46e-05
+2026-09-23 20:46:38,263 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 3.8457, val 3.0052, genus 0.221, 334 s
+2026-09-23 20:46:38,263 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: epoch 3 done in 5.6 min, val loss 3.0052, genus 0.221, species 0.065
+2026-09-23 20:46:38,293 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: epoch 4/6 started (782 batches)
+2026-09-23 20:49:57,241 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: step 500, loss 3.6881, 322 sequences/s, lr 4.82e-05
+2026-09-23 20:52:10,947 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 3.6655, val 2.8375, genus 0.231, 333 s
+2026-09-23 20:52:10,947 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: epoch 4 done in 5.5 min, val loss 2.8375, genus 0.231, species 0.072
+2026-09-23 20:52:10,978 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: epoch 5/6 started (782 batches)
+2026-09-23 20:55:30,592 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: step 500, loss 3.5776, 321 sequences/s, lr 1.75e-05
+2026-09-23 20:57:44,529 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 3.5693, val 2.7718, genus 0.231, 334 s
+2026-09-23 20:57:44,529 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: epoch 5 done in 5.6 min, val loss 2.7718, genus 0.231, species 0.072
+2026-09-23 20:57:44,562 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: epoch 6/6 started (782 batches)
+2026-09-23 21:01:04,212 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: step 500, loss 3.5296, 321 sequences/s, lr 1.28e-06
+2026-09-23 21:03:17,850 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 3.5262, val 2.7511, genus 0.240, 333 s
+2026-09-23 21:03:17,850 INFO     taxonomy_classifier.training.trainer: Transformer trial 6: epoch 6 done in 5.6 min, val loss 2.7511, genus 0.240, species 0.073
+[I 2026-09-23 21:03:18,091] Trial 6 pruned. 
+2026-09-23 21:03:18,277 INFO     taxonomy_classifier.cli: Transformer trial 7: {'dropout': 0.1032747126417358, 'learning_rate': 0.0017217997283999209, 'weight_decay': 0.08522121740859318, 'warmup_fraction': 0.02076595204482591, 'sampling_power': 0.7300827223420581, 'crop_probability': 0.7307418176683143, 'transformer_tokenizer': 'k8s4', 'transformer_dim': 192, 'transformer_layers': 4}
+2026-09-23 21:03:18,416 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: epoch 1/6 started (782 batches)
+2026-09-23 21:05:38,382 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: step 500, loss 4.6776, 457 sequences/s, lr 1.69e-03
+2026-09-23 21:07:11,113 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.5419, val 3.9400, genus 0.003, 233 s
+2026-09-23 21:07:11,113 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: epoch 1 done in 3.9 min, val loss 3.9400, genus 0.003, species 0.004
+2026-09-23 21:07:11,149 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: epoch 2/6 started (782 batches)
+2026-09-23 21:09:30,872 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: step 500, loss 4.1392, 458 sequences/s, lr 1.45e-03
+2026-09-23 21:11:03,762 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 4.0905, val 3.6320, genus 0.016, 233 s
+2026-09-23 21:11:03,762 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: epoch 2 done in 3.9 min, val loss 3.6320, genus 0.016, species 0.005
+2026-09-23 21:11:03,797 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: epoch 3/6 started (782 batches)
+2026-09-23 21:13:24,184 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: step 500, loss 3.8622, 456 sequences/s, lr 1.05e-03
+2026-09-23 21:14:57,489 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 3.8102, val 3.2342, genus 0.072, 234 s
+2026-09-23 21:14:57,489 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: epoch 3 done in 3.9 min, val loss 3.2342, genus 0.072, species 0.024
+2026-09-23 21:14:57,521 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: epoch 4/6 started (782 batches)
+2026-09-23 21:17:17,038 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: step 500, loss 3.5766, 459 sequences/s, lr 5.99e-04
+2026-09-23 21:18:49,996 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 3.5209, val 2.9404, genus 0.074, 233 s
+2026-09-23 21:18:49,996 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: epoch 4 done in 3.9 min, val loss 2.9404, genus 0.074, species 0.037
+2026-09-23 21:18:50,027 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: epoch 5/6 started (782 batches)
+2026-09-23 21:21:10,371 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: step 500, loss 3.3044, 456 sequences/s, lr 2.18e-04
+2026-09-23 21:22:43,145 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 3.2775, val 2.7324, genus 0.187, 233 s
+2026-09-23 21:22:43,146 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: epoch 5 done in 3.9 min, val loss 2.7324, genus 0.187, species 0.057
+2026-09-23 21:22:43,182 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: epoch 6/6 started (782 batches)
+2026-09-23 21:25:03,398 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: step 500, loss 3.1737, 456 sequences/s, lr 1.60e-05
+2026-09-23 21:26:36,511 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 3.1684, val 2.6975, genus 0.203, 233 s
+2026-09-23 21:26:36,511 INFO     taxonomy_classifier.training.trainer: Transformer trial 7: epoch 6 done in 3.9 min, val loss 2.6975, genus 0.203, species 0.052
+[I 2026-09-23 21:26:36,741] Trial 7 pruned. 
+2026-09-23 21:26:36,937 INFO     taxonomy_classifier.cli: Transformer trial 8: {'dropout': 0.023624932464671566, 'learning_rate': 0.0001441459463262171, 'weight_decay': 0.007854059410336324, 'warmup_fraction': 0.06702289155143469, 'sampling_power': 0.48952950933232975, 'crop_probability': 0.4345339395878396, 'transformer_tokenizer': 'k6s3', 'transformer_dim': 192, 'transformer_layers': 4}
+2026-09-23 21:26:37,086 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: epoch 1/6 started (782 batches)
+2026-09-23 21:30:14,483 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: step 500, loss 5.1212, 294 sequences/s, lr 1.44e-04
+2026-09-23 21:32:38,435 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.8798, val 3.9876, genus 0.141, 361 s
+2026-09-23 21:32:38,435 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: epoch 1 done in 6.0 min, val loss 3.9876, genus 0.141, species 0.033
+2026-09-23 21:32:38,468 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: epoch 2/6 started (782 batches)
+2026-09-23 21:36:16,708 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: step 500, loss 4.2164, 293 sequences/s, lr 1.27e-04
+2026-09-23 21:38:39,998 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 4.1506, val 3.5768, genus 0.176, 362 s
+2026-09-23 21:38:39,999 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: epoch 2 done in 6.0 min, val loss 3.5768, genus 0.176, species 0.043
+2026-09-23 21:38:40,031 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: epoch 3/6 started (782 batches)
+2026-09-23 21:42:18,179 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: step 500, loss 3.8997, 293 sequences/s, lr 9.44e-05
+2026-09-23 21:44:42,093 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 3.8531, val 3.2174, genus 0.204, 362 s
+2026-09-23 21:44:42,093 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: epoch 3 done in 6.0 min, val loss 3.2174, genus 0.204, species 0.047
+2026-09-23 21:44:42,125 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: epoch 4/6 started (782 batches)
+2026-09-23 21:48:20,491 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: step 500, loss 3.6769, 293 sequences/s, lr 5.45e-05
+2026-09-23 21:50:44,029 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 3.6475, val 3.0063, genus 0.211, 362 s
+2026-09-23 21:50:44,030 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: epoch 4 done in 6.0 min, val loss 3.0063, genus 0.211, species 0.055
+2026-09-23 21:50:44,062 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: epoch 5/6 started (782 batches)
+2026-09-23 21:54:22,381 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: step 500, loss 3.5423, 293 sequences/s, lr 2.00e-05
+2026-09-23 21:56:46,538 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 3.5255, val 2.8813, genus 0.235, 363 s
+2026-09-23 21:56:46,538 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: epoch 5 done in 6.0 min, val loss 2.8813, genus 0.235, species 0.068
+2026-09-23 21:56:46,571 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: epoch 6/6 started (782 batches)
+2026-09-23 22:00:24,875 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: step 500, loss 3.4907, 293 sequences/s, lr 1.47e-06
+2026-09-23 22:02:48,412 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 3.4853, val 2.8644, genus 0.243, 362 s
+2026-09-23 22:02:48,412 INFO     taxonomy_classifier.training.trainer: Transformer trial 8: epoch 6 done in 6.0 min, val loss 2.8644, genus 0.243, species 0.069
+[I 2026-09-23 22:02:48,646] Trial 8 pruned. 
+2026-09-23 22:02:48,861 INFO     taxonomy_classifier.cli: Transformer trial 9: {'dropout': 0.06720341170110179, 'learning_rate': 0.0018434223954697654, 'weight_decay': 0.02395496250319459, 'warmup_fraction': 0.07493777647310651, 'sampling_power': 0.24621726011237643, 'crop_probability': 0.42761316305527175, 'transformer_tokenizer': 'k12s6', 'transformer_dim': 320, 'transformer_layers': 6}
+2026-09-23 22:02:49,096 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: epoch 1/6 started (782 batches)
+2026-09-23 22:06:09,815 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: step 500, loss 4.5903, 319 sequences/s, lr 1.84e-03
+2026-09-23 22:08:24,281 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.4828, val 3.5604, genus 0.171, 335 s
+2026-09-23 22:08:24,281 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: epoch 1 done in 5.6 min, val loss 3.5604, genus 0.171, species 0.042
+2026-09-23 22:08:24,316 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: epoch 2/6 started (782 batches)
+2026-09-23 22:11:44,849 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: step 500, loss 4.2267, 319 sequences/s, lr 1.64e-03
+2026-09-23 22:13:59,931 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 4.2103, val 3.5516, genus 0.171, 336 s
+2026-09-23 22:13:59,931 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: epoch 2 done in 5.6 min, val loss 3.5516, genus 0.171, species 0.062
+2026-09-23 22:13:59,976 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: epoch 3/6 started (782 batches)
+2026-09-23 22:17:21,119 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: step 500, loss 4.1919, 318 sequences/s, lr 1.22e-03
+2026-09-23 22:19:35,753 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 4.1827, val 3.5734, genus 0.175, 336 s
+2026-09-23 22:19:35,753 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: epoch 3 done in 5.6 min, val loss 3.5734, genus 0.175, species 0.041
+2026-09-23 22:19:35,789 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: epoch 4/6 started (782 batches)
+2026-09-23 22:22:56,075 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: step 500, loss 4.1299, 320 sequences/s, lr 7.07e-04
+2026-09-23 22:25:10,961 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 4.1006, val 3.3485, genus 0.190, 335 s
+2026-09-23 22:25:10,962 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: epoch 4 done in 5.6 min, val loss 3.3485, genus 0.190, species 0.054
+2026-09-23 22:25:10,995 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: epoch 5/6 started (782 batches)
+2026-09-23 22:28:30,859 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: step 500, loss 4.0085, 320 sequences/s, lr 2.60e-04
+2026-09-23 22:30:45,581 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 3.9923, val 3.2287, genus 0.207, 335 s
+2026-09-23 22:30:45,581 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: epoch 5 done in 5.6 min, val loss 3.2287, genus 0.207, species 0.085
+2026-09-23 22:30:45,621 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: epoch 6/6 started (782 batches)
+2026-09-23 22:34:06,173 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: step 500, loss 3.9190, 319 sequences/s, lr 1.91e-05
+2026-09-23 22:36:20,520 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 3.9157, val 3.1921, genus 0.215, 335 s
+2026-09-23 22:36:20,520 INFO     taxonomy_classifier.training.trainer: Transformer trial 9: epoch 6 done in 5.6 min, val loss 3.1921, genus 0.215, species 0.092
+[I 2026-09-23 22:36:20,757] Trial 9 pruned. 
+2026-09-23 22:36:20,952 INFO     taxonomy_classifier.cli: Transformer trial 10: {'dropout': 0.24562386121309154, 'learning_rate': 0.0016364587248267396, 'weight_decay': 0.0026603034366986474, 'warmup_fraction': 0.05549240698360107, 'sampling_power': 0.9271188562461868, 'crop_probability': 0.2058979721090905, 'transformer_tokenizer': 'k12s6', 'transformer_dim': 256, 'transformer_layers': 8}
+2026-09-23 22:36:21,164 INFO     taxonomy_classifier.training.trainer: Transformer trial 10: epoch 1/6 started (782 batches)
+2026-09-23 22:39:47,148 INFO     taxonomy_classifier.training.trainer: Transformer trial 10: step 500, loss 4.7146, 311 sequences/s, lr 1.62e-03
+2026-09-23 22:42:03,379 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.5908, val 4.3739, genus 0.000, 342 s
+2026-09-23 22:42:03,379 INFO     taxonomy_classifier.training.trainer: Transformer trial 10: epoch 1 done in 5.7 min, val loss 4.3739, genus 0.000, species 0.000
+2026-09-23 22:42:03,410 INFO     taxonomy_classifier.training.trainer: Transformer trial 10: epoch 2/6 started (782 batches)
+2026-09-23 22:45:27,927 INFO     taxonomy_classifier.training.trainer: Transformer trial 10: step 500, loss 4.2576, 313 sequences/s, lr 1.43e-03
+2026-09-23 22:47:44,015 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 4.2395, val 4.4359, genus 0.001, 341 s
+2026-09-23 22:47:44,015 INFO     taxonomy_classifier.training.trainer: Transformer trial 10: epoch 2 done in 5.7 min, val loss 4.4359, genus 0.001, species 0.000
+[I 2026-09-23 22:47:44,276] Trial 10 pruned. 
+2026-09-23 22:47:44,477 INFO     taxonomy_classifier.cli: Transformer trial 11: {'dropout': 0.2451304933552201, 'learning_rate': 0.0007631569647547399, 'weight_decay': 0.07323043798032469, 'warmup_fraction': 0.07212640960619777, 'sampling_power': 0.40046113332020483, 'crop_probability': 0.7212015117639814, 'transformer_tokenizer': 'k6s3', 'transformer_dim': 320, 'transformer_layers': 8}
+2026-09-23 22:47:44,733 INFO     taxonomy_classifier.training.trainer: Transformer trial 11: epoch 1/6 started (782 batches)
+2026-09-23 22:58:01,136 INFO     taxonomy_classifier.training.trainer: Transformer trial 11: step 500, loss 4.7693, 104 sequences/s, lr 7.61e-04
+2026-09-23 23:04:50,718 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.6144, val 3.6864, genus 0.119, 1026 s
+2026-09-23 23:04:50,718 INFO     taxonomy_classifier.training.trainer: Transformer trial 11: epoch 1 done in 17.1 min, val loss 3.6864, genus 0.119, species 0.008
+2026-09-23 23:04:50,749 INFO     taxonomy_classifier.training.trainer: Transformer trial 11: epoch 2/6 started (782 batches)
+2026-09-23 23:15:05,762 INFO     taxonomy_classifier.training.trainer: Transformer trial 11: step 500, loss 4.1519, 104 sequences/s, lr 6.78e-04
+2026-09-23 23:21:53,885 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 4.0949, val 3.1998, genus 0.167, 1023 s
+2026-09-23 23:21:53,885 INFO     taxonomy_classifier.training.trainer: Transformer trial 11: epoch 2 done in 17.1 min, val loss 3.1998, genus 0.167, species 0.049
+[I 2026-09-23 23:21:54,149] Trial 11 pruned. 
+2026-09-23 23:21:54,326 INFO     taxonomy_classifier.cli: Transformer trial 12: {'dropout': 0.14850305123847735, 'learning_rate': 0.0005241310576286801, 'weight_decay': 0.01223876120411368, 'warmup_fraction': 0.07919176368850195, 'sampling_power': 0.41561666966775457, 'crop_probability': 0.4819984813109055, 'transformer_tokenizer': 'k6s3', 'transformer_dim': 320, 'transformer_layers': 6}
+2026-09-23 23:21:54,527 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: epoch 1/6 started (782 batches)
+2026-09-23 23:29:53,351 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: step 500, loss 4.7747, 134 sequences/s, lr 5.23e-04
+2026-09-23 23:35:12,383 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.5644, val 3.4710, genus 0.176, 798 s
+2026-09-23 23:35:12,383 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: epoch 1 done in 13.3 min, val loss 3.4710, genus 0.176, species 0.023
+2026-09-23 23:35:12,413 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: epoch 2/6 started (782 batches)
+2026-09-23 23:43:11,233 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: step 500, loss 3.9137, 134 sequences/s, lr 4.69e-04
+2026-09-23 23:48:31,518 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 3.8323, val 2.9745, genus 0.199, 799 s
+2026-09-23 23:48:31,518 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: epoch 2 done in 13.3 min, val loss 2.9745, genus 0.199, species 0.029
+2026-09-23 23:48:31,551 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: epoch 3/6 started (782 batches)
+2026-09-23 23:56:32,618 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: step 500, loss 3.4855, 133 sequences/s, lr 3.49e-04
+2026-09-24 00:01:51,324 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 3.4362, val 2.4971, genus 0.255, 800 s
+2026-09-24 00:01:51,324 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: epoch 3 done in 13.3 min, val loss 2.4971, genus 0.255, species 0.046
+2026-09-24 00:01:51,358 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: epoch 4/6 started (782 batches)
+2026-09-24 00:09:53,349 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: step 500, loss 3.1886, 133 sequences/s, lr 2.03e-04
+2026-09-24 00:15:14,356 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 3.1496, val 2.2457, genus 0.300, 803 s
+2026-09-24 00:15:14,356 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: epoch 4 done in 13.4 min, val loss 2.2457, genus 0.300, species 0.104
+2026-09-24 00:15:14,387 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: epoch 5/6 started (782 batches)
+2026-09-24 00:23:18,299 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: step 500, loss 2.9824, 132 sequences/s, lr 7.46e-05
+2026-09-24 00:28:40,123 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 2.9611, val 2.0920, genus 0.359, 806 s
+2026-09-24 00:28:40,123 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: epoch 5 done in 13.4 min, val loss 2.0920, genus 0.359, species 0.128
+2026-09-24 00:28:40,152 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: epoch 6/6 started (782 batches)
+2026-09-24 00:36:42,714 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: step 500, loss 2.8830, 133 sequences/s, lr 5.49e-06
+2026-09-24 00:42:03,400 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 2.8806, val 2.0640, genus 0.370, 803 s
+2026-09-24 00:42:03,401 INFO     taxonomy_classifier.training.trainer: Transformer trial 12: epoch 6 done in 13.4 min, val loss 2.0640, genus 0.370, species 0.140
+[I 2026-09-24 00:42:03,688] Trial 12 finished with value: 0.2549359730155514 and parameters: {'dropout': 0.14850305123847735, 'learning_rate': 0.0005241310576286801, 'weight_decay': 0.01223876120411368, 'warmup_fraction': 0.07919176368850195, 'sampling_power': 0.41561666966775457, 'crop_probability': 0.4819984813109055, 'transformer_tokenizer': 'k6s3', 'transformer_dim': 320, 'transformer_layers': 6}. Best is trial 12 with value: 0.2549359730155514.
+2026-09-24 00:42:03,859 INFO     taxonomy_classifier.cli: Transformer trial 13: {'dropout': 0.16998696096718938, 'learning_rate': 0.00027129816722577923, 'weight_decay': 0.0040925803989230285, 'warmup_fraction': 0.08973532832388786, 'sampling_power': 0.4820459899248859, 'crop_probability': 0.38652980231474654, 'transformer_tokenizer': 'k12s6', 'transformer_dim': 256, 'transformer_layers': 6}
+2026-09-24 00:42:04,030 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: epoch 1/6 started (782 batches)
+2026-09-24 00:44:39,238 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: step 500, loss 4.9491, 412 sequences/s, lr 2.71e-04
+2026-09-24 00:46:22,264 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.7125, val 3.6634, genus 0.162, 258 s
+2026-09-24 00:46:22,264 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: epoch 1 done in 4.3 min, val loss 3.6634, genus 0.162, species 0.037
+2026-09-24 00:46:22,293 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: epoch 2/6 started (782 batches)
+2026-09-24 00:48:56,870 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: step 500, loss 4.0099, 414 sequences/s, lr 2.45e-04
+2026-09-24 00:50:40,007 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 3.9229, val 3.0517, genus 0.199, 258 s
+2026-09-24 00:50:40,007 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: epoch 2 done in 4.3 min, val loss 3.0517, genus 0.199, species 0.067
+2026-09-24 00:50:40,039 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: epoch 3/6 started (782 batches)
+2026-09-24 00:53:15,721 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: step 500, loss 3.5844, 411 sequences/s, lr 1.84e-04
+2026-09-24 00:54:59,052 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 3.5290, val 2.6890, genus 0.253, 259 s
+2026-09-24 00:54:59,053 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: epoch 3 done in 4.3 min, val loss 2.6890, genus 0.253, species 0.076
+2026-09-24 00:54:59,084 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: epoch 4/6 started (782 batches)
+2026-09-24 00:57:34,116 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: step 500, loss 3.3032, 413 sequences/s, lr 1.07e-04
+2026-09-24 00:59:17,697 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 3.2699, val 2.4734, genus 0.291, 259 s
+2026-09-24 00:59:17,697 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: epoch 4 done in 4.3 min, val loss 2.4734, genus 0.291, species 0.076
+2026-09-24 00:59:17,730 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: epoch 5/6 started (782 batches)
+2026-09-24 01:01:53,310 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: step 500, loss 3.1390, 411 sequences/s, lr 3.95e-05
+2026-09-24 01:03:36,837 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 3.1200, val 2.3610, genus 0.308, 259 s
+2026-09-24 01:03:36,837 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: epoch 5 done in 4.3 min, val loss 2.3610, genus 0.308, species 0.083
+2026-09-24 01:03:36,874 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: epoch 6/6 started (782 batches)
+2026-09-24 01:06:12,299 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: step 500, loss 3.0580, 412 sequences/s, lr 2.91e-06
+2026-09-24 01:07:55,195 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 3.0570, val 2.3428, genus 0.316, 258 s
+2026-09-24 01:07:55,195 INFO     taxonomy_classifier.training.trainer: Transformer trial 13: epoch 6 done in 4.3 min, val loss 2.3428, genus 0.316, species 0.104
+[I 2026-09-24 01:07:55,433] Trial 13 pruned. 
+2026-09-24 01:07:55,630 INFO     taxonomy_classifier.cli: Transformer trial 14: {'dropout': 0.11149055116725676, 'learning_rate': 0.0010744155730488508, 'weight_decay': 0.001966704419178245, 'warmup_fraction': 0.07393072286175449, 'sampling_power': 0.8065523144236602, 'crop_probability': 0.514671032883786, 'transformer_tokenizer': 'k12s6', 'transformer_dim': 256, 'transformer_layers': 8}
+2026-09-24 01:07:55,829 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: epoch 1/6 started (782 batches)
+2026-09-24 01:11:17,379 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: step 500, loss 4.7601, 318 sequences/s, lr 1.07e-03
+2026-09-24 01:13:31,112 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.5909, val 4.0745, genus 0.002, 335 s
+2026-09-24 01:13:31,112 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: epoch 1 done in 5.6 min, val loss 4.0745, genus 0.002, species 0.003
+2026-09-24 01:13:31,148 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: epoch 2/6 started (782 batches)
+2026-09-24 01:16:51,789 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: step 500, loss 4.0659, 319 sequences/s, lr 9.56e-04
+2026-09-24 01:19:06,202 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 4.0049, val 3.6695, genus 0.007, 335 s
+2026-09-24 01:19:06,202 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: epoch 2 done in 5.6 min, val loss 3.6695, genus 0.007, species 0.002
+2026-09-24 01:19:06,233 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: epoch 3/6 started (782 batches)
+2026-09-24 01:22:26,986 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: step 500, loss 3.7659, 319 sequences/s, lr 7.11e-04
+2026-09-24 01:24:40,820 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 3.7222, val 3.4622, genus 0.013, 335 s
+2026-09-24 01:24:40,820 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: epoch 3 done in 5.6 min, val loss 3.4622, genus 0.013, species 0.030
+2026-09-24 01:24:40,853 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: epoch 4/6 started (782 batches)
+2026-09-24 01:28:01,468 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: step 500, loss 3.5209, 319 sequences/s, lr 4.11e-04
+2026-09-24 01:30:15,318 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 3.4849, val 3.1282, genus 0.038, 334 s
+2026-09-24 01:30:15,318 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: epoch 4 done in 5.6 min, val loss 3.1282, genus 0.038, species 0.029
+2026-09-24 01:30:15,353 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: epoch 5/6 started (782 batches)
+2026-09-24 01:33:36,439 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: step 500, loss 3.3260, 318 sequences/s, lr 1.51e-04
+2026-09-24 01:35:50,355 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 3.3025, val 2.9733, genus 0.082, 335 s
+2026-09-24 01:35:50,355 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: epoch 5 done in 5.6 min, val loss 2.9733, genus 0.082, species 0.017
+2026-09-24 01:35:50,385 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: epoch 6/6 started (782 batches)
+2026-09-24 01:39:11,484 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: step 500, loss 3.2176, 318 sequences/s, lr 1.11e-05
+2026-09-24 01:41:25,681 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 3.2112, val 2.9267, genus 0.155, 335 s
+2026-09-24 01:41:25,681 INFO     taxonomy_classifier.training.trainer: Transformer trial 14: epoch 6 done in 5.6 min, val loss 2.9267, genus 0.155, species 0.037
+[I 2026-09-24 01:41:25,945] Trial 14 pruned. 
+2026-09-24 01:41:26,152 INFO     taxonomy_classifier.cli: Transformer trial 15: {'dropout': 0.1444036101518832, 'learning_rate': 0.0007439857110596231, 'weight_decay': 0.0036721259226001075, 'warmup_fraction': 0.04957659213568436, 'sampling_power': 0.36375908404426427, 'crop_probability': 0.5152214489079162, 'transformer_tokenizer': 'k6s3', 'transformer_dim': 320, 'transformer_layers': 6}
+2026-09-24 01:41:26,368 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: epoch 1/6 started (782 batches)
+2026-09-24 01:49:21,271 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: step 500, loss 4.6800, 135 sequences/s, lr 7.37e-04
+2026-09-24 01:54:37,391 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.4920, val 3.5958, genus 0.150, 791 s
+2026-09-24 01:54:37,391 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: epoch 1 done in 13.2 min, val loss 3.5958, genus 0.150, species 0.021
+2026-09-24 01:54:37,430 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: epoch 2/6 started (782 batches)
+2026-09-24 02:02:32,277 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: step 500, loss 3.9084, 135 sequences/s, lr 6.47e-04
+2026-09-24 02:07:49,530 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 3.8417, val 2.9321, genus 0.214, 792 s
+2026-09-24 02:07:49,531 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: epoch 2 done in 13.2 min, val loss 2.9321, genus 0.214, species 0.062
+2026-09-24 02:07:49,568 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: epoch 3/6 started (782 batches)
+2026-09-24 02:15:45,889 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: step 500, loss 3.5506, 134 sequences/s, lr 4.75e-04
+2026-09-24 02:21:03,077 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 3.5025, val 2.5255, genus 0.264, 794 s
+2026-09-24 02:21:03,077 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: epoch 3 done in 13.2 min, val loss 2.5255, genus 0.264, species 0.067
+2026-09-24 02:21:03,111 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: epoch 4/6 started (782 batches)
+2026-09-24 02:29:00,380 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: step 500, loss 3.2918, 134 sequences/s, lr 2.73e-04
+2026-09-24 02:34:17,890 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 3.2482, val 2.2427, genus 0.303, 795 s
+2026-09-24 02:34:17,890 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: epoch 4 done in 13.2 min, val loss 2.2427, genus 0.303, species 0.106
+2026-09-24 02:34:17,924 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: epoch 5/6 started (782 batches)
+2026-09-24 02:42:13,793 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: step 500, loss 3.0837, 134 sequences/s, lr 9.97e-05
+2026-09-24 02:47:29,926 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 3.0574, val 2.1193, genus 0.342, 792 s
+2026-09-24 02:47:29,926 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: epoch 5 done in 13.2 min, val loss 2.1193, genus 0.342, species 0.117
+2026-09-24 02:47:29,958 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: epoch 6/6 started (782 batches)
+2026-09-24 02:55:26,309 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: step 500, loss 2.9908, 134 sequences/s, lr 7.31e-06
+2026-09-24 03:00:42,966 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 2.9848, val 2.0906, genus 0.350, 793 s
+2026-09-24 03:00:42,966 INFO     taxonomy_classifier.training.trainer: Transformer trial 15: epoch 6 done in 13.2 min, val loss 2.0906, genus 0.350, species 0.120
+[I 2026-09-24 03:00:43,292] Trial 15 finished with value: 0.234987047027727 and parameters: {'dropout': 0.1444036101518832, 'learning_rate': 0.0007439857110596231, 'weight_decay': 0.0036721259226001075, 'warmup_fraction': 0.04957659213568436, 'sampling_power': 0.36375908404426427, 'crop_probability': 0.5152214489079162, 'transformer_tokenizer': 'k6s3', 'transformer_dim': 320, 'transformer_layers': 6}. Best is trial 12 with value: 0.2549359730155514.
+2026-09-24 03:00:43,493 INFO     taxonomy_classifier.cli: Transformer trial 16: {'dropout': 0.08501520343154548, 'learning_rate': 0.0008712527489399975, 'weight_decay': 0.0066987747669526925, 'warmup_fraction': 0.05137230491541184, 'sampling_power': 0.3098116197938878, 'crop_probability': 0.47275022885694473, 'transformer_tokenizer': 'k6s3', 'transformer_dim': 320, 'transformer_layers': 4}
+2026-09-24 03:00:43,685 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: epoch 1/6 started (782 batches)
+2026-09-24 03:06:05,337 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: step 500, loss 4.6032, 199 sequences/s, lr 8.64e-04
+2026-09-24 03:09:39,338 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.3997, val 3.1256, genus 0.190, 536 s
+2026-09-24 03:09:39,338 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: epoch 1 done in 8.9 min, val loss 3.1256, genus 0.190, species 0.064
+2026-09-24 03:09:39,369 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: epoch 2/6 started (782 batches)
+2026-09-24 03:15:02,082 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: step 500, loss 3.7723, 198 sequences/s, lr 7.59e-04
+2026-09-24 03:18:37,130 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 3.6942, val 2.6509, genus 0.229, 538 s
+2026-09-24 03:18:37,130 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: epoch 2 done in 9.0 min, val loss 2.6509, genus 0.229, species 0.044
+2026-09-24 03:18:37,166 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: epoch 3/6 started (782 batches)
+2026-09-24 03:23:59,843 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: step 500, loss 3.3740, 198 sequences/s, lr 5.58e-04
+2026-09-24 03:27:34,514 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 3.3146, val 2.2346, genus 0.311, 537 s
+2026-09-24 03:27:34,514 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: epoch 3 done in 9.0 min, val loss 2.2346, genus 0.311, species 0.082
+2026-09-24 03:27:34,546 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: epoch 4/6 started (782 batches)
+2026-09-24 03:32:56,057 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: step 500, loss 3.0338, 199 sequences/s, lr 3.20e-04
+2026-09-24 03:36:31,141 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 2.9865, val 1.9232, genus 0.391, 537 s
+2026-09-24 03:36:31,141 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: epoch 4 done in 8.9 min, val loss 1.9232, genus 0.391, species 0.156
+2026-09-24 03:36:31,172 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: epoch 5/6 started (782 batches)
+2026-09-24 03:41:54,818 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: step 500, loss 2.7732, 198 sequences/s, lr 1.17e-04
+2026-09-24 03:45:30,650 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 2.7420, val 1.7572, genus 0.443, 540 s
+2026-09-24 03:45:30,650 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: epoch 5 done in 9.0 min, val loss 1.7572, genus 0.443, species 0.184
+2026-09-24 03:45:30,682 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: epoch 6/6 started (782 batches)
+2026-09-24 03:50:54,730 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: step 500, loss 2.6366, 198 sequences/s, lr 8.60e-06
+2026-09-24 03:54:29,148 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 2.6344, val 1.7108, genus 0.457, 538 s
+2026-09-24 03:54:29,148 INFO     taxonomy_classifier.training.trainer: Transformer trial 16: epoch 6 done in 9.0 min, val loss 1.7108, genus 0.457, species 0.198
+[I 2026-09-24 03:54:29,421] Trial 16 finished with value: 0.32770557284327606 and parameters: {'dropout': 0.08501520343154548, 'learning_rate': 0.0008712527489399975, 'weight_decay': 0.0066987747669526925, 'warmup_fraction': 0.05137230491541184, 'sampling_power': 0.3098116197938878, 'crop_probability': 0.47275022885694473, 'transformer_tokenizer': 'k6s3', 'transformer_dim': 320, 'transformer_layers': 4}. Best is trial 16 with value: 0.32770557284327606.
+2026-09-24 03:54:29,627 INFO     taxonomy_classifier.cli: Transformer trial 17: {'dropout': 0.181709314773908, 'learning_rate': 0.0011517327231060825, 'weight_decay': 0.016955503745380532, 'warmup_fraction': 0.05710773000783205, 'sampling_power': 0.47044208919458863, 'crop_probability': 0.4596569150170445, 'transformer_tokenizer': 'k8s4', 'transformer_dim': 320, 'transformer_layers': 4}
+2026-09-24 03:54:29,831 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: epoch 1/6 started (782 batches)
+2026-09-24 03:58:09,399 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: step 500, loss 4.7009, 291 sequences/s, lr 1.14e-03
+2026-09-24 04:00:35,854 INFO     taxonomy_classifier.training.trainer: Epoch 1/6: train 4.5493, val 3.6451, genus 0.139, 366 s
+2026-09-24 04:00:35,854 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: epoch 1 done in 6.1 min, val loss 3.6451, genus 0.139, species 0.046
+2026-09-24 04:00:35,886 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: epoch 2/6 started (782 batches)
+2026-09-24 04:04:15,981 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: step 500, loss 4.1281, 291 sequences/s, lr 1.01e-03
+2026-09-24 04:06:43,163 INFO     taxonomy_classifier.training.trainer: Epoch 2/6: train 4.0753, val 3.3798, genus 0.168, 367 s
+2026-09-24 04:06:43,164 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: epoch 2 done in 6.1 min, val loss 3.3798, genus 0.168, species 0.055
+2026-09-24 04:06:43,195 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: epoch 3/6 started (782 batches)
+2026-09-24 04:10:22,342 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: step 500, loss 3.8644, 292 sequences/s, lr 7.43e-04
+2026-09-24 04:12:48,574 INFO     taxonomy_classifier.training.trainer: Epoch 3/6: train 3.8274, val 3.0016, genus 0.194, 365 s
+2026-09-24 04:12:48,574 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: epoch 3 done in 6.1 min, val loss 3.0016, genus 0.194, species 0.069
+2026-09-24 04:12:48,612 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: epoch 4/6 started (782 batches)
+2026-09-24 04:16:27,799 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: step 500, loss 3.6365, 292 sequences/s, lr 4.28e-04
+2026-09-24 04:18:54,527 INFO     taxonomy_classifier.training.trainer: Epoch 4/6: train 3.5939, val 2.7149, genus 0.253, 366 s
+2026-09-24 04:18:54,527 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: epoch 4 done in 6.1 min, val loss 2.7149, genus 0.253, species 0.091
+2026-09-24 04:18:54,558 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: epoch 5/6 started (782 batches)
+2026-09-24 04:22:34,764 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: step 500, loss 3.4121, 291 sequences/s, lr 1.57e-04
+2026-09-24 04:25:01,966 INFO     taxonomy_classifier.training.trainer: Epoch 5/6: train 3.3751, val 2.4758, genus 0.313, 367 s
+2026-09-24 04:25:01,966 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: epoch 5 done in 6.1 min, val loss 2.4758, genus 0.313, species 0.135
+2026-09-24 04:25:01,998 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: epoch 6/6 started (782 batches)
+2026-09-24 04:28:41,971 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: step 500, loss 3.2715, 291 sequences/s, lr 1.15e-05
+2026-09-24 04:31:09,019 INFO     taxonomy_classifier.training.trainer: Epoch 6/6: train 3.2622, val 2.4227, genus 0.330, 367 s
+2026-09-24 04:31:09,019 INFO     taxonomy_classifier.training.trainer: Transformer trial 17: epoch 6 done in 6.1 min, val loss 2.4227, genus 0.330, species 0.138
+[I 2026-09-24 04:31:09,278] Trial 17 finished with value: 0.23403850736639692 and parameters: {'dropout': 0.181709314773908, 'learning_rate': 0.0011517327231060825, 'weight_decay': 0.016955503745380532, 'warmup_fraction': 0.05710773000783205, 'sampling_power': 0.47044208919458863, 'crop_probability': 0.4596569150170445, 'transformer_tokenizer': 'k8s4', 'transformer_dim': 320, 'transformer_layers': 4}. Best is trial 16 with value: 0.32770557284327606.
+2026-09-24 04:31:09,480 INFO     taxonomy_classifier.cli: Transformer trial 18: {'dropout': 0.009803618771503, 'learning_rate': 0.00045486140901266844, 'weight_decay': 0.0056205931394956495, 'warmup_fraction': 0.02744441627965233, 'sampling_power': 0.4641676316890567, 'crop_probability': 0.49018743764787936, 'transformer_tokenizer': 'k6s3', 'transformer_dim': 320, 'transformer_layers': 4}
+2026-09-24 04:31:09,675 INFO     taxonomy_classifier.training.trainer: Transformer trial 18: epoch 1/6 started (782 batches)
+[I 2026-09-24 04:35:41,356] Trial 18 pruned. 
+2026-09-24 04:35:41,525 INFO     taxonomy_classifier.cli: Transformer best trial 16: 0.3277 {'dropout': 0.08501520343154548, 'learning_rate': 0.0008712527489399975, 'weight_decay': 0.0066987747669526925, 'warmup_fraction': 0.05137230491541184, 'sampling_power': 0.3098116197938878, 'crop_probability': 0.47275022885694473, 'transformer_tokenizer': 'k6s3', 'transformer_dim': 320, 'transformer_layers': 4}
