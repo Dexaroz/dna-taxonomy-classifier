@@ -149,8 +149,13 @@ class TrainingData:
     train: LabeledSet
     frequencies: torch.Tensor
     validation: LabeledSet
+    validation_markers: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
+        if self.validation_markers and len(self.validation_markers) != len(self.validation):
+            msg = "Expected one marker per validation sequence"
+            raise ValueError(msg)
+
         if len(self.frequencies) != len(self.train):
             msg = f"Expected one class frequency per training sequence, got {len(self.frequencies)}"
             raise ValueError(msg)

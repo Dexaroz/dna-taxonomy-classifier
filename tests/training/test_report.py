@@ -7,7 +7,13 @@ import torch
 
 from taxonomy_classifier.model.labels import IGNORE_INDEX, LEVELS, LabelSpace
 from taxonomy_classifier.training.data import LabeledSet, SequenceBank
-from taxonomy_classifier.training.report import LevelReport, classification_report, format_report
+from taxonomy_classifier.training.report import (
+    OVERALL,
+    LevelReport,
+    classification_report,
+    format_group_summary,
+    format_report,
+)
 
 if TYPE_CHECKING:
     from taxonomy_classifier.model.classifier import TaxonomyClassifier
@@ -40,10 +46,19 @@ def _data() -> LabeledSet:
     )
 
 
-def _reports() -> list[LevelReport]:
+def _grouped(groups: tuple[str, ...] = (), batch_size: int = 8) -> dict[str, list[LevelReport]]:
     return classification_report(
-        cast("TaxonomyClassifier", FixedModel()), _data(), SPACE, batch_size=8, device=CPU
+        cast("TaxonomyClassifier", FixedModel()),
+        _data(),
+        SPACE,
+        batch_size=batch_size,
+        device=CPU,
+        groups=groups,
     )
+
+
+def _reports() -> list[LevelReport]:
+    return _grouped()[OVERALL]
 
 
 def test_report_matches_hand_computed_metrics() -> None:
@@ -75,3 +90,33 @@ def test_format_report_lists_every_level() -> None:
     assert "support" in lines[0]
     assert [line.split()[0] for line in lines[2:]] == list(LEVELS)
     assert lines[2 + LEVELS.index("genus")].split()[1:2] == ["0.5000"]
+
+
+def test_groups_get_their_own_reports_across_batches() -> None:
+    grouped = _grouped(("coi", "ssu", "ssu", "ssu"), batch_size=3)
+    genus = LEVELS.index("genus")
+
+    assert list(grouped) == [OVERALL, "coi", "ssu"]
+    assert grouped[OVERALL][genus].accuracy == pytest.approx(0.5)
+    assert grouped["coi"][genus].accuracy == pytest.approx(1.0)
+    assert grouped["ssu"][genus].accuracy == pytest.approx(1 / 3)
+    assert (grouped["coi"][genus].support, grouped["ssu"][genus].support) == (1, 3)
+
+
+def test_groups_must_cover_every_sequence() -> None:
+    with pytest.raises(ValueError, match="one group per sequence"):
+        _grouped(("coi",))
+
+
+def test_group_summary_has_one_row_per_group_and_dashes_for_missing_levels() -> None:
+    lines = format_group_summary(_grouped(("coi", "ssu", "ssu", "ssu"))).splitlines()
+
+    assert lines[0].split() == [*LEVELS, "support"]
+    assert [line.split()[0] for line in lines[2:]] == [OVERALL, "coi", "ssu"]
+    assert lines[3].split()[-2:] == ["-", "1"]
+
+
+def test_group_summary_can_show_another_metric() -> None:
+    summary = format_group_summary({OVERALL: _reports()}, metric="macro_f1")
+
+    assert summary.splitlines()[2].split()[LEVELS.index("genus") + 1] == f"{(2 / 3 + 0.5) / 3:.4f}"

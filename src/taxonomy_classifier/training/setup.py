@@ -35,6 +35,12 @@ def load_training_data(
     )
     write_text_atomic(label_space_path(layout), label_space.to_json())
 
+    markers = (
+        tuple(validation.select("marker").collect().get_column("marker").to_list())
+        if "marker" in validation.collect_schema().names()
+        else ()
+    )
+
     data = TrainingData(
         train=LabeledSet.from_frame(
             train, label_space, cache=layout.interim_dir / TRAIN_TOKENS_FILENAME
@@ -43,6 +49,7 @@ def load_training_data(
         validation=LabeledSet.from_frame(
             validation, label_space, cache=layout.interim_dir / VALIDATION_TOKENS_FILENAME
         ),
+        validation_markers=markers,
     )
 
     return label_space, data

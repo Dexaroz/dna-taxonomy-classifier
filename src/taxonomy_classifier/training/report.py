@@ -8,11 +8,13 @@ from taxonomy_classifier.model.labels import IGNORE_INDEX, LEVELS
 from taxonomy_classifier.training.trainer import Precision, predict_batches
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
 
     from taxonomy_classifier.model.classifier import TaxonomyClassifier
     from taxonomy_classifier.model.labels import LabelSpace
     from taxonomy_classifier.training.data import LabeledSet
+
+OVERALL: Final = "all"
 
 _COLUMNS: Final = (
     ("accuracy", "accuracy"),
@@ -58,15 +60,17 @@ def classification_report(
     device: torch.device,
     precision: Precision = Precision.FP32,
     max_length: int | None = None,
-) -> list[LevelReport]:
-    counts = [
-        _Counts(
-            hits=torch.zeros(size, dtype=torch.long, device=device),
-            predicted=torch.zeros(size, dtype=torch.long, device=device),
-            actual=torch.zeros(size, dtype=torch.long, device=device),
-        )
-        for size in label_space.sizes
-    ]
+    groups: Sequence[str] = (),
+) -> dict[str, list[LevelReport]]:
+    if groups and len(groups) != len(data):
+        msg = f"Expected one group per sequence, got {len(groups)} for {len(data)}"
+        raise ValueError(msg)
+
+    names = sorted(set(groups))
+    codes = {name: code for code, name in enumerate(names)}
+    group_codes = torch.tensor([codes[group] for group in groups], dtype=torch.long)
+    counters = {name: _empty_counts(label_space, device) for name in (OVERALL, *names)}
+    start = 0
 
     for logits, targets in predict_batches(
         model,
@@ -76,22 +80,28 @@ def classification_report(
         precision=precision,
         max_length=max_length,
     ):
-        for index, (level_logits, level_counts) in enumerate(zip(logits, counts, strict=True)):
-            target = targets[:, index]
-            known = target != IGNORE_INDEX
+        rows = len(targets)
 
-            actual = target[known]
-            predicted = level_logits.argmax(dim=-1)[known]
-            size = level_counts.actual.numel()
+        _accumulate(counters[OVERALL], logits, targets)
 
-            level_counts.hits.add_(torch.bincount(actual[predicted == actual], minlength=size))
-            level_counts.predicted.add_(torch.bincount(predicted, minlength=size))
-            level_counts.actual.add_(torch.bincount(actual, minlength=size))
+        if names:
+            batch_codes = group_codes[start : start + rows].to(device)
 
-    return [
-        _level_report(level, level_counts)
-        for level, level_counts in zip(LEVELS, counts, strict=True)
-    ]
+            for code in torch.unique(batch_codes).tolist():
+                selected = batch_codes == code
+                chosen = [level_logits[selected] for level_logits in logits]
+
+                _accumulate(counters[names[code]], chosen, targets[selected])
+
+        start += rows
+
+    return {
+        name: [
+            _level_report(level, level_counts)
+            for level, level_counts in zip(LEVELS, counts, strict=True)
+        ]
+        for name, counts in counters.items()
+    }
 
 
 def format_report(reports: Sequence[LevelReport]) -> str:
@@ -109,6 +119,52 @@ def format_report(reports: Sequence[LevelReport]) -> str:
     ]
 
     return "\n".join([header, "", *rows])
+
+
+def format_group_summary(
+    reports: Mapping[str, Sequence[LevelReport]], *, metric: str = "accuracy"
+) -> str:
+    header = f"{'':>10}" + "".join(f"{level:>10}" for level in LEVELS) + f"{'support':>10}"
+
+    rows = [
+        f"{name:>10}"
+        + "".join(_cell(getattr(report, metric)) for report in levels)
+        + f"{levels[0].support:>10}"
+        for name, levels in reports.items()
+    ]
+
+    return "\n".join([header, "", *rows])
+
+
+def _cell(value: float) -> str:
+    return f"{'-':>10}" if math.isnan(value) else f"{value:>10.4f}"
+
+
+def _empty_counts(label_space: LabelSpace, device: torch.device) -> list[_Counts]:
+    return [
+        _Counts(
+            hits=torch.zeros(size, dtype=torch.long, device=device),
+            predicted=torch.zeros(size, dtype=torch.long, device=device),
+            actual=torch.zeros(size, dtype=torch.long, device=device),
+        )
+        for size in label_space.sizes
+    ]
+
+
+def _accumulate(
+    counts: Sequence[_Counts], logits: Sequence[torch.Tensor], targets: torch.Tensor
+) -> None:
+    for index, (level_logits, level_counts) in enumerate(zip(logits, counts, strict=True)):
+        target = targets[:, index]
+        known = target != IGNORE_INDEX
+
+        actual = target[known]
+        predicted = level_logits.argmax(dim=-1)[known]
+        size = level_counts.actual.numel()
+
+        level_counts.hits.add_(torch.bincount(actual[predicted == actual], minlength=size))
+        level_counts.predicted.add_(torch.bincount(predicted, minlength=size))
+        level_counts.actual.add_(torch.bincount(actual, minlength=size))
 
 
 def _level_report(level: str, counts: _Counts) -> LevelReport:

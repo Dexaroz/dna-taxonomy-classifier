@@ -1,4 +1,4 @@
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass, field, replace
 import json
 import time
 from typing import TYPE_CHECKING, Any, Final
@@ -8,7 +8,7 @@ import optuna
 from taxonomy_classifier.data.files import write_text_atomic
 from taxonomy_classifier.exceptions import DataError, TrainingDeadlineError
 from taxonomy_classifier.model.classifier import build_classifier, parameter_counts
-from taxonomy_classifier.training.report import classification_report
+from taxonomy_classifier.training.report import OVERALL, classification_report
 from taxonomy_classifier.training.search import SearchConfig, TrialSetup, suggest_setup
 from taxonomy_classifier.training.setup import LABEL_SPACE_FILENAME
 from taxonomy_classifier.training.trainer import (
@@ -32,6 +32,8 @@ if TYPE_CHECKING:
 RUN_FILENAME: Final = "run.json"
 
 REPORT_FILENAME: Final = "report.json"
+
+MARKER_REPORT_FILENAME: Final = "report_by_marker.json"
 
 _ROW_FIELDS: Final = frozenset({"trial", "state", "value", "epochs"})
 
@@ -66,6 +68,7 @@ class FinalConfig:
 class FinalResult:
     history: list[EpochRecord]
     reports: list[LevelReport]
+    marker_reports: dict[str, list[LevelReport]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
@@ -194,7 +197,7 @@ def train_final(
 
     load_weights(model, output_dir / BEST_CHECKPOINT, device=device)
 
-    reports = classification_report(
+    grouped = classification_report(
         model,
         data.validation,
         label_space,
@@ -202,13 +205,28 @@ def train_final(
         device=device,
         precision=setup.training.precision,
         max_length=setup.training.max_length,
+        groups=data.validation_markers,
     )
+    reports = grouped.pop(OVERALL)
+
     write_text_atomic(
         output_dir / REPORT_FILENAME,
         json.dumps([report.to_dict() for report in reports], indent=2),
     )
 
-    return FinalResult(history=history, reports=reports)
+    if grouped:
+        write_text_atomic(
+            output_dir / MARKER_REPORT_FILENAME,
+            json.dumps(
+                {
+                    marker: [report.to_dict() for report in levels]
+                    for marker, levels in grouped.items()
+                },
+                indent=2,
+            ),
+        )
+
+    return FinalResult(history=history, reports=reports, marker_reports=grouped)
 
 
 def _describe(

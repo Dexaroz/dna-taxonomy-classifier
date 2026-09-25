@@ -16,7 +16,7 @@ from taxonomy_classifier.exceptions import DataError, GeneflowError, TrainingDea
 from taxonomy_classifier.training.final import FinalConfig, load_search_choice, train_final
 from taxonomy_classifier.training.oversampling import OversamplingConfig, oversample_train
 from taxonomy_classifier.training.progress import ProgressBarMonitor
-from taxonomy_classifier.training.report import format_report
+from taxonomy_classifier.training.report import OVERALL, format_group_summary, format_report
 from taxonomy_classifier.training.search import SUGGESTERS, SearchConfig, run_search
 from taxonomy_classifier.training.setup import load_training_data
 from taxonomy_classifier.training.trainer import LoggingMonitor, Precision
@@ -282,6 +282,15 @@ def _train(args: argparse.Namespace, layout: DataLayout) -> None:
         f"Classification report on validation, best epoch {best.epoch}/{len(result.history)}\n\n"
         f"{format_report(result.reports)}\n\n"
     )
+
+    if result.marker_reports:
+        grouped = {OVERALL: result.reports, **result.marker_reports}
+
+        sys.stdout.write(
+            f"Accuracy by marker\n\n{format_group_summary(grouped)}\n\n"
+            f"Macro-F1 by marker\n\n{format_group_summary(grouped, metric='macro_f1')}\n\n"
+        )
+
     sys.stdout.flush()
 
     _LOGGER.info("%s finished; checkpoints and reports in %s", name, output)

@@ -1,3 +1,4 @@
+from dataclasses import replace
 import json
 import runpy
 import sys
@@ -10,12 +11,15 @@ import pytest
 
 from taxonomy_classifier import cli
 from taxonomy_classifier.data.build import DataLayout
+from taxonomy_classifier.training import setup
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from taxonomy_classifier.data.sources.base import DataSource, TaxonomySource
     from taxonomy_classifier.data.sources.genbank import GenBankSource
+    from taxonomy_classifier.model.labels import LabelSpace
+    from taxonomy_classifier.training.data import TrainingData
 
 
 @pytest.fixture
@@ -289,7 +293,32 @@ def test_train_writes_checkpoints_progress_and_reports(
     assert "val_loss:" in output
     assert "Classification report on validation, best epoch 1/1" in output
     assert "macro-f1" in output
+    assert "Accuracy by marker" in output
+    assert "Macro-F1 by marker" in output
+    assert (tmp_path / "final" / "report_by_marker.json").exists()
     assert steps[0]["step"] == 1
+
+
+def test_train_skips_the_marker_tables_without_markers(
+    built_layout: DataLayout,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    load = setup.load_training_data
+
+    def without_markers(
+        layout: DataLayout, *, min_class_count: int
+    ) -> tuple[LabelSpace, TrainingData]:
+        label_space, data = load(layout, min_class_count=min_class_count)
+
+        return label_space, replace(data, validation_markers=())
+
+    monkeypatch.setattr(cli, "load_training_data", without_markers)
+
+    assert cli.main(_train_arguments(built_layout, tmp_path, "--epochs", "1")) == 0
+    assert "by marker" not in capsys.readouterr().out
+    assert not (tmp_path / "final" / "report_by_marker.json").exists()
 
 
 def test_train_stops_cleanly_at_its_time_budget(

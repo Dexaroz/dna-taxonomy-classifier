@@ -1,3 +1,4 @@
+from dataclasses import replace
 import json
 import time
 from typing import TYPE_CHECKING
@@ -11,6 +12,7 @@ from taxonomy_classifier.model.encoders import CnnConfig, TransformerConfig
 from taxonomy_classifier.model.labels import LEVELS, LabelSpace
 from taxonomy_classifier.training.data import LabeledSet, SequenceBank, TrainingData
 from taxonomy_classifier.training.final import (
+    MARKER_REPORT_FILENAME,
     REPORT_FILENAME,
     RUN_FILENAME,
     DeadlineMonitor,
@@ -260,6 +262,28 @@ def test_train_final_writes_checkpoints_and_a_run_description(tmp_path: Path) ->
     assert (
         LabelSpace.from_json((tmp_path / LABEL_SPACE_FILENAME).read_text(encoding="utf-8")) == SPACE
     )
+    assert result.marker_reports == {}
+    assert not (tmp_path / MARKER_REPORT_FILENAME).exists()
+
+
+def test_train_final_reports_each_marker_separately(tmp_path: Path) -> None:
+    data = replace(DATA, validation_markers=("coi", "ssu"))
+
+    result = train_final(
+        SearchChoice(trial=12, params=CNN_PARAMS),
+        data,
+        SPACE,
+        config=TINY_FINAL,
+        output_dir=tmp_path,
+        device=CPU,
+    )
+
+    written = json.loads((tmp_path / MARKER_REPORT_FILENAME).read_text(encoding="utf-8"))
+
+    assert list(result.marker_reports) == ["coi", "ssu"]
+    assert list(written) == ["coi", "ssu"]
+    assert written["coi"][0]["support"] == 1
+    assert result.reports[0].support == 2
 
 
 def test_train_final_stops_at_its_time_budget(tmp_path: Path) -> None:

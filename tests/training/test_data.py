@@ -104,6 +104,18 @@ def test_training_data_needs_one_weight_per_sequence() -> None:
         TrainingData(train=labeled, frequencies=torch.ones(2), validation=labeled)
 
 
+def test_training_data_needs_one_marker_per_validation_sequence() -> None:
+    labeled = LabeledSet.from_frame(FRAME, SPACE)
+
+    with pytest.raises(ValueError, match="one marker per validation sequence"):
+        TrainingData(
+            train=labeled,
+            frequencies=torch.ones(len(labeled)),
+            validation=labeled,
+            validation_markers=("ssu",),
+        )
+
+
 def test_training_data_rejects_frequencies_below_one() -> None:
     labeled = LabeledSet.from_frame(FRAME, SPACE)
 
