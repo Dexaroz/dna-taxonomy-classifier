@@ -5,6 +5,7 @@ from taxonomy_classifier.data.dna import count_ambiguous
 
 if TYPE_CHECKING:
     from taxonomy_classifier.data.kingdom import Kingdom
+    from taxonomy_classifier.data.markers import Marker
     from taxonomy_classifier.data.taxonomy import Lineage, Taxon
 
 
@@ -16,6 +17,7 @@ class SequenceRecord:
     source_lineage: tuple[Taxon, ...]
     lineage: Lineage
     kingdom: Kingdom | None
+    marker: Marker
 
     @property
     def length(self) -> int:

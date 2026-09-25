@@ -1,10 +1,11 @@
 from dataclasses import dataclass
+from functools import partial
 import re
 from typing import TYPE_CHECKING, Final
 
 from taxonomy_classifier.data.dna import normalize_sequence
 from taxonomy_classifier.data.exclusions import ExclusionReason
-from taxonomy_classifier.data.kingdom import Kingdom
+from taxonomy_classifier.data.markers import Marker
 from taxonomy_classifier.data.records import SequenceRecord
 from taxonomy_classifier.data.sources.base import parse_fasta_file
 from taxonomy_classifier.data.taxonomy import Lineage, Rank, Taxon
@@ -41,16 +42,6 @@ _PLACEHOLDER: Final = re.compile(r"_X+$")
 
 _UNNAMED_SPECIES: Final = "_sp."
 
-_DIVISION: Final = 2
-
-_SUBDIVISION: Final = 3
-
-_PLANT_DIVISIONS: Final = frozenset(
-    {"Streptophyta", "Chlorophyta", "Prasinodermophyta", "Rhodophyta", "Glaucophyta"}
-)
-
-_OPISTHOKONT_KINGDOMS: Final = {"Metazoa": Kingdom.ANIMALIA, "Fungi": Kingdom.FUNGI}
-
 
 @dataclass(frozen=True, slots=True)
 class Pr2Source:
@@ -67,15 +58,15 @@ class Pr2Source:
 
     @property
     def is_backbone(self) -> bool:
-        return True
+        return False
 
     def read(self, raw_dir: Path, backbone: BackboneIndex) -> Iterator[Outcome]:
-        del backbone
+        parse = partial(parse_record, backbone=backbone)
 
-        yield from parse_fasta_file(raw_dir / self.fasta.filename, parse_record)
+        yield from parse_fasta_file(raw_dir / self.fasta.filename, parse)
 
 
-def parse_record(record: FastaRecord) -> Outcome:
+def parse_record(record: FastaRecord, *, backbone: BackboneIndex) -> Outcome:
     fields = record.header.split("|")
 
     if len(fields) != _METADATA_FIELDS + len(PR2_RANKS):
@@ -89,11 +80,7 @@ def parse_record(record: FastaRecord) -> Outcome:
     if (gene, organelle, raw_names[0]) != _TARGET:
         return ExclusionReason.OFF_TARGET
 
-    names: dict[Rank, str | None] = {}
-
-    for raw_name, rank in zip(raw_names, PR2_RANKS, strict=True):
-        if rank is not None:
-            names[rank] = clean_name(raw_name, rank)
+    lineage = map_names(raw_names, domain=raw_names[0], backbone=backbone)
 
     return SequenceRecord(
         source=SOURCE_NAME,
@@ -104,16 +91,28 @@ def parse_record(record: FastaRecord) -> Outcome:
             for raw_name, rank in zip(raw_names, PR2_RANKS, strict=True)
             if raw_name
         ),
-        lineage=Lineage.from_ranks(names),
-        kingdom=pr2_kingdom(raw_names[_DIVISION], raw_names[_SUBDIVISION]),
+        lineage=lineage,
+        kingdom=backbone.kingdom_of(lineage),
+        marker=Marker.SSU,
     )
 
 
-def pr2_kingdom(division: str, subdivision: str) -> Kingdom:
-    if division in _PLANT_DIVISIONS:
-        return Kingdom.PLANTAE
+def map_names(raw_names: list[str], *, domain: str, backbone: BackboneIndex) -> Lineage:
+    species = clean_name(raw_names[-1], Rank.SPECIES)
 
-    return _OPISTHOKONT_KINGDOMS.get(subdivision, Kingdom.PROTISTA)
+    if species is not None:
+        lineage = backbone.lookup_species(species, domain=domain)
+
+        if lineage is not None:
+            return lineage
+
+    candidates = [
+        name
+        for name in (clean_name(raw_name, Rank.GENUS) for raw_name in reversed(raw_names[1:-1]))
+        if name is not None
+    ]
+
+    return backbone.map_lineage(candidates, domain=domain) or Lineage.domain_only(domain)
 
 
 def clean_name(raw_name: str, rank: Rank) -> str | None:

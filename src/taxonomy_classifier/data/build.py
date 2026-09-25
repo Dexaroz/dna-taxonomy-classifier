@@ -10,6 +10,7 @@ from taxonomy_classifier.data.files import partial_path, write_text_atomic
 from taxonomy_classifier.data.filters import FilterConfig
 from taxonomy_classifier.data.harmonize import BackboneIndex
 from taxonomy_classifier.data.kingdom import Kingdom
+from taxonomy_classifier.data.markers import Marker
 from taxonomy_classifier.data.merge import merge_staged
 from taxonomy_classifier.data.split import Split, SplitConfig, assign_splits
 from taxonomy_classifier.data.staging import stage_source
@@ -19,7 +20,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from taxonomy_classifier.data.merge import MergeReport
-    from taxonomy_classifier.data.sources.base import DataSource
+    from taxonomy_classifier.data.sources.base import DataSource, RemoteBundle, TaxonomySource
     from taxonomy_classifier.data.staging import SourceReport
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -43,7 +44,7 @@ UNKNOWN_KINGDOM: Final = "unknown"
 class DataLayout:
     root: Path
 
-    def raw_dir(self, source: DataSource) -> Path:
+    def raw_dir(self, source: RemoteBundle) -> Path:
         return self.root / "raw" / source.slug
 
     @property
@@ -89,19 +90,23 @@ class BuildConfig:
 @dataclass(frozen=True, slots=True)
 class BuildReport:
     config: BuildConfig
+    taxonomies: Mapping[str, int]
     sources: Sequence[SourceReport]
     merge: MergeReport
     splits: Mapping[str, int]
     kingdoms: Mapping[str, int]
+    markers: Mapping[str, int]
     rank_coverage: Mapping[str, int]
 
     def to_json(self) -> str:
         payload = {
             "config": asdict(self.config),
+            "taxonomies": dict(self.taxonomies),
             "sources": [report.to_dict() for report in self.sources],
             "merge": self.merge.to_dict(),
             "splits": dict(self.splits),
             "kingdoms": dict(self.kingdoms),
+            "markers": dict(self.markers),
             "rank_coverage": dict(self.rank_coverage),
         }
 
@@ -113,8 +118,15 @@ def build_dataset(
     layout: DataLayout,
     *,
     config: BuildConfig,
+    taxonomies: Sequence[TaxonomySource] = (),
 ) -> BuildReport:
     backbone = BackboneIndex()
+    loaded = {
+        taxonomy.slug: taxonomy.load(layout.raw_dir(taxonomy), backbone) for taxonomy in taxonomies
+    }
+
+    for slug, count in loaded.items():
+        _LOGGER.info("Loaded %d reference taxa from %s", count, slug)
 
     source_reports = [
         stage_source(
@@ -138,10 +150,12 @@ def build_dataset(
 
     report = BuildReport(
         config=config,
+        taxonomies=loaded,
         sources=source_reports,
         merge=merge_report,
         splits=_split_counts(layout.dataset_path),
         kingdoms=_kingdom_counts(layout.dataset_path),
+        markers=_marker_counts(layout.dataset_path),
         rank_coverage=_rank_coverage(layout.dataset_path),
     )
 
@@ -192,6 +206,13 @@ def _kingdom_counts(dataset_path: Path) -> dict[str, int]:
         **{kingdom.value: observed.get(kingdom.value, 0) for kingdom in Kingdom},
         UNKNOWN_KINGDOM: observed.get(None, 0),
     }
+
+
+def _marker_counts(dataset_path: Path) -> dict[str, int]:
+    counts = pl.scan_parquet(dataset_path).group_by("marker").len().collect()
+    observed = dict(counts.iter_rows())
+
+    return {marker.value: observed.get(marker.value, 0) for marker in Marker}
 
 
 def _rank_coverage(dataset_path: Path) -> dict[str, int]:

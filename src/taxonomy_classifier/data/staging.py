@@ -37,6 +37,7 @@ _FIELDS: Final[list[pa.Field[pa.DataType]]] = [
     pa.field("source_lineage", pa.list_(pa.string()), nullable=False),
     *(pa.field(column, pa.string()) for column in RANK_COLUMNS),
     pa.field("kingdom", pa.string()),
+    pa.field("marker", pa.string(), nullable=False),
 ]
 
 STAGING_SCHEMA: Final = pa.schema(_FIELDS)
@@ -164,5 +165,6 @@ def _to_record_batch(records: Sequence[SequenceRecord]) -> pa.RecordBatch:
         columns[column] = [record.lineage.get(rank) for record in records]
 
     columns["kingdom"] = [record.kingdom for record in records]
+    columns["marker"] = [record.marker for record in records]
 
     return pa.RecordBatch.from_pydict(columns, schema=STAGING_SCHEMA)

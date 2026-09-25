@@ -41,6 +41,17 @@ class BackboneIndex:
                 self._taxa[taxon.name].add(truncated)
                 self._add_kingdom(truncated, record.kingdom)
 
+    def add_lineage(self, lineage: Lineage, kingdom: Kingdom | None) -> None:
+        rank = lineage.deepest_rank
+        name = lineage.get(rank)
+
+        if rank is Rank.DOMAIN or name is None:
+            return
+
+        index = self._species if rank is Rank.SPECIES else self._taxa
+        index[name].add(lineage)
+        self._add_kingdom(lineage, kingdom)
+
     def add_all(self, records: Iterable[SequenceRecord]) -> None:
         for record in records:
             self.add(record)

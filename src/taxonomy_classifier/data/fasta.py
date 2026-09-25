@@ -1,8 +1,10 @@
 from dataclasses import dataclass
+import io
+import tarfile
 from typing import TYPE_CHECKING
 
 from taxonomy_classifier.data.files import open_text
-from taxonomy_classifier.exceptions import MalformedFastaError
+from taxonomy_classifier.exceptions import DataError, MalformedFastaError
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -47,6 +49,18 @@ def parse_fasta(lines: Iterable[str]) -> Iterator[FastaRecord]:
 def read_fasta(path: Path) -> Iterator[FastaRecord]:
     with open_text(path) as handle:
         yield from parse_fasta(handle)
+
+
+def read_fasta_member(archive: Path, member: str) -> Iterator[FastaRecord]:
+    with tarfile.open(archive, "r:*") as bundle:
+        extracted = bundle.extractfile(member) if member in bundle.getnames() else None
+
+        if extracted is None:
+            msg = f"{archive} has no FASTA file named {member!r}"
+            raise DataError(msg)
+
+        with io.TextIOWrapper(extracted, encoding="utf-8") as handle:
+            yield from parse_fasta(handle)
 
 
 def _parse_header_line(line: str, line_number: int) -> str:

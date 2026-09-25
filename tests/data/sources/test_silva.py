@@ -77,7 +77,9 @@ def test_parse_record_climbs_past_unknown_names(backbone: BackboneIndex) -> None
     assert record.lineage.get(Rank.FAMILY) == "Pseudomonadaceae"
 
 
-def test_parse_record_maps_eukaryotes_onto_pr2(backbone: BackboneIndex) -> None:
+def test_parse_record_maps_eukaryotes_onto_the_reference_taxonomy(
+    backbone: BackboneIndex,
+) -> None:
     header = "AB1.1.24 Eukaryota;Amorphea;Obazoa;Fungi;Ascomycota;Sordariomycetes;uncultured"
 
     record = _parse(header, backbone)
@@ -85,10 +87,10 @@ def test_parse_record_maps_eukaryotes_onto_pr2(backbone: BackboneIndex) -> None:
     assert isinstance(record, SequenceRecord)
     assert record.lineage.names == (
         "Eukaryota",
-        "Opisthokonta",
         "Ascomycota",
-        "Pezizomycotina",
         "Sordariomycetes",
+        None,
+        None,
         None,
         None,
     )

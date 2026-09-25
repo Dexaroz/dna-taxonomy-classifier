@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from taxonomy_classifier.data.build import BuildReport
-    from taxonomy_classifier.data.sources.base import DataSource
+    from taxonomy_classifier.data.sources.base import DataSource, TaxonomySource
 
 CONFIG = BuildConfig(
     filters=FilterConfig(min_length=10, max_length=100),
@@ -23,10 +23,15 @@ CONFIG = BuildConfig(
 
 
 @pytest.fixture
-def layout(sources: tuple[DataSource, ...], fixtures_dir: Path, tmp_path: Path) -> DataLayout:
+def layout(
+    sources: tuple[DataSource, ...],
+    taxonomies: tuple[TaxonomySource, ...],
+    fixtures_dir: Path,
+    tmp_path: Path,
+) -> DataLayout:
     layout = DataLayout(root=tmp_path / "data")
 
-    for source in sources:
+    for source in (*taxonomies, *sources):
         raw_dir = layout.raw_dir(source)
         raw_dir.mkdir(parents=True)
 
@@ -37,16 +42,20 @@ def layout(sources: tuple[DataSource, ...], fixtures_dir: Path, tmp_path: Path) 
 
 
 @pytest.fixture
-def report(sources: tuple[DataSource, ...], layout: DataLayout) -> BuildReport:
-    return build_dataset(sources, layout, config=CONFIG)
+def report(
+    sources: tuple[DataSource, ...],
+    taxonomies: tuple[TaxonomySource, ...],
+    layout: DataLayout,
+) -> BuildReport:
+    return build_dataset(sources, layout, config=CONFIG, taxonomies=taxonomies)
 
 
 def test_backbone_sources_are_staged_first(report: BuildReport) -> None:
     assert [source.source for source in report.sources] == [
         "gtdb_test",
-        "pr2_test",
         "silva_test",
         "refseq_16s",
+        "pr2_test",
     ]
 
 

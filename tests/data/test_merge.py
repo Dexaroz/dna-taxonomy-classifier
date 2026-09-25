@@ -42,6 +42,7 @@ def _row(
         "source_lineage": [name for name in names if name],
         **dict(zip(RANK_COLUMNS, names, strict=True)),
         "kingdom": kingdom,
+        "marker": "ssu",
     }
 
 
@@ -147,11 +148,12 @@ def test_merge_staged_cleans_up_on_failure(tmp_path: Path, monkeypatch: pytest.M
     assert sorted(path.name for path in tmp_path.iterdir()) == ["staged.parquet"]
 
 
-def test_kingdom_is_placed_after_the_domain() -> None:
+def test_marker_and_kingdom_are_placed_before_the_ranks() -> None:
     [row] = _merge(_row(b"h1", "gtdb", "G", ECOLI))
 
-    assert list(row)[3:6] == ["n_ambiguous", "domain", "kingdom"]
+    assert list(row)[3:7] == ["n_ambiguous", "marker", "domain", "kingdom"]
     assert row["kingdom"] == "Bacteria"
+    assert row["marker"] == "ssu"
 
 
 def test_missing_kingdoms_do_not_count_as_conflicts() -> None:

@@ -28,7 +28,7 @@ def test_known_species_gets_the_backbone_lineage(backbone: BackboneIndex) -> Non
     assert record.accession == "AB1"
     assert record.sequence == "ACGT"
     assert record.lineage.get(Rank.SPECIES) == "Podospora anserina"
-    assert record.lineage.get(Rank.CLASS) == "Ascomycota"
+    assert record.lineage.get(Rank.CLASS) == "Sordariomycetes"
     assert record.kingdom is Kingdom.FUNGI
     assert record.source_lineage[0].rank is Rank.DOMAIN
     assert [taxon.name for taxon in record.source_lineage[1:]] == [

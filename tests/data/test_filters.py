@@ -4,6 +4,7 @@ import pytest
 
 from taxonomy_classifier.data.exclusions import ExclusionReason
 from taxonomy_classifier.data.filters import FilterConfig, build_filters, first_exclusion
+from taxonomy_classifier.data.markers import MARKER_LENGTHS, LengthRange, Marker
 
 if TYPE_CHECKING:
     from conftest import RecordFactory
@@ -66,3 +67,35 @@ def test_first_exclusion_reports_the_first_failing_filter(make_record: RecordFac
 
 def test_first_exclusion_without_filters_keeps_everything(make_record: RecordFactory) -> None:
     assert first_exclusion(make_record(sequence="N"), ()) is None
+
+
+@pytest.mark.parametrize(
+    ("marker", "length", "expected"),
+    [
+        (Marker.SSU, 25, ExclusionReason.TOO_LONG),
+        (Marker.COI, 25, None),
+        (Marker.COI, 4, ExclusionReason.TOO_SHORT),
+        (Marker.ITS, 25, ExclusionReason.TOO_LONG),
+    ],
+)
+def test_each_marker_uses_its_own_length_range(
+    marker: Marker,
+    length: int,
+    expected: ExclusionReason | None,
+    make_record: RecordFactory,
+) -> None:
+    config = FilterConfig(
+        min_length=10,
+        max_length=20,
+        marker_lengths={Marker.COI: LengthRange(min_length=5, max_length=30)},
+    )
+    record = make_record(sequence="A" * length, marker=marker)
+
+    assert first_exclusion(record, build_filters(config)) is expected
+
+
+def test_default_config_uses_the_published_marker_ranges() -> None:
+    config = FilterConfig()
+
+    assert config.length_range(Marker.COI) == MARKER_LENGTHS[Marker.COI]
+    assert config.length_range(Marker.SSU) == LengthRange(min_length=500, max_length=4000)

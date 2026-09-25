@@ -9,7 +9,9 @@ import torch
 
 from taxonomy_classifier.data.build import BuildConfig, DataLayout, build_dataset
 from taxonomy_classifier.data.download import download_all
-from taxonomy_classifier.data.sources.registry import DEFAULT_SOURCES
+from taxonomy_classifier.data.entrez import fetch_query
+from taxonomy_classifier.data.sources.base import QueriedBundle, expected_filenames
+from taxonomy_classifier.data.sources.registry import DEFAULT_SOURCES, DEFAULT_TAXONOMIES
 from taxonomy_classifier.exceptions import DataError, GeneflowError, TrainingDeadlineError
 from taxonomy_classifier.training.final import FinalConfig, load_search_choice, train_final
 from taxonomy_classifier.training.oversampling import OversamplingConfig, oversample_train
@@ -24,7 +26,7 @@ if TYPE_CHECKING:
 
     import optuna
 
-    from taxonomy_classifier.data.sources.base import DataSource
+    from taxonomy_classifier.data.sources.base import DataSource, RemoteBundle, TaxonomySource
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -80,7 +82,7 @@ def main(argv: Sequence[str] | None = None, *, transport: httpx.BaseTransport | 
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO, format=_LOG_FORMAT)
 
     try:
-        _run(args, DEFAULT_SOURCES, layout, transport=transport)
+        _run(args, DEFAULT_SOURCES, DEFAULT_TAXONOMIES, layout, transport=transport)
 
     except GeneflowError:
         _LOGGER.exception("Command %r failed", command)
@@ -122,21 +124,28 @@ def _add_device_arguments(command: argparse.ArgumentParser) -> None:
 def _run(
     args: argparse.Namespace,
     sources: Sequence[DataSource],
+    taxonomies: Sequence[TaxonomySource],
     layout: DataLayout,
     *,
     transport: httpx.BaseTransport | None,
 ) -> None:
     command: str = args.command
+    bundles: list[RemoteBundle] = [*taxonomies, *sources]
 
     if command in {"download", "prepare"}:
         with httpx.Client(transport=transport, timeout=_TIMEOUT, follow_redirects=True) as client:
-            for source in sources:
-                download_all(source.files, layout.raw_dir(source), client=client)
+            for bundle in bundles:
+                raw_dir = layout.raw_dir(bundle)
+
+                download_all(bundle.files, raw_dir, client=client)
+
+                for query in bundle.queries if isinstance(bundle, QueriedBundle) else ():
+                    fetch_query(query, raw_dir, client=client)
 
     if command in {"build", "prepare"}:
-        _require_raw_files(sources, layout)
+        _require_raw_files(bundles, layout)
 
-        build_dataset(sources, layout, config=BuildConfig())
+        build_dataset(sources, layout, config=BuildConfig(), taxonomies=taxonomies)
 
     if command in {"augment", "prepare"}:
         _require_dataset(layout)
@@ -287,12 +296,12 @@ def _device(args: argparse.Namespace) -> torch.device:
     return device
 
 
-def _require_raw_files(sources: Sequence[DataSource], layout: DataLayout) -> None:
+def _require_raw_files(sources: Sequence[RemoteBundle], layout: DataLayout) -> None:
     missing = [
-        str(layout.raw_dir(source) / remote.filename)
+        str(layout.raw_dir(source) / filename)
         for source in sources
-        for remote in source.files
-        if not (layout.raw_dir(source) / remote.filename).exists()
+        for filename in expected_filenames(source)
+        if not (layout.raw_dir(source) / filename).exists()
     ]
 
     if missing:

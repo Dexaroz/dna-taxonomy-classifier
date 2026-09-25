@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Final
 from taxonomy_classifier.data.dna import normalize_sequence
 from taxonomy_classifier.data.exclusions import ExclusionReason
 from taxonomy_classifier.data.kingdom import prokaryote_kingdom
+from taxonomy_classifier.data.markers import Marker
 from taxonomy_classifier.data.organisms import split_organism
 from taxonomy_classifier.data.records import SequenceRecord
 from taxonomy_classifier.data.sources.base import parse_fasta_file
@@ -105,6 +106,7 @@ def parse_record(record: FastaRecord, *, backbone: BackboneIndex) -> Outcome:
         ),
         lineage=lineage,
         kingdom=prokaryote_kingdom(domain) or backbone.kingdom_of(lineage),
+        marker=Marker.SSU,
     )
 
 

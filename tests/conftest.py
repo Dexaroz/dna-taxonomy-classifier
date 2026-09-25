@@ -5,22 +5,28 @@ from typing import TYPE_CHECKING, Protocol
 import pytest
 
 from taxonomy_classifier.data.build import BuildConfig, DataLayout, build_dataset
+from taxonomy_classifier.data.entrez import EntrezQuery
 from taxonomy_classifier.data.filters import FilterConfig
 from taxonomy_classifier.data.harmonize import BackboneIndex
 from taxonomy_classifier.data.kingdom import Kingdom
+from taxonomy_classifier.data.markers import Marker
 from taxonomy_classifier.data.records import SequenceRecord
 from taxonomy_classifier.data.remote import RemoteFile
 from taxonomy_classifier.data.sources.eukribo import EukRiboSource
+from taxonomy_classifier.data.sources.genbank import GenBankSource
 from taxonomy_classifier.data.sources.gtdb import GtdbSource
+from taxonomy_classifier.data.sources.midori import Midori2Source
+from taxonomy_classifier.data.sources.ncbi import NcbiTaxonomy
 from taxonomy_classifier.data.sources.pr2 import Pr2Source
 from taxonomy_classifier.data.sources.refseq import RefSeqLocus, RefSeqSource
 from taxonomy_classifier.data.sources.silva import SilvaSource
+from taxonomy_classifier.data.sources.unite import UniteSource
 from taxonomy_classifier.data.split import SplitConfig
 from taxonomy_classifier.data.taxonomy import Lineage, Rank, Taxon
 from taxonomy_classifier.training.oversampling import OversamplingConfig, oversample_train
 
 if TYPE_CHECKING:
-    from taxonomy_classifier.data.sources.base import DataSource
+    from taxonomy_classifier.data.sources.base import DataSource, TaxonomySource
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -38,6 +44,7 @@ class RecordFactory(Protocol):
         source_lineage: tuple[Taxon, ...] = ...,
         source: str = ...,
         kingdom: Kingdom | None = ...,
+        marker: Marker = ...,
     ) -> SequenceRecord: ...
 
 
@@ -55,6 +62,7 @@ def make_record() -> RecordFactory:
         source_lineage: tuple[Taxon, ...] = BACTERIA_TAXA,
         source: str = "test",
         kingdom: Kingdom | None = Kingdom.BACTERIA,
+        marker: Marker = Marker.SSU,
     ) -> SequenceRecord:
         return SequenceRecord(
             source=source,
@@ -63,6 +71,7 @@ def make_record() -> RecordFactory:
             source_lineage=source_lineage,
             lineage=lineage,
             kingdom=kingdom,
+            marker=marker,
         )
 
     return factory
@@ -71,6 +80,8 @@ def make_record() -> RecordFactory:
 def _fixture_file(name: str) -> RemoteFile:
     return RemoteFile(url=f"https://example.org/fixtures/{name}", sha256=None)
 
+
+NCBI_TEST = NcbiTaxonomy(release="test", archive=_fixture_file("ncbi_taxdump.zip"))
 
 GTDB_TEST = GtdbSource(release="test", fasta=_fixture_file("gtdb_ssu.fna"))
 
@@ -90,6 +101,20 @@ REFSEQ_FUNGI_TEST = RefSeqSource(
 )
 
 EUKRIBO_TEST = EukRiboSource(release="test", fasta=_fixture_file("eukribo_ssu.fas"))
+
+GENBANK_TEST = GenBankSource(
+    name="rbcl_test",
+    marker=Marker.RBCL,
+    query=EntrezQuery(term="rbcL[Gene Name]", filename="genbank_rbcl.fasta.gz"),
+)
+
+UNITE_TEST = UniteSource(
+    release="test", archive=_fixture_file("unite_its.tgz"), member="unite_its.fasta"
+)
+
+MIDORI_TEST = Midori2Source(
+    release="test", marker=Marker.COI, fasta=_fixture_file("midori_coi.fasta")
+)
 
 SILVA_TEST = SilvaSource(release="test", fasta=_fixture_file("silva_ssu.fasta"))
 
@@ -120,6 +145,21 @@ def eukribo_source() -> EukRiboSource:
 
 
 @pytest.fixture
+def midori_source() -> Midori2Source:
+    return MIDORI_TEST
+
+
+@pytest.fixture
+def unite_source() -> UniteSource:
+    return UNITE_TEST
+
+
+@pytest.fixture
+def genbank_source() -> GenBankSource:
+    return GENBANK_TEST
+
+
+@pytest.fixture
 def silva_source() -> SilvaSource:
     return SILVA_TEST
 
@@ -130,24 +170,39 @@ def sources() -> tuple[DataSource, ...]:
 
 
 @pytest.fixture
+def ncbi_source() -> NcbiTaxonomy:
+    return NCBI_TEST
+
+
+@pytest.fixture
+def taxonomies() -> tuple[TaxonomySource, ...]:
+    return (NCBI_TEST,)
+
+
+@pytest.fixture
 def backbone(fixtures_dir: Path) -> BackboneIndex:
     index = BackboneIndex()
 
-    for source in (GTDB_TEST, PR2_TEST):
-        index.add_all(
-            outcome
-            for outcome in source.read(fixtures_dir, index)
-            if isinstance(outcome, SequenceRecord)
-        )
+    NCBI_TEST.load(fixtures_dir, index)
+    index.add_all(
+        outcome
+        for outcome in GTDB_TEST.read(fixtures_dir, index)
+        if isinstance(outcome, SequenceRecord)
+    )
 
     return index
 
 
 @pytest.fixture
-def built_layout(sources: tuple[DataSource, ...], fixtures_dir: Path, tmp_path: Path) -> DataLayout:
+def built_layout(
+    sources: tuple[DataSource, ...],
+    taxonomies: tuple[TaxonomySource, ...],
+    fixtures_dir: Path,
+    tmp_path: Path,
+) -> DataLayout:
     layout = DataLayout(root=tmp_path / "built")
 
-    for source in sources:
+    for source in (*taxonomies, *sources):
         raw_dir = layout.raw_dir(source)
         raw_dir.mkdir(parents=True)
 
@@ -161,6 +216,7 @@ def built_layout(sources: tuple[DataSource, ...], fixtures_dir: Path, tmp_path: 
             filters=FilterConfig(min_length=10, max_length=100),
             split=SplitConfig(val_fraction=0.3, test_fraction=0.1, seed=3),
         ),
+        taxonomies=taxonomies,
     )
     oversample_train(
         layout.dataset_path,

@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from taxonomy_classifier.data.fasta import FastaRecord, parse_fasta, read_fasta
-from taxonomy_classifier.exceptions import MalformedFastaError
+from taxonomy_classifier.data.fasta import FastaRecord, parse_fasta, read_fasta, read_fasta_member
+from taxonomy_classifier.exceptions import DataError, MalformedFastaError
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -68,3 +68,15 @@ def test_read_fasta_reads_gzip_files(tmp_path: Path) -> None:
         handle.write(">a\nACGT\n")
 
     assert list(read_fasta(path)) == [FastaRecord(header="a", sequence="ACGT")]
+
+
+def test_read_fasta_member_streams_a_file_from_an_archive(fixtures_dir: Path) -> None:
+    records = list(read_fasta_member(fixtures_dir / "unite_its.tgz", "unite_its.fasta"))
+
+    assert len(records) == 4
+    assert records[0].sequence == "ACGTACGTACGTTTAA"
+
+
+def test_read_fasta_member_rejects_missing_members(fixtures_dir: Path) -> None:
+    with pytest.raises(DataError, match="has no FASTA file named 'missing"):
+        list(read_fasta_member(fixtures_dir / "unite_its.tgz", "missing.fasta"))

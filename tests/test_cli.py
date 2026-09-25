@@ -1,6 +1,7 @@
 import json
 import runpy
 import sys
+import time
 from typing import TYPE_CHECKING
 
 import httpx
@@ -13,14 +14,19 @@ from taxonomy_classifier.data.build import DataLayout
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from taxonomy_classifier.data.sources.base import DataSource
+    from taxonomy_classifier.data.sources.base import DataSource, TaxonomySource
+    from taxonomy_classifier.data.sources.genbank import GenBankSource
 
 
 @pytest.fixture
 def transport(
-    sources: tuple[DataSource, ...], fixtures_dir: Path, monkeypatch: pytest.MonkeyPatch
+    sources: tuple[DataSource, ...],
+    taxonomies: tuple[TaxonomySource, ...],
+    fixtures_dir: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> httpx.MockTransport:
     monkeypatch.setattr(cli, "DEFAULT_SOURCES", sources)
+    monkeypatch.setattr(cli, "DEFAULT_TAXONOMIES", taxonomies)
 
     def serve(request: httpx.Request) -> httpx.Response:
         return httpx.Response(
@@ -56,6 +62,30 @@ def test_build_without_raw_files_fails_cleanly(
     assert "run 'geneflow download' first" in caplog.text
 
 
+def test_download_runs_entrez_queries(
+    genbank_source: GenBankSource,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(cli, "DEFAULT_SOURCES", (genbank_source,))
+    monkeypatch.setattr(cli, "DEFAULT_TAXONOMIES", ())
+    monkeypatch.setattr(time, "sleep", lambda _: None)
+
+    def serve(request: httpx.Request) -> httpx.Response:
+        if request.url.path.endswith("esearch.fcgi"):
+            return httpx.Response(
+                200, json={"esearchresult": {"count": "1", "webenv": "E", "querykey": "1"}}
+            )
+
+        return httpx.Response(200, text=">OR1.1 Micromonas pusilla rbcL\nACGT\n")
+
+    layout = DataLayout(root=tmp_path)
+    transport = httpx.MockTransport(serve)
+
+    assert cli.main(["download", "--data-dir", str(tmp_path)], transport=transport) == 0
+    assert (layout.raw_dir(genbank_source) / genbank_source.query.filename).exists()
+
+
 def test_download_fetches_every_source_file(
     sources: tuple[DataSource, ...],
     transport: httpx.MockTransport,
@@ -84,7 +114,8 @@ def test_prepare_downloads_and_builds(transport: httpx.MockTransport, tmp_path: 
     assert layout.dataset_path.exists()
     assert layout.synthetic_path.exists()
     assert layout.augment_report_path.exists()
-    assert [source["read"] for source in report["sources"]] == [7, 4, 7, 5]
+    assert report["taxonomies"] == {"ncbi_taxonomy_test": 10}
+    assert [source["read"] for source in report["sources"]] == [7, 7, 5, 4]
 
 
 def test_module_entrypoint_exits_with_command_status(
