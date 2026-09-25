@@ -14,7 +14,7 @@ type Filter = Callable[[SequenceRecord], ExclusionReason | None]
 
 @dataclass(frozen=True, slots=True)
 class FilterConfig:
-    min_length: int = 900
+    min_length: int = 500
     max_length: int = 4000
     max_ambiguous_fraction: float = 0.01
 

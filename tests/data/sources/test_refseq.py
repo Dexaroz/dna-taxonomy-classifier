@@ -6,7 +6,8 @@ from taxonomy_classifier.data.exclusions import ExclusionReason
 from taxonomy_classifier.data.fasta import FastaRecord
 from taxonomy_classifier.data.kingdom import Kingdom
 from taxonomy_classifier.data.records import SequenceRecord
-from taxonomy_classifier.data.sources.refseq import parse_record
+from taxonomy_classifier.data.remote import RemoteFile
+from taxonomy_classifier.data.sources.refseq import RefSeqLocus, parse_record
 from taxonomy_classifier.data.taxonomy import Rank
 from taxonomy_classifier.exceptions import MalformedHeaderError
 
@@ -17,10 +18,15 @@ if TYPE_CHECKING:
     from taxonomy_classifier.data.sources.refseq import RefSeqSource
 
 
-def _parse(header: str, backbone: BackboneIndex, domain: str = "Bacteria") -> SequenceRecord:
+FASTA = RemoteFile(url="https://example.org/refseq.fna", sha256=None)
+
+
+def _parse(
+    header: str, backbone: BackboneIndex, domain: str = "Bacteria", marker: str = "16S"
+) -> SequenceRecord:
     return parse_record(
         FastaRecord(header=header, sequence="ACGT"),
-        domain=domain,
+        locus=RefSeqLocus(fasta=FASTA, domain=domain, marker=marker),
         backbone=backbone,
     )
 
@@ -66,7 +72,10 @@ def test_parse_record_rejects_non_16s_headers(header: str, backbone: BackboneInd
 
 def test_source_metadata(refseq_source: RefSeqSource) -> None:
     assert refseq_source.slug == "refseq_16s"
-    assert refseq_source.files == (refseq_source.bacteria, refseq_source.archaea)
+    assert [remote.filename for remote in refseq_source.files] == [
+        "refseq_bacteria.fna",
+        "refseq_archaea.fna",
+    ]
     assert not refseq_source.is_backbone
 
 
@@ -87,3 +96,27 @@ def test_unnamed_species_are_mapped_through_their_genus(backbone: BackboneIndex)
 
     assert record.lineage.deepest_rank is Rank.GENUS
     assert record.lineage.get(Rank.GENUS) == "Pseudomonas"
+
+
+def test_eukaryote_loci_take_the_kingdom_from_the_backbone(backbone: BackboneIndex) -> None:
+    record = _parse(
+        "NG_1.1 Podospora anserina strain S 18S rRNA gene, partial",
+        backbone,
+        domain="Eukaryota",
+        marker="18S",
+    )
+
+    assert record.lineage.get(Rank.SPECIES) == "Podospora anserina"
+    assert record.kingdom is Kingdom.FUNGI
+
+
+def test_read_parses_the_fungal_18s_locus(
+    refseq_fungi_source: RefSeqSource, fixtures_dir: Path, backbone: BackboneIndex
+) -> None:
+    outcomes = list(refseq_fungi_source.read(fixtures_dir, backbone))
+    records = [outcome for outcome in outcomes if isinstance(outcome, SequenceRecord)]
+
+    assert refseq_fungi_source.slug == "refseq_fungi_18s"
+    assert outcomes.count(ExclusionReason.MALFORMED_HEADER) == 1
+    assert [record.lineage.deepest_rank for record in records] == [Rank.SPECIES, Rank.GENUS]
+    assert {record.kingdom for record in records} == {Kingdom.FUNGI}

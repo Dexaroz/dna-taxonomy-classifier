@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from functools import partial
+import re
 from typing import TYPE_CHECKING, Final
 
 from taxonomy_classifier.data.dna import normalize_sequence
@@ -21,52 +22,69 @@ if TYPE_CHECKING:
 
 SOURCE_NAME: Final = "refseq"
 
-_MARKER: Final = " 16S ribosomal RNA"
+
+@dataclass(frozen=True, slots=True)
+class RefSeqLocus:
+    fasta: RemoteFile
+    domain: str
+    marker: str
+
+    @property
+    def pattern(self) -> re.Pattern[str]:
+        return re.compile(rf" {re.escape(self.marker)} (?:ribosomal RNA|rRNA)\b")
 
 
 @dataclass(frozen=True, slots=True)
 class RefSeqSource:
-    bacteria: RemoteFile
-    archaea: RemoteFile
+    name: str
+    loci: tuple[RefSeqLocus, ...]
 
     @property
     def slug(self) -> str:
-        return f"{SOURCE_NAME}_16s"
+        return f"{SOURCE_NAME}_{self.name}"
 
     @property
     def files(self) -> tuple[RemoteFile, ...]:
-        return (self.bacteria, self.archaea)
+        return tuple(locus.fasta for locus in self.loci)
 
     @property
     def is_backbone(self) -> bool:
         return False
 
     def read(self, raw_dir: Path, backbone: BackboneIndex) -> Iterator[Outcome]:
-        for remote, domain in ((self.bacteria, "Bacteria"), (self.archaea, "Archaea")):
-            parse = partial(parse_record, domain=domain, backbone=backbone)
+        for locus in self.loci:
+            parse = partial(parse_record, locus=locus, backbone=backbone)
 
-            yield from parse_fasta_file(raw_dir / remote.filename, parse)
+            yield from parse_fasta_file(raw_dir / locus.fasta.filename, parse)
 
 
-def parse_record(record: FastaRecord, *, domain: str, backbone: BackboneIndex) -> SequenceRecord:
+def parse_record(
+    record: FastaRecord, *, locus: RefSeqLocus, backbone: BackboneIndex
+) -> SequenceRecord:
     accession, _, description = record.header.partition(" ")
-    organism, marker, _ = description.partition(_MARKER)
+    match = locus.pattern.search(description)
+    organism = description[: match.start()] if match else ""
 
-    if not marker or not organism.strip():
+    if not organism.strip():
         msg = (
-            f"RefSeq header is not '<accession> <organism> 16S ribosomal RNA...': {record.header!r}"
+            f"RefSeq header is not '<accession> <organism> {locus.marker} ribosomal RNA...': "
+            f"{record.header!r}"
         )
         raise MalformedHeaderError(msg)
 
     genus, species = split_organism(organism)
+    lineage = map_organism(genus, species, domain=locus.domain, backbone=backbone)
 
     return SequenceRecord(
         source=SOURCE_NAME,
         accession=accession,
         sequence=normalize_sequence(record.sequence),
-        source_lineage=(Taxon(name=domain, rank=Rank.DOMAIN), Taxon(name=organism, rank=None)),
-        lineage=map_organism(genus, species, domain=domain, backbone=backbone),
-        kingdom=prokaryote_kingdom(domain),
+        source_lineage=(
+            Taxon(name=locus.domain, rank=Rank.DOMAIN),
+            Taxon(name=organism, rank=None),
+        ),
+        lineage=lineage,
+        kingdom=prokaryote_kingdom(locus.domain) or backbone.kingdom_of(lineage),
     )
 
 

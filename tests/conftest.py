@@ -10,9 +10,10 @@ from taxonomy_classifier.data.harmonize import BackboneIndex
 from taxonomy_classifier.data.kingdom import Kingdom
 from taxonomy_classifier.data.records import SequenceRecord
 from taxonomy_classifier.data.remote import RemoteFile
+from taxonomy_classifier.data.sources.eukribo import EukRiboSource
 from taxonomy_classifier.data.sources.gtdb import GtdbSource
 from taxonomy_classifier.data.sources.pr2 import Pr2Source
-from taxonomy_classifier.data.sources.refseq import RefSeqSource
+from taxonomy_classifier.data.sources.refseq import RefSeqLocus, RefSeqSource
 from taxonomy_classifier.data.sources.silva import SilvaSource
 from taxonomy_classifier.data.split import SplitConfig
 from taxonomy_classifier.data.taxonomy import Lineage, Rank, Taxon
@@ -76,9 +77,19 @@ GTDB_TEST = GtdbSource(release="test", fasta=_fixture_file("gtdb_ssu.fna"))
 PR2_TEST = Pr2Source(release="test", fasta=_fixture_file("pr2_ssu.fasta"))
 
 REFSEQ_TEST = RefSeqSource(
-    bacteria=_fixture_file("refseq_bacteria.fna"),
-    archaea=_fixture_file("refseq_archaea.fna"),
+    name="16s",
+    loci=(
+        RefSeqLocus(fasta=_fixture_file("refseq_bacteria.fna"), domain="Bacteria", marker="16S"),
+        RefSeqLocus(fasta=_fixture_file("refseq_archaea.fna"), domain="Archaea", marker="16S"),
+    ),
 )
+
+REFSEQ_FUNGI_TEST = RefSeqSource(
+    name="fungi_18s",
+    loci=(RefSeqLocus(fasta=_fixture_file("refseq_fungi.fna"), domain="Eukaryota", marker="18S"),),
+)
+
+EUKRIBO_TEST = EukRiboSource(release="test", fasta=_fixture_file("eukribo_ssu.fas"))
 
 SILVA_TEST = SilvaSource(release="test", fasta=_fixture_file("silva_ssu.fasta"))
 
@@ -96,6 +107,16 @@ def pr2_source() -> Pr2Source:
 @pytest.fixture
 def refseq_source() -> RefSeqSource:
     return REFSEQ_TEST
+
+
+@pytest.fixture
+def refseq_fungi_source() -> RefSeqSource:
+    return REFSEQ_FUNGI_TEST
+
+
+@pytest.fixture
+def eukribo_source() -> EukRiboSource:
+    return EUKRIBO_TEST
 
 
 @pytest.fixture

@@ -1,9 +1,10 @@
 from typing import TYPE_CHECKING, Final
 
 from taxonomy_classifier.data.remote import RemoteFile
+from taxonomy_classifier.data.sources.eukribo import EukRiboSource
 from taxonomy_classifier.data.sources.gtdb import GtdbSource
 from taxonomy_classifier.data.sources.pr2 import Pr2Source
-from taxonomy_classifier.data.sources.refseq import RefSeqSource
+from taxonomy_classifier.data.sources.refseq import RefSeqLocus, RefSeqSource
 from taxonomy_classifier.data.sources.silva import SilvaSource
 
 if TYPE_CHECKING:
@@ -25,23 +26,63 @@ PR2_5_1_1: Final = Pr2Source(
     ),
 )
 
-REFSEQ_16S: Final = RefSeqSource(
-    bacteria=RemoteFile(
-        url="https://ftp.ncbi.nlm.nih.gov/refseq/TargetedLoci/Bacteria/bacteria.16SrRNA.fna.gz",
-        sha256=None,
+EUKRIBO_2: Final = EukRiboSource(
+    release="2",
+    fasta=RemoteFile(
+        url="https://zenodo.org/records/6896896/files/46346_EukRibo-02_full_seqs_2022-07-22.fas.gz",
+        sha256="62b19ff1dd1add45d6b4aed338a93bbbb6467da6b3549bec8bc93da2ee7dcf72",
     ),
-    archaea=RemoteFile(
-        url="https://ftp.ncbi.nlm.nih.gov/refseq/TargetedLoci/Archaea/archaea.16SrRNA.fna.gz",
-        sha256=None,
+)
+
+REFSEQ_16S: Final = RefSeqSource(
+    name="16s",
+    loci=(
+        RefSeqLocus(
+            fasta=RemoteFile(
+                url="https://ftp.ncbi.nlm.nih.gov/refseq/TargetedLoci/Bacteria/bacteria.16SrRNA.fna.gz",
+                sha256=None,
+            ),
+            domain="Bacteria",
+            marker="16S",
+        ),
+        RefSeqLocus(
+            fasta=RemoteFile(
+                url="https://ftp.ncbi.nlm.nih.gov/refseq/TargetedLoci/Archaea/archaea.16SrRNA.fna.gz",
+                sha256=None,
+            ),
+            domain="Archaea",
+            marker="16S",
+        ),
+    ),
+)
+
+REFSEQ_FUNGI_18S: Final = RefSeqSource(
+    name="fungi_18s",
+    loci=(
+        RefSeqLocus(
+            fasta=RemoteFile(
+                url="https://ftp.ncbi.nlm.nih.gov/refseq/TargetedLoci/Fungi/fungi.18SrRNA.fna.gz",
+                sha256=None,
+            ),
+            domain="Eukaryota",
+            marker="18S",
+        ),
     ),
 )
 
 SILVA_144: Final = SilvaSource(
     release="144",
     fasta=RemoteFile(
-        url="https://www.arb-silva.de/fileadmin/silva_databases/release_144/Exports/SILVA_144_SSURef_NR99_tax_silva_trunc.fasta.gz",
-        sha256="2cbdfb7b31e117d8b30dec40f80eebeb947e538d478fd341b8865b09027c2862",
+        url="https://www.arb-silva.de/fileadmin/silva_databases/release_144/Exports/SILVA_144_SSURef_tax_silva_trunc.fasta.gz",
+        sha256="2e8ce1f937ae81771c2b27d001f1bc5c09e09998fcca83a4a3b12c28df14b078",
     ),
 )
 
-DEFAULT_SOURCES: Final[tuple[DataSource, ...]] = (GTDB_R232, PR2_5_1_1, REFSEQ_16S, SILVA_144)
+DEFAULT_SOURCES: Final[tuple[DataSource, ...]] = (
+    GTDB_R232,
+    PR2_5_1_1,
+    REFSEQ_16S,
+    REFSEQ_FUNGI_18S,
+    EUKRIBO_2,
+    SILVA_144,
+)
