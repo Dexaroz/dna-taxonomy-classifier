@@ -7,7 +7,7 @@ from taxonomy_classifier.data.files import write_text_atomic
 from taxonomy_classifier.model.labels import LEVELS
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping
+    from collections.abc import Callable, Mapping, Sequence
     from pathlib import Path
 
     from taxonomy_classifier.training.trainer import EpochRecord
@@ -63,6 +63,7 @@ class ProgressBarMonitor:
         steps_path: Path | None = None,
         width: int = 30,
         clock: Callable[[], float] = time.monotonic,
+        records: Sequence[dict[str, Any]] = (),
     ) -> None:
         self._stream = stream
         self._refresh_seconds = refresh_seconds
@@ -80,7 +81,7 @@ class ProgressBarMonitor:
         self._line_length = 0
         self._evaluation_batches = 0
         self._evaluated = 0
-        self._records: list[dict[str, Any]] = []
+        self._records: list[dict[str, Any]] = list(records)
 
     @property
     def records(self) -> list[dict[str, Any]]:

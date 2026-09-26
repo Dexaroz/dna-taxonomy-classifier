@@ -9,7 +9,8 @@ from typing import TYPE_CHECKING, Any, Final, Protocol
 
 import torch
 
-from taxonomy_classifier.data.files import write_text_atomic
+from taxonomy_classifier.data.files import partial_path, write_text_atomic
+from taxonomy_classifier.exceptions import TrainingResumeError
 from taxonomy_classifier.model.heads import hierarchical_loss
 from taxonomy_classifier.model.labels import IGNORE_INDEX, LEVELS
 from taxonomy_classifier.training.data import (
@@ -33,6 +34,10 @@ BEST_CHECKPOINT: Final = "best.pt"
 LAST_CHECKPOINT: Final = "last.pt"
 
 HISTORY_FILENAME: Final = "history.json"
+
+STATE_FILENAME: Final = "state.pt"
+
+_RESUME_IGNORED: Final = frozenset({"log_every"})
 
 _MATRIX_NDIM: Final = 2
 
@@ -326,6 +331,7 @@ def train_classifier(
     device: torch.device,
     metadata: Mapping[str, Any] | None = None,
     monitor: TrainingMonitor | None = None,
+    resume: bool = False,
 ) -> list[EpochRecord]:
     watcher = monitor or SilentMonitor()
     torch.manual_seed(config.seed)
@@ -355,8 +361,20 @@ def train_classifier(
 
     history: list[EpochRecord] = []
     best_loss = math.inf
+    state_path = None if checkpoint_dir is None else checkpoint_dir / STATE_FILENAME
 
-    for epoch in range(1, config.epochs + 1):
+    if resume and state_path is not None and state_path.exists():
+        history, best_loss = _restore(
+            model,
+            optimization,
+            state_path,
+            config=config,
+            device=device,
+            rng=rng,
+            generator=generator,
+        )
+
+    for epoch in range(len(history) + 1, config.epochs + 1):
         started = time.perf_counter()
         indices = bucket_by_length(
             torch.multinomial(weights, samples, replacement=True, generator=generator),
@@ -413,6 +431,10 @@ def train_classifier(
             }
 
             _save_checkpoint(checkpoint_dir, state, history, improved=improved)
+            _atomic_save(
+                _training_state(optimization, epoch, best_loss, config, rng, generator),
+                checkpoint_dir / STATE_FILENAME,
+            )
 
         _LOGGER.debug(
             "Epoch %d/%d: train %.4f, val %.4f, genus %.3f, %.0f s",
@@ -518,15 +540,83 @@ def _save_checkpoint(
     improved: bool,
 ) -> None:
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
-    torch.save(state, checkpoint_dir / LAST_CHECKPOINT)
+    _atomic_save(state, checkpoint_dir / LAST_CHECKPOINT)
 
     if improved:
-        torch.save(state, checkpoint_dir / BEST_CHECKPOINT)
+        _atomic_save(state, checkpoint_dir / BEST_CHECKPOINT)
 
     write_text_atomic(
         checkpoint_dir / HISTORY_FILENAME,
         json.dumps([item.to_dict() for item in history], indent=2),
     )
+
+
+def _atomic_save(state: dict[str, Any], path: Path) -> None:
+    partial = partial_path(path)
+
+    torch.save(state, partial)
+    partial.replace(path)
+
+
+def _training_state(
+    optimization: _Optimization,
+    epoch: int,
+    best_loss: float,
+    config: TrainingConfig,
+    rng: random.Random,
+    generator: torch.Generator,
+) -> dict[str, Any]:
+    return {
+        "epoch": epoch,
+        "best_loss": best_loss,
+        "config": _resumable(config),
+        "optimizer": optimization.optimizer.state_dict(),
+        "scheduler": optimization.scheduler.state_dict(),
+        "scaler": optimization.scaler.state_dict(),
+        "python_rng": rng.getstate(),
+        "sampling_rng": generator.get_state(),
+        "torch_rng": torch.get_rng_state(),
+        "cuda_rng": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else [],
+    }
+
+
+def _restore(
+    model: TaxonomyClassifier,
+    optimization: _Optimization,
+    state_path: Path,
+    *,
+    config: TrainingConfig,
+    device: torch.device,
+    rng: random.Random,
+    generator: torch.Generator,
+) -> tuple[list[EpochRecord], float]:
+    state: dict[str, Any] = torch.load(state_path, map_location="cpu", weights_only=True)
+
+    if state["config"] != _resumable(config):
+        msg = f"Cannot resume from {state_path}: it was trained with another configuration"
+        raise TrainingResumeError(msg)
+
+    load_weights(model, state_path.with_name(LAST_CHECKPOINT), device=device)
+    optimization.optimizer.load_state_dict(state["optimizer"])
+    optimization.scheduler.load_state_dict(state["scheduler"])
+    optimization.scaler.load_state_dict(state["scaler"])
+    rng.setstate(state["python_rng"])
+    generator.set_state(state["sampling_rng"])
+    torch.set_rng_state(state["torch_rng"])
+    torch.cuda.set_rng_state_all(state["cuda_rng"])
+
+    history = [
+        EpochRecord.from_dict(record)
+        for record in load_history(state_path.parent)[: int(state["epoch"])]
+    ]
+
+    return history, float(state["best_loss"])
+
+
+def _resumable(config: TrainingConfig) -> dict[str, Any]:
+    plain: dict[str, Any] = json.loads(json.dumps(asdict(config)))
+
+    return {name: value for name, value in plain.items() if name not in _RESUME_IGNORED}
 
 
 def _optimizer(model: TaxonomyClassifier, config: TrainingConfig) -> torch.optim.AdamW:

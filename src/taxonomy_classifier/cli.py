@@ -1,4 +1,5 @@
 import argparse
+import json
 import logging
 from pathlib import Path
 import sys
@@ -115,6 +116,7 @@ def _add_train_arguments(command: argparse.ArgumentParser) -> None:
     command.add_argument("--batch-size", type=int, default=128)
     command.add_argument("--log-every", type=int, default=500)
     command.add_argument("--refresh-seconds", type=float, default=0.5)
+    command.add_argument("--resume", action="store_true")
 
 
 def _add_device_arguments(command: argparse.ArgumentParser) -> None:
@@ -259,8 +261,17 @@ def _train(args: argparse.Namespace, layout: DataLayout) -> None:
 
     _LOGGER.info("Training %s from %s: %s", name, args.params, choice.params)
 
+    steps_path = output / "steps.json"
+    resume: bool = args.resume
+    previous_steps = (
+        json.loads(steps_path.read_text(encoding="utf-8")) if resume and steps_path.exists() else []
+    )
+
     monitor = ProgressBarMonitor(
-        sys.stdout, refresh_seconds=args.refresh_seconds, steps_path=output / "steps.json"
+        sys.stdout,
+        refresh_seconds=args.refresh_seconds,
+        steps_path=steps_path,
+        records=previous_steps,
     )
 
     try:
@@ -272,6 +283,7 @@ def _train(args: argparse.Namespace, layout: DataLayout) -> None:
             output_dir=output,
             device=device,
             monitor=monitor,
+            resume=resume,
         )
 
     except TrainingDeadlineError:

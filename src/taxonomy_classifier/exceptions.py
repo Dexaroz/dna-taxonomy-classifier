@@ -12,6 +12,10 @@ class DataError(GeneflowError):
     pass
 
 
+class TrainingResumeError(GeneflowError):
+    pass
+
+
 class TrainingDeadlineError(GeneflowError):
     pass
 

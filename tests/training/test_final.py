@@ -367,3 +367,26 @@ def test_a_deadline_after_an_epoch_still_reports_the_best_checkpoint(tmp_path: P
     assert result.history[0].train_accuracy
     assert [item.level for item in result.reports] == list(LEVELS)
     assert (tmp_path / REPORT_FILENAME).exists()
+
+
+def test_deadline_monitor_skips_an_epoch_that_would_not_fit() -> None:
+    now = [100.0]
+    inner = RecordingMonitor()
+    monitor = DeadlineMonitor(inner, 200.0, epoch_seconds=50.0, clock=lambda: now[0])
+
+    monitor.epoch_started(1, 3, 4)
+    monitor.epoch_finished(
+        EpochRecord(
+            epoch=1,
+            train_loss=1.0,
+            validation=Evaluation(loss=1.0, accuracy=dict.fromkeys(LEVELS, 0.5)),
+            learning_rate=1e-3,
+            seconds=80.0,
+        )
+    )
+    now[0] = 150.0
+
+    with pytest.raises(TrainingDeadlineError, match="no room for epoch 2"):
+        monitor.epoch_started(2, 3, 4)
+
+    assert inner.calls == ["epoch_started 1/3 4", "epoch_finished 1"]

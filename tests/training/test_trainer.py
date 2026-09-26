@@ -1,3 +1,4 @@
+from dataclasses import replace
 from itertools import pairwise
 import json
 import math
@@ -8,6 +9,7 @@ import pytest
 import torch
 from torch import nn
 
+from taxonomy_classifier.exceptions import TrainingResumeError
 from taxonomy_classifier.model.classifier import build_classifier
 from taxonomy_classifier.model.encoders import CnnConfig
 from taxonomy_classifier.model.labels import IGNORE_INDEX, LEVELS, LabelSpace
@@ -17,6 +19,7 @@ from taxonomy_classifier.training.trainer import (
     BEST_CHECKPOINT,
     HISTORY_FILENAME,
     LAST_CHECKPOINT,
+    STATE_FILENAME,
     EpochRecord,
     Evaluation,
     LoggingMonitor,
@@ -304,3 +307,120 @@ def test_logging_monitor_reports_progress(caplog: pytest.LogCaptureFixture) -> N
     assert [message.split(":")[0] for message in caplog.messages] == ["CNN trial 3"] * 3
     assert "800 sequences/s" in caplog.messages[1]
     assert "genus 0.250" in caplog.messages[2]
+
+
+class _InterruptedError(Exception):
+    pass
+
+
+class _StopBeforeEpoch(_RecordingMonitor):
+    def __init__(self, epoch: int) -> None:
+        super().__init__()
+        self.stop_at = epoch
+
+    @override
+    def epoch_started(self, epoch: int, epochs: int, steps: int) -> None:
+        if epoch == self.stop_at:
+            raise _InterruptedError
+
+        super().epoch_started(epoch, epochs, steps)
+
+
+def _parameters(model: nn.Module) -> list[torch.Tensor]:
+    return [parameter.detach().clone() for parameter in model.parameters()]
+
+
+def test_resuming_after_an_interruption_matches_an_uninterrupted_run(tmp_path: Path) -> None:
+    torch.manual_seed(0)
+    straight = build_classifier(TINY_CNN, SPACE)
+    expected = train_classifier(
+        straight, DATA, config=CONFIG, checkpoint_dir=tmp_path / "straight", device=CPU
+    )
+
+    torch.manual_seed(0)
+    interrupted = build_classifier(TINY_CNN, SPACE)
+
+    with pytest.raises(_InterruptedError):
+        train_classifier(
+            interrupted,
+            DATA,
+            config=CONFIG,
+            checkpoint_dir=tmp_path / "resumed",
+            device=CPU,
+            monitor=_StopBeforeEpoch(3),
+        )
+
+    torch.manual_seed(123)
+    resumed = build_classifier(TINY_CNN, SPACE)
+    monitor = _RecordingMonitor()
+    history = train_classifier(
+        resumed,
+        DATA,
+        config=CONFIG,
+        checkpoint_dir=tmp_path / "resumed",
+        device=CPU,
+        monitor=monitor,
+        resume=True,
+    )
+
+    assert [record.epoch for record in monitor.records] == [3, 4]
+    assert [record.to_dict()["val_loss"] for record in history] == pytest.approx(
+        [record.to_dict()["val_loss"] for record in expected]
+    )
+
+    for left, right in zip(_parameters(straight), _parameters(resumed), strict=True):
+        torch.testing.assert_close(left, right)
+
+
+def test_resuming_a_finished_run_trains_nothing(tmp_path: Path) -> None:
+    train_classifier(
+        build_classifier(TINY_CNN, SPACE), DATA, config=CONFIG, checkpoint_dir=tmp_path, device=CPU
+    )
+    monitor = _RecordingMonitor()
+
+    history = train_classifier(
+        build_classifier(TINY_CNN, SPACE),
+        DATA,
+        config=CONFIG,
+        checkpoint_dir=tmp_path,
+        device=CPU,
+        monitor=monitor,
+        resume=True,
+    )
+
+    assert len(history) == CONFIG.epochs
+    assert monitor.records == []
+
+
+def test_resume_without_a_saved_state_starts_from_scratch(tmp_path: Path) -> None:
+    history = train_classifier(
+        build_classifier(TINY_CNN, SPACE),
+        DATA,
+        config=replace(CONFIG, epochs=1),
+        checkpoint_dir=tmp_path,
+        device=CPU,
+        resume=True,
+    )
+
+    assert [record.epoch for record in history] == [1]
+    assert (tmp_path / STATE_FILENAME).exists()
+
+
+def test_resume_refuses_a_different_configuration(tmp_path: Path) -> None:
+    train_classifier(
+        build_classifier(TINY_CNN, SPACE),
+        DATA,
+        config=replace(CONFIG, epochs=1),
+        checkpoint_dir=tmp_path,
+        device=CPU,
+    )
+
+    with pytest.raises(TrainingResumeError, match="another configuration"):
+        train_classifier(
+            build_classifier(TINY_CNN, SPACE),
+            DATA,
+            config=replace(CONFIG, epochs=2, learning_rate=1e-3),
+            checkpoint_dir=tmp_path,
+            device=CPU,
+            resume=True,
+        )

@@ -14,15 +14,16 @@ from taxonomy_classifier.training.search import SearchConfig, TrialSetup, sugges
 from taxonomy_classifier.training.setup import LABEL_SPACE_FILENAME
 from taxonomy_classifier.training.trainer import (
     BEST_CHECKPOINT,
-    HISTORY_FILENAME,
     EpochRecord,
     Precision,
     SilentMonitor,
+    load_history,
     load_weights,
     train_classifier,
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from pathlib import Path
 
     import torch
@@ -141,17 +142,30 @@ def final_setup(choice: SearchChoice, config: FinalConfig) -> TrialSetup:
 
 
 class DeadlineMonitor:
-    def __init__(self, inner: TrainingMonitor, deadline: float) -> None:
+    def __init__(
+        self,
+        inner: TrainingMonitor,
+        deadline: float,
+        *,
+        epoch_seconds: float | None = None,
+        clock: Callable[[], float] = time.monotonic,
+    ) -> None:
         self._inner = inner
         self._deadline = deadline
+        self._epoch_seconds = epoch_seconds
+        self._clock = clock
 
     def epoch_started(self, epoch: int, epochs: int, steps: int) -> None:
+        if self._epoch_seconds is not None and self._clock() + self._epoch_seconds > self._deadline:
+            msg = f"The time budget has no room for epoch {epoch}"
+            raise TrainingDeadlineError(msg)
+
         self._inner.epoch_started(epoch, epochs, steps)
 
     def step_finished(self, step: int) -> None:
         self._inner.step_finished(step)
 
-        if time.monotonic() >= self._deadline:
+        if self._clock() >= self._deadline:
             msg = "The time budget ran out before training finished"
             raise TrainingDeadlineError(msg)
 
@@ -167,6 +181,7 @@ class DeadlineMonitor:
         self._inner.evaluation_step()
 
     def epoch_finished(self, record: EpochRecord) -> None:
+        self._epoch_seconds = record.seconds
         self._inner.epoch_finished(record)
 
 
@@ -179,6 +194,7 @@ def train_final(
     output_dir: Path,
     device: torch.device,
     monitor: TrainingMonitor | None = None,
+    resume: bool = False,
 ) -> FinalResult:
     setup = final_setup(choice, config)
     model = build_classifier(setup.encoder, label_space, setup.heads)
@@ -192,8 +208,15 @@ def train_final(
     inner = monitor or SilentMonitor()
     budget = config.time_budget_hours
 
+    previous = load_history(output_dir) if resume else []
     watcher: TrainingMonitor = (
-        inner if budget is None else DeadlineMonitor(inner, time.monotonic() + budget * 3600)
+        inner
+        if budget is None
+        else DeadlineMonitor(
+            inner,
+            time.monotonic() + budget * 3600,
+            epoch_seconds=float(previous[-1]["seconds"]) if previous else None,
+        )
     )
 
     try:
@@ -205,6 +228,7 @@ def train_final(
             device=device,
             metadata=description,
             monitor=watcher,
+            resume=resume,
         )
         stopped = False
 
@@ -212,10 +236,7 @@ def train_final(
         if not (output_dir / BEST_CHECKPOINT).exists():
             raise
 
-        history = [
-            EpochRecord.from_dict(record)
-            for record in json.loads((output_dir / HISTORY_FILENAME).read_text(encoding="utf-8"))
-        ]
+        history = [EpochRecord.from_dict(record) for record in load_history(output_dir)]
         stopped = True
 
     load_weights(model, output_dir / BEST_CHECKPOINT, device=device)

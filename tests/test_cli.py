@@ -350,6 +350,21 @@ def test_train_reports_the_best_epoch_when_the_budget_runs_out_later(
     assert "best epoch 1/1" in capsys.readouterr().out
 
 
+def test_train_resumes_from_its_output_directory(
+    built_layout: DataLayout, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    first = _train_arguments(built_layout, tmp_path, "--epochs", "2", "--log-every", "1")
+
+    assert cli.main([*first, "--resume"]) == 0
+
+    steps = json.loads((tmp_path / "final" / "steps.json").read_text(encoding="utf-8"))
+    capsys.readouterr()
+
+    assert cli.main([*first, "--resume"]) == 0
+    assert "Epoch" not in capsys.readouterr().out
+    assert json.loads((tmp_path / "final" / "steps.json").read_text(encoding="utf-8")) == steps
+
+
 def test_train_stops_cleanly_at_its_time_budget(
     built_layout: DataLayout, tmp_path: Path, caplog: pytest.LogCaptureFixture
 ) -> None:
