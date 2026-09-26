@@ -70,9 +70,8 @@ def classification_report(
     codes = {name: code for code, name in enumerate(names)}
     group_codes = torch.tensor([codes[group] for group in groups], dtype=torch.long)
     counters = {name: _empty_counts(label_space, device) for name in (OVERALL, *names)}
-    start = 0
 
-    for logits, targets in predict_batches(
+    for logits, targets, positions in predict_batches(
         model,
         data,
         batch_size=batch_size,
@@ -80,20 +79,16 @@ def classification_report(
         precision=precision,
         max_length=max_length,
     ):
-        rows = len(targets)
-
         _accumulate(counters[OVERALL], logits, targets)
 
         if names:
-            batch_codes = group_codes[start : start + rows].to(device)
+            batch_codes = group_codes[positions].to(device)
 
             for code in torch.unique(batch_codes).tolist():
                 selected = batch_codes == code
                 chosen = [level_logits[selected] for level_logits in logits]
 
                 _accumulate(counters[names[code]], chosen, targets[selected])
-
-        start += rows
 
     return {
         name: [

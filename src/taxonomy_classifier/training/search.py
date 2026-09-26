@@ -14,7 +14,7 @@ from taxonomy_classifier.data.files import write_text_atomic
 from taxonomy_classifier.model.classifier import build_classifier
 from taxonomy_classifier.model.encoders import CnnConfig, TransformerConfig
 from taxonomy_classifier.model.heads import HeadConfig
-from taxonomy_classifier.training.data import CropConfig, TrainingData
+from taxonomy_classifier.training.data import CropConfig, with_validation_subset
 from taxonomy_classifier.training.trainer import (
     Precision,
     SilentMonitor,
@@ -30,6 +30,7 @@ if TYPE_CHECKING:
 
     from taxonomy_classifier.model.classifier import EncoderConfig
     from taxonomy_classifier.model.labels import LabelSpace
+    from taxonomy_classifier.training.data import TrainingData
     from taxonomy_classifier.training.trainer import EpochRecord, Evaluation, TrainingMonitor
 
 CNN_WIDTHS: Final = {
@@ -243,7 +244,7 @@ def run_search(
     finished = sum(trial.state.is_finished() for trial in study.trials)
     budget = config.time_budget_seconds
     deadline = None if budget is None else time.monotonic() + budget
-    search_data = _with_validation_subset(data, config)
+    search_data = with_validation_subset(data, config.validation_samples, seed=config.seed)
 
     def objective(trial: optuna.Trial) -> float:
         setup = suggest_setup(trial, architecture, config)
@@ -316,22 +317,6 @@ def trial_rows(study: optuna.Study) -> list[dict[str, Any]]:
         }
         for trial in study.trials
     ]
-
-
-def _with_validation_subset(data: TrainingData, config: SearchConfig) -> TrainingData:
-    samples = config.validation_samples
-
-    if samples is None or samples >= len(data.validation):
-        return data
-
-    generator = torch.Generator().manual_seed(config.seed)
-    chosen = torch.randperm(len(data.validation), generator=generator)[:samples].sort().values
-
-    return TrainingData(
-        train=data.train,
-        frequencies=data.frequencies,
-        validation=data.validation.take(chosen.tolist()),
-    )
 
 
 def _existing_trials(name: str, storage: JournalStorage) -> int:

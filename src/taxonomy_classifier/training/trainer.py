@@ -12,7 +12,12 @@ import torch
 from taxonomy_classifier.data.files import write_text_atomic
 from taxonomy_classifier.model.heads import hierarchical_loss
 from taxonomy_classifier.model.labels import IGNORE_INDEX, LEVELS
-from taxonomy_classifier.training.data import CropConfig, iterate_batches, sampling_weights
+from taxonomy_classifier.training.data import (
+    CropConfig,
+    bucket_by_length,
+    iterate_batches,
+    sampling_weights,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Mapping
@@ -54,6 +59,7 @@ class TrainingConfig:
     sampling_power: float = 0.5
     crop: CropConfig = field(default_factory=CropConfig)
     evaluation_batch_size: int = 256
+    length_bucket_batches: int = 64
     precision: Precision = Precision.BF16
     log_every: int = 500
     seed: int = 20260923
@@ -64,6 +70,7 @@ class TrainingConfig:
             "batch_size": self.batch_size,
             "max_length": self.max_length,
             "evaluation_batch_size": self.evaluation_batch_size,
+            "length_bucket_batches": self.length_bucket_batches,
             "log_every": self.log_every,
         }
 
@@ -224,21 +231,24 @@ def predict_batches(
     precision: Precision = Precision.FP32,
     max_length: int | None = None,
     on_batch: Callable[[], None] | None = None,
-) -> Iterator[tuple[list[torch.Tensor], torch.Tensor]]:
+) -> Iterator[tuple[list[torch.Tensor], torch.Tensor, torch.Tensor]]:
     model.eval()
+    order = torch.argsort(data.bank.lengths, stable=True)
 
     with torch.inference_mode(), _autocast(device, precision):
-        for batch in iterate_batches(
+        batches = iterate_batches(
             data,
-            torch.arange(len(data)),
+            order,
             batch_size=batch_size,
             crop=None,
             rng=random.Random(0),
             max_length=max_length,
-        ):
+        )
+
+        for positions, batch in zip(torch.split(order, batch_size), batches, strict=True):
             on_device = batch.to(device)
 
-            yield model(on_device.tokens, on_device.mask), on_device.targets
+            yield model(on_device.tokens, on_device.mask), on_device.targets, positions
 
             if on_batch is not None:
                 on_batch()
@@ -259,7 +269,7 @@ def evaluate(
     loss_sum = 0.0
     batches = 0
 
-    for logits, targets in predict_batches(
+    for logits, targets, _ in predict_batches(
         model,
         data,
         batch_size=batch_size,
@@ -335,7 +345,13 @@ def train_classifier(
 
     for epoch in range(1, config.epochs + 1):
         started = time.perf_counter()
-        indices = torch.multinomial(weights, samples, replacement=True, generator=generator)
+        indices = bucket_by_length(
+            torch.multinomial(weights, samples, replacement=True, generator=generator),
+            data.train.bank.lengths,
+            batch_size=config.batch_size,
+            window=config.length_bucket_batches,
+            generator=generator,
+        )
 
         watcher.epoch_started(epoch, config.epochs, steps_per_epoch)
 

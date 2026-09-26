@@ -104,6 +104,10 @@ class SequenceBank:
     def __len__(self) -> int:
         return len(self.offsets) - 1
 
+    @property
+    def lengths(self) -> torch.Tensor:
+        return self.offsets[1:] - self.offsets[:-1]
+
     def get(self, index: int) -> torch.Tensor:
         return self.tokens[int(self.offsets[index]) : int(self.offsets[index + 1])]
 
@@ -179,6 +183,20 @@ class Batch:
         )
 
 
+def with_validation_subset(data: TrainingData, samples: int | None, *, seed: int) -> TrainingData:
+    if samples is None or samples >= len(data.validation):
+        return data
+
+    generator = torch.Generator().manual_seed(seed)
+    chosen = torch.randperm(len(data.validation), generator=generator)[:samples].sort().values
+
+    return TrainingData(
+        train=data.train,
+        frequencies=data.frequencies,
+        validation=data.validation.take(chosen.tolist()),
+    )
+
+
 def class_frequencies(frame: pl.LazyFrame, *, rank: Rank = Rank.GENUS) -> torch.Tensor:
     depth = RANK_INDEX[rank] + 1
     lineages = frame.select(RANK_COLUMNS[:depth]).collect()
@@ -217,6 +235,28 @@ def make_batch(
     mask = torch.arange(tokens.shape[1]) < lengths.unsqueeze(-1)
 
     return Batch(tokens=tokens.long(), mask=mask, targets=data.targets[list(indices)])
+
+
+def bucket_by_length(
+    indices: torch.Tensor,
+    lengths: torch.Tensor,
+    *,
+    batch_size: int,
+    window: int,
+    generator: torch.Generator,
+) -> torch.Tensor:
+    batches: list[torch.Tensor] = []
+
+    for part in torch.split(indices, batch_size * window):
+        ordered = part[torch.argsort(lengths[part], stable=True)]
+
+        batches.extend(torch.split(ordered, batch_size))
+
+    full = [batch for batch in batches if len(batch) == batch_size]
+    partial = [batch for batch in batches if len(batch) < batch_size]
+    order = torch.randperm(len(full), generator=generator).tolist()
+
+    return torch.cat([*(full[position] for position in order), *partial])
 
 
 def iterate_batches(

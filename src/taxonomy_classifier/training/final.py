@@ -8,6 +8,7 @@ import optuna
 from taxonomy_classifier.data.files import write_text_atomic
 from taxonomy_classifier.exceptions import DataError, TrainingDeadlineError
 from taxonomy_classifier.model.classifier import build_classifier, parameter_counts
+from taxonomy_classifier.training.data import with_validation_subset
 from taxonomy_classifier.training.report import OVERALL, classification_report
 from taxonomy_classifier.training.search import SearchConfig, TrialSetup, suggest_setup
 from taxonomy_classifier.training.setup import LABEL_SPACE_FILENAME
@@ -44,6 +45,7 @@ _ARCHITECTURE_PREFIXES: Final = {"cnn_": "CNN", "transformer_": "Transformer"}
 class FinalConfig:
     epochs: int = 10
     samples_per_epoch: int | None = None
+    validation_samples: int | None = 50_000
     batch_size: int = 128
     precision: Precision = Precision.BF16
     time_budget_hours: float | None = None
@@ -55,9 +57,13 @@ class FinalConfig:
             msg = "epochs, batch_size and log_every must be positive"
             raise ValueError(msg)
 
-        if self.samples_per_epoch is not None and self.samples_per_epoch < 1:
-            msg = f"samples_per_epoch must be positive, got {self.samples_per_epoch}"
-            raise ValueError(msg)
+        for name, value in (
+            ("samples_per_epoch", self.samples_per_epoch),
+            ("validation_samples", self.validation_samples),
+        ):
+            if value is not None and value < 1:
+                msg = f"{name} must be positive, got {value}"
+                raise ValueError(msg)
 
         if self.time_budget_hours is not None and self.time_budget_hours <= 0:
             msg = f"time_budget_hours must be positive, got {self.time_budget_hours}"
@@ -187,7 +193,7 @@ def train_final(
 
     history = train_classifier(
         model,
-        data,
+        with_validation_subset(data, config.validation_samples, seed=config.seed),
         config=setup.training,
         checkpoint_dir=output_dir,
         device=device,

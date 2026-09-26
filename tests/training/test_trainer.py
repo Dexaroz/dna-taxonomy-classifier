@@ -114,6 +114,7 @@ class _FirstClassModel(nn.Module):
         ({"epochs": 0}, "epochs must be positive"),
         ({"batch_size": 0}, "batch_size must be positive"),
         ({"max_length": 0}, "max_length must be positive"),
+        ({"length_bucket_batches": 0}, "length_bucket_batches must be positive"),
         ({"samples_per_epoch": 0}, "samples_per_epoch must be positive"),
         ({"learning_rate": 0.0}, "learning_rate and gradient_clip"),
         ({"weight_decay": -1.0}, "weight_decay non-negative"),

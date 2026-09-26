@@ -109,6 +109,7 @@ class RecordingMonitor:
         ({"batch_size": 0}, "epochs, batch_size and log_every must be positive"),
         ({"log_every": 0}, "epochs, batch_size and log_every must be positive"),
         ({"samples_per_epoch": 0}, "samples_per_epoch must be positive"),
+        ({"validation_samples": 0}, "validation_samples must be positive"),
         ({"time_budget_hours": 0.0}, "time_budget_hours must be positive"),
     ],
 )
@@ -306,3 +307,20 @@ def test_train_final_stops_at_its_time_budget(tmp_path: Path) -> None:
         )
 
     assert (tmp_path / RUN_FILENAME).exists()
+
+
+def test_epochs_validate_on_a_subset_but_the_report_uses_every_sequence(tmp_path: Path) -> None:
+    monitor = RecordingMonitor()
+
+    result = train_final(
+        SearchChoice(trial=12, params=CNN_PARAMS),
+        DATA,
+        SPACE,
+        config=replace(TINY_FINAL, validation_samples=1),
+        output_dir=tmp_path,
+        device=CPU,
+        monitor=monitor,
+    )
+
+    assert "evaluation_started 1" in monitor.calls
+    assert result.reports[0].support == len(DATA.validation)

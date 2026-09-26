@@ -110,6 +110,7 @@ def _add_train_arguments(command: argparse.ArgumentParser) -> None:
     command.add_argument("--hours", type=float, default=None)
     command.add_argument("--epochs", type=int, default=10)
     command.add_argument("--samples-per-epoch", type=int, default=None)
+    command.add_argument("--validation-samples", type=int, default=50_000)
     command.add_argument("--batch-size", type=int, default=128)
     command.add_argument("--log-every", type=int, default=500)
     command.add_argument("--refresh-seconds", type=float, default=0.5)
@@ -236,6 +237,7 @@ def _train(args: argparse.Namespace, layout: DataLayout) -> None:
         config = FinalConfig(
             epochs=args.epochs,
             samples_per_epoch=args.samples_per_epoch,
+            validation_samples=args.validation_samples,
             batch_size=args.batch_size,
             precision=Precision(args.precision),
             time_budget_hours=args.hours,

@@ -15,6 +15,7 @@ from taxonomy_classifier.training.data import (
     LabeledSet,
     SequenceBank,
     TrainingData,
+    bucket_by_length,
     class_frequencies,
     iterate_batches,
     make_batch,
@@ -285,3 +286,61 @@ def test_take_builds_a_compact_subset() -> None:
 
 def test_take_accepts_an_empty_selection() -> None:
     assert len(LabeledSet.from_frame(FRAME, SPACE).take([])) == 0
+
+
+def _buckets(indices: list[int], lengths: list[int], window: int) -> list[list[int]]:
+    ordered = bucket_by_length(
+        torch.tensor(indices),
+        torch.tensor(lengths),
+        batch_size=2,
+        window=window,
+        generator=torch.Generator().manual_seed(0),
+    )
+
+    return [ordered[start : start + 2].tolist() for start in range(0, len(ordered), 2)]
+
+
+def test_bucket_by_length_groups_similar_lengths_and_keeps_every_sample() -> None:
+    lengths = [100, 900, 110, 950, 500, 510]
+    batches = _buckets([0, 1, 2, 3, 4, 5, 0], lengths, window=3)
+
+    assert sorted(index for batch in batches for index in batch) == [0, 0, 1, 2, 3, 4, 5]
+    assert sorted(batches[:-1]) == [[0, 2], [1, 3], [4, 5]]
+    assert batches[-1] == [0]
+
+
+def test_bucket_by_length_only_sorts_within_each_window() -> None:
+    batches = _buckets([1, 0, 3, 2], [10, 90, 20, 80], window=1)
+
+    assert sorted(map(sorted, batches)) == [[0, 1], [2, 3]]
+
+
+def test_bucket_by_length_is_deterministic_and_handles_empty_epochs() -> None:
+    lengths = torch.arange(50)
+    indices = torch.randperm(50, generator=torch.Generator().manual_seed(1))
+
+    def shuffled(seed: int) -> list[int]:
+        generator = torch.Generator().manual_seed(seed)
+
+        return bucket_by_length(
+            indices, lengths, batch_size=4, window=5, generator=generator
+        ).tolist()
+
+    assert shuffled(3) == shuffled(3)
+    assert shuffled(3) != shuffled(4)
+    assert (
+        bucket_by_length(
+            torch.empty(0, dtype=torch.long),
+            lengths,
+            batch_size=4,
+            window=5,
+            generator=torch.Generator(),
+        ).tolist()
+        == []
+    )
+
+
+def test_sequence_bank_exposes_its_lengths() -> None:
+    bank = SequenceBank.from_batches([pl.Series(["ACG", "A"])], pl.Series([3, 1]))
+
+    assert bank.lengths.tolist() == [3, 1]
