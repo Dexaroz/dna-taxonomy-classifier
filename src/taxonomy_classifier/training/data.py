@@ -190,10 +190,14 @@ def with_validation_subset(data: TrainingData, samples: int | None, *, seed: int
     generator = torch.Generator().manual_seed(seed)
     chosen = torch.randperm(len(data.validation), generator=generator)[:samples].sort().values
 
+    positions = chosen.tolist()
+    markers = data.validation_markers
+
     return TrainingData(
         train=data.train,
         frequencies=data.frequencies,
-        validation=data.validation.take(chosen.tolist()),
+        validation=data.validation.take(positions),
+        validation_markers=tuple(markers[position] for position in positions) if markers else (),
     )
 
 

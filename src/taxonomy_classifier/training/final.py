@@ -14,6 +14,8 @@ from taxonomy_classifier.training.search import SearchConfig, TrialSetup, sugges
 from taxonomy_classifier.training.setup import LABEL_SPACE_FILENAME
 from taxonomy_classifier.training.trainer import (
     BEST_CHECKPOINT,
+    HISTORY_FILENAME,
+    EpochRecord,
     Precision,
     SilentMonitor,
     load_weights,
@@ -28,7 +30,7 @@ if TYPE_CHECKING:
     from taxonomy_classifier.model.labels import LabelSpace
     from taxonomy_classifier.training.data import TrainingData
     from taxonomy_classifier.training.report import LevelReport
-    from taxonomy_classifier.training.trainer import EpochRecord, TrainingMonitor
+    from taxonomy_classifier.training.trainer import TrainingMonitor
 
 RUN_FILENAME: Final = "run.json"
 
@@ -46,6 +48,7 @@ class FinalConfig:
     epochs: int = 10
     samples_per_epoch: int | None = None
     validation_samples: int | None = 50_000
+    report_samples: int | None = None
     batch_size: int = 128
     precision: Precision = Precision.BF16
     time_budget_hours: float | None = None
@@ -60,6 +63,7 @@ class FinalConfig:
         for name, value in (
             ("samples_per_epoch", self.samples_per_epoch),
             ("validation_samples", self.validation_samples),
+            ("report_samples", self.report_samples),
         ):
             if value is not None and value < 1:
                 msg = f"{name} must be positive, got {value}"
@@ -75,6 +79,7 @@ class FinalResult:
     history: list[EpochRecord]
     reports: list[LevelReport]
     marker_reports: dict[str, list[LevelReport]] = field(default_factory=dict)
+    stopped: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -191,27 +196,41 @@ def train_final(
         inner if budget is None else DeadlineMonitor(inner, time.monotonic() + budget * 3600)
     )
 
-    history = train_classifier(
-        model,
-        with_validation_subset(data, config.validation_samples, seed=config.seed),
-        config=setup.training,
-        checkpoint_dir=output_dir,
-        device=device,
-        metadata=description,
-        monitor=watcher,
-    )
+    try:
+        history = train_classifier(
+            model,
+            with_validation_subset(data, config.validation_samples, seed=config.seed),
+            config=setup.training,
+            checkpoint_dir=output_dir,
+            device=device,
+            metadata=description,
+            monitor=watcher,
+        )
+        stopped = False
+
+    except TrainingDeadlineError:
+        if not (output_dir / BEST_CHECKPOINT).exists():
+            raise
+
+        history = [
+            EpochRecord.from_dict(record)
+            for record in json.loads((output_dir / HISTORY_FILENAME).read_text(encoding="utf-8"))
+        ]
+        stopped = True
 
     load_weights(model, output_dir / BEST_CHECKPOINT, device=device)
 
+    reported = with_validation_subset(data, config.report_samples, seed=config.seed)
+
     grouped = classification_report(
         model,
-        data.validation,
+        reported.validation,
         label_space,
         batch_size=setup.training.evaluation_batch_size,
         device=device,
         precision=setup.training.precision,
         max_length=setup.training.max_length,
-        groups=data.validation_markers,
+        groups=reported.validation_markers,
     )
     reports = grouped.pop(OVERALL)
 
@@ -232,7 +251,7 @@ def train_final(
             ),
         )
 
-    return FinalResult(history=history, reports=reports, marker_reports=grouped)
+    return FinalResult(history=history, reports=reports, marker_reports=grouped, stopped=stopped)
 
 
 def _describe(

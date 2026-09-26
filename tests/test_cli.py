@@ -3,7 +3,7 @@ import json
 import runpy
 import sys
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 import httpx
 import optuna
@@ -11,7 +11,9 @@ import pytest
 
 from taxonomy_classifier import cli
 from taxonomy_classifier.data.build import DataLayout
+from taxonomy_classifier.exceptions import TrainingDeadlineError
 from taxonomy_classifier.training import setup
+from taxonomy_classifier.training.progress import ProgressBarMonitor
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -319,6 +321,33 @@ def test_train_skips_the_marker_tables_without_markers(
     assert cli.main(_train_arguments(built_layout, tmp_path, "--epochs", "1")) == 0
     assert "by marker" not in capsys.readouterr().out
     assert not (tmp_path / "final" / "report_by_marker.json").exists()
+
+
+def test_train_reports_the_best_epoch_when_the_budget_runs_out_later(
+    built_layout: DataLayout,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class StopAfterFirstEpoch(ProgressBarMonitor):
+        @override
+        def step_finished(self, step: int) -> None:
+            super().step_finished(step)
+
+            if self.records and self.records[-1]["epoch"] == 2:
+                msg = "The time budget ran out before training finished"
+                raise TrainingDeadlineError(msg)
+
+    monkeypatch.setattr(cli, "ProgressBarMonitor", StopAfterFirstEpoch)
+
+    exit_code = cli.main(
+        _train_arguments(built_layout, tmp_path, "--epochs", "3", "--log-every", "1")
+    )
+
+    assert exit_code == 0
+    assert "stopped by its time budget after 1 epochs" in caplog.text
+    assert "best epoch 1/1" in capsys.readouterr().out
 
 
 def test_train_stops_cleanly_at_its_time_budget(

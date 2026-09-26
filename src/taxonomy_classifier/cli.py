@@ -111,6 +111,7 @@ def _add_train_arguments(command: argparse.ArgumentParser) -> None:
     command.add_argument("--epochs", type=int, default=10)
     command.add_argument("--samples-per-epoch", type=int, default=None)
     command.add_argument("--validation-samples", type=int, default=50_000)
+    command.add_argument("--report-samples", type=int, default=None)
     command.add_argument("--batch-size", type=int, default=128)
     command.add_argument("--log-every", type=int, default=500)
     command.add_argument("--refresh-seconds", type=float, default=0.5)
@@ -238,6 +239,7 @@ def _train(args: argparse.Namespace, layout: DataLayout) -> None:
             epochs=args.epochs,
             samples_per_epoch=args.samples_per_epoch,
             validation_samples=args.validation_samples,
+            report_samples=args.report_samples,
             batch_size=args.batch_size,
             precision=Precision(args.precision),
             time_budget_hours=args.hours,
@@ -277,6 +279,14 @@ def _train(args: argparse.Namespace, layout: DataLayout) -> None:
         _LOGGER.warning("%s stopped by its time budget; checkpoints kept in %s", name, output)
 
         return
+
+    if result.stopped:
+        sys.stdout.write("\n")
+        _LOGGER.warning(
+            "%s stopped by its time budget after %d epochs; reporting its best checkpoint",
+            name,
+            len(result.history),
+        )
 
     best = min(result.history, key=lambda record: record.validation.loss)
 

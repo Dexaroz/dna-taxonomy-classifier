@@ -118,6 +118,19 @@ class EpochRecord:
             "seconds": self.seconds,
         }
 
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> EpochRecord:
+        return cls(
+            epoch=int(payload["epoch"]),
+            train_loss=float(payload["train_loss"]),
+            validation=Evaluation(
+                loss=float(payload["val_loss"]), accuracy=dict(payload["val_accuracy"])
+            ),
+            learning_rate=float(payload["learning_rate"]),
+            seconds=float(payload["seconds"]),
+            train_accuracy=dict(payload.get("train_accuracy", {})),
+        )
+
 
 class TrainingMonitor(Protocol):
     def epoch_started(self, epoch: int, epochs: int, steps: int) -> None: ...

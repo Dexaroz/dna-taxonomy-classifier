@@ -1,7 +1,7 @@
 from dataclasses import replace
 import json
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 import polars as pl
 import pytest
@@ -110,6 +110,7 @@ class RecordingMonitor:
         ({"log_every": 0}, "epochs, batch_size and log_every must be positive"),
         ({"samples_per_epoch": 0}, "samples_per_epoch must be positive"),
         ({"validation_samples": 0}, "validation_samples must be positive"),
+        ({"report_samples": 0}, "report_samples must be positive"),
         ({"time_budget_hours": 0.0}, "time_budget_hours must be positive"),
     ],
 )
@@ -324,3 +325,45 @@ def test_epochs_validate_on_a_subset_but_the_report_uses_every_sequence(tmp_path
 
     assert "evaluation_started 1" in monitor.calls
     assert result.reports[0].support == len(DATA.validation)
+
+
+def test_the_report_can_use_a_subset_that_keeps_the_markers(tmp_path: Path) -> None:
+    result = train_final(
+        SearchChoice(trial=12, params=CNN_PARAMS),
+        replace(DATA, validation_markers=("coi", "ssu")),
+        SPACE,
+        config=replace(TINY_FINAL, report_samples=1),
+        output_dir=tmp_path,
+        device=CPU,
+    )
+
+    assert result.reports[0].support == 1
+    assert sum(levels[0].support for levels in result.marker_reports.values()) == 1
+
+
+class StopAfterFirstEpoch(RecordingMonitor):
+    @override
+    def step_finished(self, step: int) -> None:
+        super().step_finished(step)
+
+        if "epoch_finished 1" in self.calls:
+            msg = "The time budget ran out before training finished"
+            raise TrainingDeadlineError(msg)
+
+
+def test_a_deadline_after_an_epoch_still_reports_the_best_checkpoint(tmp_path: Path) -> None:
+    result = train_final(
+        SearchChoice(trial=12, params=CNN_PARAMS),
+        DATA,
+        SPACE,
+        config=TINY_FINAL,
+        output_dir=tmp_path,
+        device=CPU,
+        monitor=StopAfterFirstEpoch(),
+    )
+
+    assert result.stopped
+    assert [record.epoch for record in result.history] == [1]
+    assert result.history[0].train_accuracy
+    assert [item.level for item in result.reports] == list(LEVELS)
+    assert (tmp_path / REPORT_FILENAME).exists()
